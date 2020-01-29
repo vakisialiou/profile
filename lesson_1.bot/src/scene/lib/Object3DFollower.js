@@ -86,7 +86,7 @@ export class Object3DFollower {
 
     this.object.quaternion.rotateTowards(this.targetRotation, this.speed * delta)
     if (this.object.quaternion.equals(this.targetRotation)) {
-      // this.isRotationReached = true
+      this.isRotationReached = true
     }
   }
 }

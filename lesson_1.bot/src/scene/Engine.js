@@ -373,7 +373,7 @@ class Engine {
     this.playController
       .renderMap(rawMap)
       .renderWaveBots()
-      // .startRenderWaveBots()
+      .startRenderWaveBots()
     return this
   }
 

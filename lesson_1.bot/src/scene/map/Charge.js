@@ -1,5 +1,5 @@
 import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, Object3D, EventDispatcher } from 'three'
-import { Object3DPusher } from '../lib'
+import { Object3DMover2 } from '../lib'
 
 export default class Charge extends Mesh {
   /**
@@ -12,6 +12,13 @@ export default class Charge extends Mesh {
     super()
     this.position.copy(position)
     this.applyQuaternion(bot.quaternion)
+
+    this.options = {
+      distance: 200,
+      speed: 80,
+      // TODO: для дебага. Не забыть убрать.
+      damage: bot.team.color === '#0000FF' ? 60 : 6
+    }
 
     /**
      *
@@ -33,6 +40,12 @@ export default class Charge extends Mesh {
 
     /**
      *
+     * @type {Vector3}
+     */
+    this.startPosition = new Vector3().copy(position)
+
+    /**
+     *
      * @type {SphereGeometry}
      */
     this.geometry = new SphereGeometry(2)
@@ -45,9 +58,9 @@ export default class Charge extends Mesh {
 
     /**
      *
-     * @type {Object3DPusher}
+     * @type {Object3DMover2}
      */
-    this.object3DPusher = new Object3DPusher(this, 30)
+    this.object3DMover = new Object3DMover2(this, direction, this.options.speed)
 
     /**
      *
@@ -60,6 +73,12 @@ export default class Charge extends Mesh {
      * @type {EventDispatcher}
      */
     this.event = new EventDispatcher()
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.destroyed = false
   }
 
   /**
@@ -75,7 +94,7 @@ export default class Charge extends Mesh {
    */
 
   /**
-   * @param {Array.<Object>} intersections
+   * @param {CollisionEventOptions} options
    * @callback collisionEventCallback
    */
 
@@ -86,6 +105,42 @@ export default class Charge extends Mesh {
    */
   collisionEvent(collisionEventCallback) {
     this.event.addEventListener(Charge.COLLISION_EVENT, collisionEventCallback)
+    return this
+  }
+
+  /**
+   *
+   * @type {string}
+   */
+  static DESTROY_EVENT = 'DESTROY_EVENT'
+
+  /**
+   * @typedef {Object} DestroyEventOptions
+   * @param {string} type
+   */
+
+  /**
+   * @param {DestroyEventOptions} options
+   * @callback destroyEventCallback
+   */
+
+  /**
+   *
+   * @param destroyEventCallback
+   * @returns {Charge}
+   */
+  destroyEvent(destroyEventCallback) {
+    this.event.addEventListener(Charge.DESTROY_EVENT, destroyEventCallback)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Charge}
+   */
+  dispatchDestroyEvent() {
+    this.destroyed = true
+    this.event.dispatchEvent({ type: Charge.DESTROY_EVENT })
     return this
   }
 
@@ -113,11 +168,17 @@ export default class Charge extends Mesh {
    * @returns {Charge}
    */
   update(delta, objects) {
+    if (this.destroyed) {
+      return this
+    }
     this.prevPosition.copy(this.position)
-    this.object3DPusher.moveForward(delta)
+    this.object3DMover.update(delta)
     const intersections = this.getIntersectionObjects(objects)
     if (intersections.length > 0) {
       this.event.dispatchEvent({ type: Charge.COLLISION_EVENT, intersections })
+    }
+    if (this.startPosition.distanceTo(this.position) >= this.options.distance) {
+      this.dispatchDestroyEvent()
     }
     return this
   }

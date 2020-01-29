@@ -62,7 +62,7 @@ export default class PlayController {
     const index = this.bots.indexOf(bot)
     if (index !== -1) {
       this.bots.splice(index, 1)
-      this.scene.add(bot)
+      this.scene.remove(bot)
     }
     return this
   }
@@ -89,7 +89,7 @@ export default class PlayController {
     const index = this.charges.indexOf(charge)
     if (index !== -1) {
       this.charges.splice(index, 1)
-      this.scene.add(charge)
+      this.scene.remove(charge)
     }
     return this
   }
@@ -144,11 +144,17 @@ export default class PlayController {
         const bot = new Bot(team, road.points, team.base.position)
         bot.shotEvent((shotOptions) => {
           const charge = new Charge(bot, shotOptions.position, shotOptions.direction)
-          charge.collisionEvent((collisionOptions) => {
-            console.log('collisionOptions', collisionOptions)
+          charge.collisionEvent((options) => {
+            const hitBot = options.intersections[0]['object']
+            hitBot.hit(charge)
+            // console.log('collisionOptions', options, hitBot)
+            charge.dispatchDestroyEvent()
           })
+
+          charge.destroyEvent(() => this.removeCharge(charge))
           this.addCharge(charge)
         })
+        bot.destroyEvent(() => this.removeBot(bot))
         this.addBot(bot)
       }
     }

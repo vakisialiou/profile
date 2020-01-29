@@ -1,12 +1,14 @@
 import { Vector3, Object3D } from 'three'
 
-export class Object3DDirection {
+export class Object3DDirection extends Vector3 {
 
   /**
    *
    * @param {Object3D} object
    */
   constructor(object) {
+    super(0, 0, -1)
+
     /**
      *
      * @type {Object3D}
@@ -25,7 +27,7 @@ export class Object3DDirection {
    * @returns {Vector3}
    */
   get() {
-    return this.tmp.applyQuaternion(this.object.quaternion)
+    return this.tmp.copy(this).applyQuaternion(this.object.quaternion)
   }
 }
 

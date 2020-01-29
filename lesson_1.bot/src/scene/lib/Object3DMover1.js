@@ -1,8 +1,10 @@
 import { Vector3, Object3D } from 'three'
 
-export class Object3DMover extends Vector3 {
+export class Object3DMover1 extends Vector3 {
   /**
    * Движение объекта в сторону цели.
+   * При достижении цели объет останавливается.
+   * При изменении цели объект продолжает движение.
    *
    * @param {Object3D} object
    * @param {number} [speed]
@@ -50,7 +52,7 @@ export class Object3DMover extends Vector3 {
   /**
    *
    * @param {Vector3} vector
-   * @return {Object3DMover}
+   * @return {Object3DMover1}
    */
   setTarget(vector) {
     if (!this.target.equals(vector)) {
@@ -71,10 +73,10 @@ export class Object3DMover extends Vector3 {
       return
     }
 
-    const velocity = this.subVectors(this.target, this.object.position).normalize().multiplyScalar(this.speed * delta)
-    this.object.position.add(velocity)
+    const velocity = this.subVectors(this.target, this.object.position).normalize()
+    this.object.position.addScaledVector(velocity, this.speed * delta)
     const currentPathLength = this.object.position.distanceTo(this.target)
-    if (this.prevPathLength && this.prevPathLength < currentPathLength) {
+    if (this.prevPathLength && this.prevPathLength <= currentPathLength) {
       this.object.position.copy(this.target)
       this.isTargetReached = true
     }
@@ -82,4 +84,4 @@ export class Object3DMover extends Vector3 {
   }
 }
 
-export default Object3DMover
+export default Object3DMover1

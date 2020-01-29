@@ -1,5 +1,5 @@
 import { Group, Mesh, Vector3, Object3D, EventDispatcher } from 'three'
-import { Object3DFollower, Object3DMover, Object3DDirection } from '../lib'
+import { Object3DFollower, Object3DMover1, Object3DDirection } from '../lib'
 import ModelBot from './ModelBot'
 
 export default class Bot extends ModelBot {
@@ -13,17 +13,19 @@ export default class Bot extends ModelBot {
     super(team)
     this.position.copy(position)
 
+    this.options = { health: 200 }
+
     /**
      *
      * @type {Object3DFollower}
      */
-    this.object3DFolower = new Object3DFollower(this, 2.5)
+    this.object3DFolower = new Object3DFollower(this, 4.5)
 
     /**
      *
-     * @type {Object3DMover}
+     * @type {Object3DMover1}
      */
-    this.object3DMover = new Object3DMover(this, 80)
+    this.object3DMover = new Object3DMover1(this, 40)
 
     /**
      *
@@ -75,9 +77,64 @@ export default class Bot extends ModelBot {
 
     /**
      *
-     * @type {{tmp: number, interval: number}}
+     * @type {{expiredTime: number, interval: number}}
      */
-    this.weaponOptions = { interval: 2, tmp: 0 }
+    this.weaponOptions = { interval: 2, expiredTime: 0 }
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.destroyed = false
+  }
+
+  /**
+   *
+   * @type {string}
+   */
+  static DESTROY_EVENT = 'DESTROY_EVENT'
+
+  /**
+   * @typedef {Object} DestroyEventOptions
+   * @param {string} type
+   */
+
+  /**
+   * @param {DestroyEventOptions} options
+   * @callback destroyEventCallback
+   */
+
+  /**
+   *
+   * @param destroyEventCallback
+   * @returns {Bot}
+   */
+  destroyEvent(destroyEventCallback) {
+    this.event.addEventListener(Bot.DESTROY_EVENT, destroyEventCallback)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  dispatchDestroyEvent() {
+    this.destroyed = true
+    this.event.dispatchEvent({ type: Bot.DESTROY_EVENT })
+    return this
+  }
+
+  /**
+   *
+   * @param {Charge} charge
+   * @returns {Bot}
+   */
+  hit(charge) {
+    this.options.health -= charge.options.damage
+    if (this.options.health <= 0) {
+      this.dispatchDestroyEvent()
+    }
+    return this
   }
 
   /**
@@ -110,6 +167,19 @@ export default class Bot extends ModelBot {
 
   /**
    *
+   * @returns {Bot}
+   */
+  dispatchShotEvent() {
+    this.event.dispatchEvent({
+      type: Bot.SHOT_EVENT,
+      position: this.position.clone(),
+      direction: this.object3DDirection.get().clone(),
+    })
+    return this
+  }
+
+  /**
+   *
    * @param {Array.<Vector3>} path
    * @param {Vector3} position
    * @returns {Array.<Vector3>}
@@ -127,6 +197,10 @@ export default class Bot extends ModelBot {
   }
 
   tryCaptureTarget(bots, builds) {
+    if (this.destroyed) {
+      return
+    }
+
     if (this.attacTarget && this.position.distanceTo(this.attacTarget.position) <= this.attackRadius) {
       // Has target. Do nothing.
       return
@@ -175,10 +249,12 @@ export default class Bot extends ModelBot {
    * @returns {Bot}
    */
   update(delta) {
-    if (this.path.length > 0 && !this.attacTarget && !this.pursuitTarget) {
-      // Clear weapon timer
-      this.weaponOptions.tmp = 0
+    if (this.destroyed) {
+      return this
+    }
 
+    this.weaponOptions.expiredTime += delta
+    if (this.path.length > 0 && !this.attacTarget && !this.pursuitTarget) {
       // Move on the road
       const target = this.path[0]
       this.object3DMover.setTarget(target).update(delta)
@@ -189,9 +265,6 @@ export default class Bot extends ModelBot {
     }
 
     // if (!this.attacTarget && this.pursuitTarget) {
-    //   // Clear weapon timer
-    //   this.weaponOptions.tmp = 0
-    //
     //   // Move on the pursuit target
     //   const target = this.pursuitTarget.position
     //   this.object3DMover.setTarget(target).update(delta)
@@ -200,56 +273,11 @@ export default class Bot extends ModelBot {
 
     if (!this.pursuitTarget && this.attacTarget) {
       this.object3DFolower.setTarget(this.attacTarget.position).update(delta)
-
-      if (this.object3DFolower.isRotationReached) {
-        this.weaponOptions.tmp += delta
-        if (this.weaponOptions.tmp >= this.weaponOptions.interval) {
-          this.weaponOptions.tmp = 0
-          this.event.dispatchEvent({
-            type: Bot.SHOT_EVENT,
-            position: this.position.clone(),
-            direction: this.object3DDirection.get().clone(),
-          })
-        }
+      if (this.weaponOptions.expiredTime >= this.weaponOptions.interval) {
+        this.weaponOptions.expiredTime = 0
+        this.dispatchShotEvent()
       }
     }
-
-
-
-
-
-
-
-    //
-    // const removes = []
-    // for (const shot of this.shots) {
-    //   shot.update(delta)
-    //
-    //   for (const team of teams) {
-    //     if (team === this.team) {
-    //       continue
-    //     }
-    //     const intersectBots = shot.getIntersectionObjects(team.bots, true)
-    //     if (intersectBots.length > 0) {
-    //       removes.push(shot)
-    //       removeCallback(shot, intersectBots)
-    //       break
-    //     }
-    //     const intersectTowers = shot.getIntersectionObjects(team.towers, true)
-    //     if (intersectTowers.length > 0) {
-    //       removes.push(shot)
-    //       removeCallback(shot, intersectBots)
-    //       break
-    //     }
-    //   }
-    // }
-    //
-    // for (const shot of removes) {
-    //   const index = this.shots.indexOf(shot)
-    //   if (index !== -1) {
-    //     this.shots.splice(index, 1)
-    //   }
-    // }
 
     return this
   }
