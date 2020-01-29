@@ -40,9 +40,21 @@ export class Object3DFollower {
 
     /**
      *
+     * @type {Vector3}
+     */
+    this.tmp = new Vector3()
+
+    /**
+     *
      * @type {boolean}
      */
     this.enabled = true
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.isRotationReached = true
   }
 
   /**
@@ -54,9 +66,11 @@ export class Object3DFollower {
     if (this.target.equals(vector)) {
       return this
     }
+
     this.target.copy(vector)
     this.rotationMatrix.lookAt(this.object.position, this.target, this.object.up)
     this.targetRotation.setFromRotationMatrix(this.rotationMatrix)
+    this.isRotationReached = false
     return this
   }
 
@@ -66,11 +80,14 @@ export class Object3DFollower {
    * @returns {void}
    */
   update(delta) {
-    if (!this.enabled || this.speed === 0 || this.object.quaternion.equals(this.targetRotation)) {
+    if (!this.enabled || this.speed === 0 || this.isRotationReached) {
       return
     }
 
     this.object.quaternion.rotateTowards(this.targetRotation, this.speed * delta)
+    if (this.object.quaternion.equals(this.targetRotation)) {
+      // this.isRotationReached = true
+    }
   }
 }
 

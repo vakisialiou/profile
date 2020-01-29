@@ -24,7 +24,7 @@ export default {
       .setHemiLight(lightPosition)
       .setPointLight(lightPosition)
       .setCamera(cameraPosition, lightPosition)
-      .renderMap(map)
+      .startPlay(map)
       .render(container)
       .setLightHelper()
       .renderDebugPanel()

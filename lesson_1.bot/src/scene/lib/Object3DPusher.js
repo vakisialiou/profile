@@ -34,7 +34,7 @@ export class Object3DPusher extends Vector3 {
    * @param {number} delta
    * @return {void}
    */
-  update(delta) {
+  moveForward(delta) {
     if (!this.enabled || this.speed === 0) {
       return
     }

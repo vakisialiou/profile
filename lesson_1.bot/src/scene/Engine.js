@@ -11,16 +11,8 @@ import {
   PointLight,
   PointLightHelper,
   Vector3,
-  Object3D,
-  Group,
-  Mesh,
-  BoxGeometry,
-  MeshBasicMaterial,
   GridHelper,
   AxesHelper,
-  LineBasicMaterial,
-  Line,
-  Geometry,
   Math as _Math,
   MOUSE,
 } from 'three'
@@ -30,12 +22,10 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
 import DebugPanel from './DebugPanel'
 import Ground from './Ground'
-import Bot from "./Bot";
+import PlayController from './PlayController'
 
 class Engine {
   constructor() {
-
-    this.r = Math.floor(Math.random() * Math.floor(100000))
 
     /**
      *
@@ -152,6 +142,12 @@ class Engine {
      * @type {Ground}
      */
     this.ground = new Ground()
+
+    /**
+     *
+     * @type {PlayController}
+     */
+    this.playController = new PlayController(this.scene)
   }
 
   /**
@@ -358,16 +354,6 @@ class Engine {
 
   /**
    *
-   * @param {Object3D|Mesh|Group} model
-   * @returns {Engine}
-   */
-  removeModel(model) {
-    this.scene.remove(model)
-    return this
-  }
-
-  /**
-   *
    * @param {Element} container
    * @returns {Engine}
    */
@@ -378,89 +364,16 @@ class Engine {
     return this
   }
 
-  renderMap(map) {
-    const store = { bases: [], towers: [], lines: [] }
-    for (const point of map.builds) {
-      let baseMeshGeometry = null
-      switch (point.type) {
-        case 'base':
-          baseMeshGeometry = new BoxGeometry(60, 10, 60)
-          break
-        case 'tower':
-          baseMeshGeometry = new BoxGeometry(10, 30, 10)
-          break
-        default:
-          continue
-      }
-
-      const baseMeshMaterial = new MeshBasicMaterial({ color: point.color })
-      const baseMesh = new Mesh(baseMeshGeometry, baseMeshMaterial)
-      baseMesh.name = point.name
-      baseMesh.userData = point
-      baseMesh.position.copy(point.position)
-      switch (point.type) {
-        case 'base':
-          store.bases.push(baseMesh)
-          break
-        case 'tower':
-          store.towers.push(baseMesh)
-          break
-      }
-      this.scene.add(baseMesh)
-    }
-
-    for (const road of map.roads) {
-      const roadLineGeometry = new Geometry()
-      for (const point of road.points) {
-        roadLineGeometry.vertices.push(new Vector3().copy(point))
-      }
-      const roadLineMaterial = new LineBasicMaterial({color: road.color})
-      const line = new Line(roadLineGeometry, roadLineMaterial)
-      line.name = road.name
-      this.ground.add(line)
-      store.lines.push(line)
-    }
-
-    const bots = []
-    // const path = [
-    //   // {"x":-115,"y":5,"z":85}
-    //   new Vector3(-115, 0, 85),
-    //   new Vector3(355, 0, 155),
-    //   new Vector3(200, 0, 255)
-    // ]
-    // const bot = new Bot({color: 0xffffff}).setPath(path).render()
-    // this.scene.add(bot)
-    // bots.push(bot)
-
-    setInterval(() => {
-      for (const base of store.bases) {
-        for (const line of store.lines) {
-
-          let path = Array.from(line.geometry.vertices)
-          if (path.length > 1) {
-            const distanceToFirstVector = base.position.distanceTo(path[0])
-            const distanceToLastVector = base.position.distanceTo(path[path.length - 1])
-            if (distanceToFirstVector > distanceToLastVector) {
-              path = path.reverse()
-            }
-          }
-
-          const bot = new Bot({color: base.userData.color}).setPath(path).render()
-          bot.position.copy(base.position)
-          this.scene.add(bot)
-          bots.push(bot)
-        }
-      }
-    }, 30000)
-
-    this.updates.push((delta) => {
-      for (const bot of bots) {
-        bot.update(delta)
-      }
-    })
-
-    console.log(map, store)
-
+  /**
+   *
+   * @param {Object} rawMap
+   * @returns {Engine}
+   */
+  startPlay(rawMap) {
+    this.playController
+      .renderMap(rawMap)
+      .renderWaveBots()
+      // .startRenderWaveBots()
     return this
   }
 
@@ -471,6 +384,7 @@ class Engine {
   animate() {
     this.register.requestAnimationId = requestAnimationFrame(() => this.animate())
     const delta = this.clock.getDelta()
+    this.playController.update(delta)
     for (const updateCallback of this.updates) {
       updateCallback(delta)
     }
