@@ -1,6 +1,5 @@
-import { Group, Mesh, Vector3, Object3D, EventDispatcher } from 'three'
-import { Object3DFollower, Object3DMover1, Object3DDirection } from '../lib'
-import ModelBot from './ModelBot'
+import { Object3DFollower, Object3DMover1 } from '../../lib'
+import ModelBot from '../models/ModelBot'
 
 export default class Bot extends ModelBot {
   /**
@@ -13,8 +12,6 @@ export default class Bot extends ModelBot {
     super(team)
     this.position.copy(position)
 
-    this.options = { health: 200 }
-
     /**
      *
      * @type {Object3DFollower}
@@ -26,12 +23,6 @@ export default class Bot extends ModelBot {
      * @type {Object3DMover1}
      */
     this.object3DMover = new Object3DMover1(this, 40)
-
-    /**
-     *
-     * @type {Object3DDirection}
-     */
-    this.object3DDirection = new Object3DDirection(this)
 
     /**
      *
@@ -71,111 +62,9 @@ export default class Bot extends ModelBot {
 
     /**
      *
-     * @type {EventDispatcher}
-     */
-    this.event = new EventDispatcher()
-
-    /**
-     *
      * @type {{expiredTime: number, interval: number}}
      */
     this.weaponOptions = { interval: 2, expiredTime: 0 }
-
-    /**
-     *
-     * @type {boolean}
-     */
-    this.destroyed = false
-  }
-
-  /**
-   *
-   * @type {string}
-   */
-  static DESTROY_EVENT = 'DESTROY_EVENT'
-
-  /**
-   * @typedef {Object} DestroyEventOptions
-   * @param {string} type
-   */
-
-  /**
-   * @param {DestroyEventOptions} options
-   * @callback destroyEventCallback
-   */
-
-  /**
-   *
-   * @param destroyEventCallback
-   * @returns {Bot}
-   */
-  destroyEvent(destroyEventCallback) {
-    this.event.addEventListener(Bot.DESTROY_EVENT, destroyEventCallback)
-    return this
-  }
-
-  /**
-   *
-   * @returns {Bot}
-   */
-  dispatchDestroyEvent() {
-    this.destroyed = true
-    this.event.dispatchEvent({ type: Bot.DESTROY_EVENT })
-    return this
-  }
-
-  /**
-   *
-   * @param {Charge} charge
-   * @returns {Bot}
-   */
-  hit(charge) {
-    this.options.health -= charge.options.damage
-    if (this.options.health <= 0) {
-      this.dispatchDestroyEvent()
-    }
-    return this
-  }
-
-  /**
-   *
-   * @type {string}
-   */
-  static SHOT_EVENT = 'SHOT_EVENT'
-
-  /**
-   * @typedef {Object} ShotEventOptions
-   * @property {string} type
-   * @property {Vector3} position
-   * @property {Vector3} direction
-   */
-
-  /**
-   * @param {ShotEventOptions}
-   * @callback shotEventCallback
-   */
-
-  /**
-   *
-   * @param shotEventCallback
-   * @returns {Bot}
-   */
-  shotEvent(shotEventCallback) {
-    this.event.addEventListener(Bot.SHOT_EVENT, shotEventCallback)
-    return this
-  }
-
-  /**
-   *
-   * @returns {Bot}
-   */
-  dispatchShotEvent() {
-    this.event.dispatchEvent({
-      type: Bot.SHOT_EVENT,
-      position: this.position.clone(),
-      direction: this.object3DDirection.get().clone(),
-    })
-    return this
   }
 
   /**
@@ -196,9 +85,13 @@ export default class Bot extends ModelBot {
     return path
   }
 
-  tryCaptureTarget(bots, builds) {
+  tryCaptureTarget(bots) {
     if (this.destroyed) {
       return
+    }
+
+    if (this.attacTarget && this.attacTarget.destroyed) {
+      this.attacTarget = null
     }
 
     if (this.attacTarget && this.position.distanceTo(this.attacTarget.position) <= this.attackRadius) {
@@ -206,33 +99,10 @@ export default class Bot extends ModelBot {
       return
     }
 
-    // if (this.pursuitTarget && this.position.distanceTo(this.pursuitTarget.position) <= this.pursuitRadius) {
-    //   // Has target. Do nothing.
-    //   return
-    // }
-
-    if (this.attacTarget) {
-      // Lost target.
-      this.attacTarget = null
-    }
-
-    // if (this.pursuitTarget) {
-    //   // Lost target.
-    //   this.pursuitTarget = null
-    // }
-
     for (const bot of bots) {
       if (this.position.distanceTo(bot.position) <= this.attackRadius) {
         // Target captured.
         this.attacTarget = bot
-        return
-      }
-    }
-
-    for (const build of builds) {
-      if (this.position.distanceTo(build.position) <= this.pursuitRadius) {
-        // Target captured.
-        this.attacTarget = build
         return
       }
     }

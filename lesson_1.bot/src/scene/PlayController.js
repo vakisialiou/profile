@@ -1,7 +1,7 @@
-import { Scene, Vector3 } from 'three'
+import { Scene } from 'three'
 import Map from './map/Map'
-import Bot from './map/Bot'
-import Charge from './map/Charge'
+import Bot from './map/units/Bot'
+import Charge from './map/units/Charge'
 
 export default class PlayController {
   /**
@@ -96,6 +96,28 @@ export default class PlayController {
 
   /**
    *
+   * @param {Tower} tower
+   * @return {PlayController}
+   */
+  removeTower(tower) {
+    this.map.removeTower(tower)
+    this.scene.remove(tower)
+    return this
+  }
+
+  /**
+   *
+   * @param {Base} base
+   * @return {PlayController}
+   */
+  removeBase(base) {
+    this.map.removeBase(base)
+    this.scene.remove(base)
+    return this
+  }
+
+  /**
+   *
    * @param {Object} rawMap
    * @returns {PlayController}
    */
@@ -140,6 +162,9 @@ export default class PlayController {
    */
   renderWaveBots() {
     for (const team of this.map.teams) {
+      if (team.defeat) {
+        continue
+      }
       for (const road of this.map.roads) {
         const bot = new Bot(team, road.points, team.base.position)
         bot.shotEvent((shotOptions) => {
@@ -157,6 +182,12 @@ export default class PlayController {
         bot.destroyEvent(() => this.removeBot(bot))
         this.addBot(bot)
       }
+
+      for (const tower of team.towers) {
+        tower.destroyEvent(() => this.removeTower(tower))
+      }
+
+      team.base.destroyEvent(() => this.removeBase(team.base))
     }
     return this
   }
@@ -172,23 +203,6 @@ export default class PlayController {
 
   /**
    *
-   * @param {Team} activeTeam
-   * @returns {(ModelBase|ModelTower)[]}
-   */
-  getEnemyBuilds(activeTeam) {
-    let builds = []
-    for (const team of this.map.teams) {
-      if (team.name === activeTeam.name) {
-        continue
-      }
-      builds = builds.concat(team.towers)
-      builds.push(team.base)
-    }
-    return builds
-  }
-
-  /**
-   *
    * @param {number} delta
    * @returns {PlayController}
    */
@@ -196,14 +210,14 @@ export default class PlayController {
     for (const bot of this.bots) {
       bot.update(delta)
       const bots = this.getEnemyBots(bot.team)
-      const builds = this.getEnemyBuilds(bot.team)
-      bot.tryCaptureTarget(bots, builds)
+      const builds = this.map.getEnemyBuilds(bot.team)
+      bot.tryCaptureTarget([ ...bots, ...builds ])
     }
 
     for (const charge of this.charges) {
       const bots = this.getEnemyBots(charge.bot.team)
-      const builds = this.getEnemyBuilds(charge.bot.team)
-      charge.update(delta, [...bots, ...builds])
+      const builds = this.map.getEnemyBuilds(charge.bot.team)
+      charge.update(delta, [ ...bots, ...builds ])
     }
 
     if (!this.waveBotsOptions.enabled) {

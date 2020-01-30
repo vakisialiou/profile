@@ -1,7 +1,5 @@
 import Team from './Team'
-import ModelRoad from './ModelRoad'
-import ModelBase from './ModelBase'
-import ModelTower from './ModelTower'
+import ModelRoad from './models/ModelRoad'
 
 export default class Map {
   constructor() {
@@ -69,6 +67,46 @@ export default class Map {
   getTeamBase(teamName) {
     const team = this.getTeam(teamName)
     return team ? team.base : []
+  }
+
+  /**
+   *
+   * @param {Team} activeTeam
+   * @returns {(ModelBase|ModelTower)[]}
+   */
+  getEnemyBuilds(activeTeam) {
+    let builds = []
+    for (const team of this.teams) {
+      if (team.defeat) {
+        continue
+      }
+      if (team.name === activeTeam.name) {
+        continue
+      }
+      builds = builds.concat(team.towers)
+      builds.push(team.base)
+    }
+    return builds
+  }
+
+  /**
+   *
+   * @param {Tower} tower
+   * @return {Map}
+   */
+  removeTower(tower) {
+    tower.team.removeTower(tower)
+    return this
+  }
+
+  /**
+   *
+   * @param {Base} base
+   * @return {Map}
+   */
+  removeBase(base) {
+    base.team.removeBase()
+    return this
   }
 
   /**

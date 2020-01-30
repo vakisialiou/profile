@@ -1,5 +1,5 @@
-import ModelBase from './ModelBase'
-import ModelTower from './ModelTower'
+import Base from './units/Base'
+import Tower from './units/Tower'
 
 export default class Team {
   constructor(name, color) {
@@ -17,15 +17,21 @@ export default class Team {
 
     /**
      *
-     * @type {ModelBase}
+     * @type {Base|ModelBase|Model}
      */
     this.base = undefined
 
     /**
      *
-     * @type {Array.<ModelTower>}
+     * @type {Array.<Tower|ModelTower|Model>}
      */
     this.towers = []
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.defeat = false
   }
 
   /**
@@ -34,7 +40,7 @@ export default class Team {
    * @return {Team}
    */
   setBase(rawBases) {
-    this.base = new ModelBase(this, rawBases[this.name]['name'], rawBases[this.name]['position'])
+    this.base = new Base(this, rawBases[this.name]['name']).setPosition(rawBases[this.name]['position'])
     return this
   }
 
@@ -45,7 +51,29 @@ export default class Team {
    */
   setTowers(rawTowers) {
     this.towers = rawTowers[this.name]
-      .map((base) => new ModelTower(this, base.name, base.position))
+      .map((base) => new Tower(this, base.name).setPosition(base.position))
+    return this
+  }
+
+  /**
+   *
+   * @param {Tower|ModelTower|Model} tower
+   * @return {Team}
+   */
+  removeTower(tower) {
+    const index = this.towers.indexOf(tower)
+    if (index !== -1) {
+      this.towers.splice(index, 1)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @return {Team}
+   */
+  removeBase() {
+    this.defeat = true
     return this
   }
 }

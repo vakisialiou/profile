@@ -1,18 +1,14 @@
-import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three'
+import { BoxGeometry, MeshBasicMaterial } from 'three'
+import Model from './base/Model'
+import ModelOptionsBot from './base/ModelOptionsBot'
 
-export default class ModelBot extends Mesh {
+export default class ModelBot extends Model {
   /**
    *
    * @param {Team} team
    */
   constructor(team) {
-    super()
-
-    /**
-     *
-     * @type {Team}
-     */
-    this.team = team
+    super(team, new ModelOptionsBot().setHealth(200))
 
     /**
      *

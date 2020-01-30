@@ -1,5 +1,5 @@
 import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, Object3D, EventDispatcher } from 'three'
-import { Object3DMover2 } from '../lib'
+import { Object3DMover2 } from '../../lib'
 
 export default class Charge extends Mesh {
   /**
