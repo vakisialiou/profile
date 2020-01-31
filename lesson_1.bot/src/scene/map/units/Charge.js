@@ -17,7 +17,7 @@ export default class Charge extends Mesh {
       distance: 200,
       speed: 80,
       // TODO: для дебага. Не забыть убрать.
-      damage: bot.team.color === '#0000FF' ? 60 : 6
+      damage: bot.team.color === '#0000FF' ? 60 : 40
     }
 
     /**

@@ -2,7 +2,20 @@ import Base from './units/Base'
 import Tower from './units/Tower'
 
 export default class Team {
-  constructor(name, color) {
+  /**
+   *
+   * @param {Scene} scene
+   * @param {string} name
+   * @param {string} color
+   */
+  constructor(scene, name, color) {
+
+    /**
+     *
+     * @type {Scene}
+     */
+    this.scene = scene
+
     /**
      *
      * @type {string}
@@ -17,15 +30,27 @@ export default class Team {
 
     /**
      *
-     * @type {Base|ModelBase|Model}
+     * @type {Array.<Base|ModelBase|Model>}
      */
-    this.base = undefined
+    this.bases = []
 
     /**
      *
      * @type {Array.<Tower|ModelTower|Model>}
      */
     this.towers = []
+
+    /**
+     *
+     * @type {Array.<Bot|ModelBot|Model>}
+     */
+    this.bots = []
+
+    /**
+     *
+     * @type {Array.<Charge|ModelCharge|Model>}
+     */
+    this.charges = []
 
     /**
      *
@@ -40,7 +65,10 @@ export default class Team {
    * @return {Team}
    */
   setBase(rawBases) {
-    this.base = new Base(this, rawBases[this.name]['name']).setPosition(rawBases[this.name]['position'])
+    const rawBase = rawBases[this.name]
+    const base = new Base(this, rawBase['name']).setPosition(rawBase['position'])
+    this.bases.push(base)
+    this.scene.add(base)
     return this
   }
 
@@ -50,8 +78,49 @@ export default class Team {
    * @return {Team}
    */
   setTowers(rawTowers) {
-    this.towers = rawTowers[this.name]
-      .map((base) => new Tower(this, base.name).setPosition(base.position))
+    for (const item of rawTowers[this.name]) {
+      const tower = new Tower(this, item.name).setPosition(item.position)
+      this.towers.push(tower)
+      this.scene.add(tower)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Charge|ModelCharge|Model} charge
+   * @return {Team}
+   */
+  addCharge(charge) {
+    if (!this.charges.includes(charge)) {
+      this.charges.push(charge)
+      this.scene.add(charge)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Tower|ModelTower|Model} tower
+   * @return {Team}
+   */
+  addTower(tower) {
+    if (!this.towers.includes(tower)) {
+      this.scene.add(tower)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Bot|ModelBot|Model} bot
+   * @return {Team}
+   */
+  addBot(bot) {
+    if (!this.bots.includes(bot)) {
+      this.bots.push(bot)
+      this.scene.add(bot)
+    }
     return this
   }
 
@@ -64,16 +133,53 @@ export default class Team {
     const index = this.towers.indexOf(tower)
     if (index !== -1) {
       this.towers.splice(index, 1)
+      this.scene.remove(tower)
     }
     return this
   }
 
   /**
    *
+   * @param {Charge|ModelCharge|Model} charge
    * @return {Team}
    */
-  removeBase() {
-    this.defeat = true
+  removeCharge(charge) {
+    const index = this.charges.indexOf(charge)
+    if (index !== -1) {
+      this.charges.splice(index, 1)
+      this.scene.remove(charge)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Bot|ModelBot|Model} bot
+   * @return {Team}
+   */
+  removeBot(bot) {
+    const index = this.bots.indexOf(bot)
+    if (index !== -1) {
+      this.bots.splice(index, 1)
+      this.scene.remove(bot)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Base|ModelBase|Model} base
+   * @return {Team}
+   */
+  removeBase(base) {
+    const index = this.bases.indexOf(base)
+    if (index !== -1) {
+      this.bases.splice(index, 1)
+      this.scene.remove(base)
+    }
+    if (this.bases.length === 0) {
+      this.defeat = true
+    }
     return this
   }
 }
