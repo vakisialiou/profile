@@ -30,7 +30,6 @@ export default {
       .renderDebugPanel()
       .setAxesHelper(500)
       .registerEvents()
-      .setGround()
       .animate()
   },
   components: {

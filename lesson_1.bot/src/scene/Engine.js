@@ -21,7 +21,6 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
 import DebugPanel from './DebugPanel'
-import Ground from './Ground'
 import PlayController from './PlayController'
 
 class Engine {
@@ -139,12 +138,6 @@ class Engine {
 
     /**
      *
-     * @type {Ground}
-     */
-    this.ground = new Ground()
-
-    /**
-     *
      * @type {PlayController}
      */
     this.playController = new PlayController(this.scene)
@@ -167,21 +160,11 @@ class Engine {
    *
    * @returns {Engine}
    */
-  setGround() {
-    this.ground.render()
-    this.scene.add(this.ground)
-    return this
-  }
-
-  /**
-   *
-   * @returns {Engine}
-   */
   renderDebugPanel() {
     DebugPanel.folderDirLight(this.dirLight)
     DebugPanel.folderHemiLight(this.hemiLight)
     DebugPanel.folderPointLight(this.pointLight)
-    DebugPanel.folderGround(this.ground)
+    DebugPanel.folderGround(this.playController.map.ground)
     DebugPanel.folderControls()
     return this
   }
@@ -290,7 +273,7 @@ class Engine {
     switch (event.button) {
       case 0:
         if (this.register.activeKeyCode === 17) { // Control
-          this.ground.onDocumentMouseDown(event, this.camera)
+          this.playController.map.ground.onDocumentMouseDown(event, this.camera)
         }
         break
     }

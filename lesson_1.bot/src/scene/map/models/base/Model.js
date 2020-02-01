@@ -5,7 +5,7 @@ class Model extends Mesh {
   /**
    *
    * @param {Team} team
-   * @param {(ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower)} options
+   * @param {(ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower|ModelOptionsGround)} options
    */
   constructor(team, options) {
     super()
@@ -18,7 +18,7 @@ class Model extends Mesh {
 
     /**
      *
-     * @type {(ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower)}
+     * @type {(ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower|ModelOptionsGround)}
      */
     this.options = options
 

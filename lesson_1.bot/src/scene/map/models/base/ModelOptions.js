@@ -1,11 +1,7 @@
 
 class ModelOptions {
   constructor() {
-    /**
-     *
-     * @type {string}
-     */
-    this.type = this.constructor.name
+
 
     /**
      *

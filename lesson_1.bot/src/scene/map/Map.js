@@ -1,5 +1,6 @@
 import Team from './Team'
 import ModelRoad from './models/ModelRoad'
+import Ground from './units/Ground'
 
 export default class Map {
   /**
@@ -28,15 +29,9 @@ export default class Map {
 
     /**
      *
-     * @type {string|undefined}
+     * @type {Ground}
      */
-    this.planeSize = undefined
-
-    /**
-     *
-     * @type {string|undefined}
-     */
-    this.pointSize = undefined
+    this.ground = new Ground()
 
     /**
      *
@@ -221,8 +216,6 @@ export default class Map {
   preset(rawMap) {
     this.type = rawMap.type
     this.name = rawMap.name
-    this.planeSize = rawMap.planeSize
-    this.pointSize = rawMap.pointSize
 
     for (let i = 0; i < rawMap.teams.length; i++) {
       const team = rawMap.teams[i]
@@ -236,6 +229,9 @@ export default class Map {
       this.roads.push(road)
       this.scene.add(road)
     }
+
+    this.ground.preset()
+    this.scene.add(this.ground)
 
     return this
   }
