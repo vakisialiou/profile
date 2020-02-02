@@ -232,7 +232,6 @@ export default class Map {
 
     this.ground.preset()
     this.scene.add(this.ground)
-
     return this
   }
 }
