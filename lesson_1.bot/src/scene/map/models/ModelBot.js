@@ -14,7 +14,7 @@ export default class ModelBot extends Model {
      *
      * @type {CylinderGeometry}
      */
-    this.geometry = new CylinderGeometry(10, 10, 10)
+    this.geometry = new CylinderGeometry(2, 2, 10)
 
     /**
      *

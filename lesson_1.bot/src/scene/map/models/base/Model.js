@@ -119,12 +119,14 @@ class Model extends Mesh {
 
   /**
    *
+   * @param {Object|Model} targetObject
    * @param {Object} [options]
    * @returns {Model}
    */
-  dispatchShotEvent(options = {}) {
+  dispatchShotEvent(targetObject, options = {}) {
     this.event.dispatchEvent({
       ...options,
+      targetObject,
       type: Model.SHOT_EVENT,
       position: this.position.clone(),
       direction: this.object3DDirection.get().clone(),

@@ -1,5 +1,6 @@
-import { Object3DFollower, Object3DMover1 } from '../../lib'
+import { Object3DFollower, Object3DMover1, Object3DDirection } from '../../lib'
 import ModelBot from '../models/ModelBot'
+import {Math as _Math, CircleGeometry, Vector3} from 'three'
 
 export default class Bot extends ModelBot {
   /**
@@ -53,12 +54,6 @@ export default class Bot extends ModelBot {
      * @type {Object3D|Group|Mesh|null}
      */
     this.attacTarget = null
-
-    /**
-     *
-     * @type {Object3D|Group|Mesh|null}
-     */
-    this.pursuitTarget = null
 
     /**
      *
@@ -124,7 +119,7 @@ export default class Bot extends ModelBot {
     }
 
     this.weaponOptions.expiredTime += delta
-    if (this.path.length > 0 && !this.attacTarget && !this.pursuitTarget) {
+    if (this.path.length > 0 && !this.attacTarget) {
       // Move on the road
       const target = this.path[0]
       this.object3DMover.setTarget(target).update(delta)
@@ -134,18 +129,11 @@ export default class Bot extends ModelBot {
       }
     }
 
-    // if (!this.attacTarget && this.pursuitTarget) {
-    //   // Move on the pursuit target
-    //   const target = this.pursuitTarget.position
-    //   this.object3DMover.setTarget(target).update(delta)
-    //   this.object3DFolower.setTarget(target).update(delta)
-    // }
-
-    if (!this.pursuitTarget && this.attacTarget) {
+    if (this.attacTarget) {
       this.object3DFolower.setTarget(this.attacTarget.position).update(delta)
       if (this.weaponOptions.expiredTime >= this.weaponOptions.interval) {
         this.weaponOptions.expiredTime = 0
-        this.dispatchShotEvent()
+        this.dispatchShotEvent(this.attacTarget)
       }
     }
 

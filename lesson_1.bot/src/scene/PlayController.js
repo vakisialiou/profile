@@ -1,4 +1,3 @@
-import { Scene } from 'three'
 import Map from './map/Map'
 import Bot from './map/units/Bot'
 import Charge from './map/units/Charge'
@@ -79,6 +78,7 @@ export default class PlayController {
         for (const base of team.bases) {
           const bot = new Bot(team, road.points, base.position)
           bot.shotEvent((shotOptions) => {
+            console.log(shotOptions)
             const charge = new Charge(bot, shotOptions.position, shotOptions.direction)
             charge.collisionEvent((options) => {
               const hitBot = options.intersections[0]['object']

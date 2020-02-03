@@ -17,6 +17,12 @@ export default class Map {
 
     /**
      *
+     * @type {Array.<{rigidBody: RigidBody, model: Model}>}
+     */
+    this.rigidBodies = []
+
+    /**
+     *
      * @type {string|undefined}
      */
     this.type = undefined
@@ -74,6 +80,16 @@ export default class Map {
       charges = charges.concat(team.charges)
     }
     return charges
+  }
+
+  /**
+   *
+   * @param {RigidBody} rigidBody
+   * @param {Model} model
+   */
+  addRigidBody(rigidBody, model) {
+    this.rigidBodies.push({ rigidBody, model })
+    return this
   }
 
   /**
