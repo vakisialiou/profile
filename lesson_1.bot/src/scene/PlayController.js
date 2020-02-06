@@ -1,6 +1,7 @@
 import Map from './map/Map'
 import Bot from './map/units/Bot'
 import Charge from './map/units/Charge'
+import LoadingModels from './LoadingModels'
 
 export default class PlayController {
   /**
@@ -22,9 +23,23 @@ export default class PlayController {
 
     /**
      *
+     * @type {LoadingModels}
+     */
+    this.loadingModels = new LoadingModels()
+
+    /**
+     *
      * @type {{tmp: number, interval: number, enabled: boolean}}
      */
     this.waveBotsOptions = { interval: 30, enabled: false, tmp: 0 }
+  }
+
+  /**
+   *
+   * @returns {void}
+   */
+  async preset() {
+    await this.loadingModels.presetModels()
   }
 
   /**
@@ -76,9 +91,9 @@ export default class PlayController {
       }
       for (const road of this.map.roads) {
         for (const base of team.bases) {
-          const bot = new Bot(team, road.points, base.position)
+          const gltf = this.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
+          const bot = new Bot(team, gltf, road.points, base.position)
           bot.shotEvent((shotOptions) => {
-            console.log(shotOptions)
             const charge = new Charge(bot, shotOptions.position, shotOptions.direction)
             charge.collisionEvent((options) => {
               const hitBot = options.intersections[0]['object']

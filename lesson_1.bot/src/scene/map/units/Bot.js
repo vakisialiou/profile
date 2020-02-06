@@ -6,11 +6,12 @@ export default class Bot extends ModelBot {
   /**
    *
    * @param {Team} team
+   * @param {GLTF} gltf
    * @param {Array.<Vector3>} path
    * @param {Vector3} position
    */
-  constructor(team, path, position) {
-    super(team)
+  constructor(team, gltf, path, position) {
+    super(team, gltf)
     this.position.copy(position)
 
     /**
@@ -23,7 +24,7 @@ export default class Bot extends ModelBot {
      *
      * @type {Object3DMover1}
      */
-    this.object3DMover = new Object3DMover1(this, 40)
+    this.object3DMover = new Object3DMover1(this, 15)
 
     /**
      *
@@ -117,7 +118,7 @@ export default class Bot extends ModelBot {
     if (this.destroyed) {
       return this
     }
-
+    super.update(delta)
     this.weaponOptions.expiredTime += delta
     if (this.path.length > 0 && !this.attacTarget) {
       // Move on the road

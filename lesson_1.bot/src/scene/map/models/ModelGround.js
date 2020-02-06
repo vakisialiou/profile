@@ -1,4 +1,4 @@
-import {MeshBasicMaterial, Group, Mesh, PlaneGeometry, DoubleSide, Vector3} from 'three'
+import {MeshBasicMaterial, Group, Mesh, PlaneGeometry, DoubleSide, Vector3, TextureLoader, MirroredRepeatWrapping, RepeatWrapping} from 'three'
 import ModelOptionsGround from './base/ModelOptionsGround'
 
 export default class ModelGround extends Group {
@@ -13,6 +13,11 @@ export default class ModelGround extends Group {
      * @type {Vector3}
      */
     this.direction = new Vector3(1, 0, 0)
+
+    this.texture = new TextureLoader().load('./textures/grass/1.jpg')
+    this.texture.wrapS = RepeatWrapping;
+    this.texture.wrapT = RepeatWrapping;
+    this.texture.repeat.set(4, 4)
 
     /**
      *
@@ -30,7 +35,13 @@ export default class ModelGround extends Group {
      *
      * @type {MeshBasicMaterial}
      */
-    this.groundMaterial = new MeshBasicMaterial({ color: 0x666666, side: DoubleSide, opacity: 0.5, transparent: true })
+    this.groundMaterial = new MeshBasicMaterial({
+      // color: 0x666666,
+      // side: DoubleSide,
+      // opacity: 0.1,
+      // transparent: true,
+      map: this.texture,
+    })
 
     /**
      *
@@ -43,7 +54,7 @@ export default class ModelGround extends Group {
    * @returns {ModelGround}
    */
   preset() {
-    this.ground.rotateOnAxis(this.direction, Math.PI / 2)
+    this.ground.rotateOnAxis(this.direction, - Math.PI / 2)
     this.add(this.ground)
     return this
   }

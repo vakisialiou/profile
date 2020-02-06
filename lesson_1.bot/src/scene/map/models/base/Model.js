@@ -133,6 +133,10 @@ class Model extends Mesh {
     })
     return this
   }
+
+  update(delta) {
+
+  }
 }
 
 export default Model

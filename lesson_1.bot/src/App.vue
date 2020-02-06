@@ -19,18 +19,20 @@ export default {
     const container = document.getElementById('container')
     const lightPosition = new Vector3(70, 70, 70)
     const cameraPosition = new Vector3(100, 100, 100)
-    engine
-      .setDirLight(lightPosition)
-      .setHemiLight(lightPosition)
-      .setPointLight(lightPosition)
-      .setCamera(cameraPosition, lightPosition)
-      .startPlay(map)
-      .render(container)
-      .setLightHelper()
-      .renderDebugPanel()
-      .setAxesHelper(500)
-      .registerEvents()
-      .animate()
+    engine.preset(() => {
+      engine
+        .setDirLight(lightPosition)
+        .setHemiLight(lightPosition)
+        .setPointLight(lightPosition)
+        .setCamera(cameraPosition, lightPosition)
+        .startPlay(map)
+        .render(container)
+        .setLightHelper()
+        .renderDebugPanel()
+        .setAxesHelper(500)
+        .registerEvents()
+        .animate()
+    }, console.warn)
   },
   components: {
     HelloWorld

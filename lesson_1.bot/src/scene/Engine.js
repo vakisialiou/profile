@@ -158,6 +158,15 @@ class Engine {
 
   /**
    *
+   * @param onSuccess
+   * @param onError
+   */
+  preset(onSuccess, onError) {
+    this.playController.preset().then(onSuccess).catch(onError)
+  }
+
+  /**
+   *
    * @returns {Engine}
    */
   renderDebugPanel() {
