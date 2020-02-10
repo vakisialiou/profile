@@ -26,7 +26,7 @@ export default class ModelBase extends Model {
     const loader = new GLTFLoader()
     loader.load('/models/base.glb', (glb) => {
       const mesh = glb.scene.children[0]
-      mesh.scale.set(15,15,15)
+      mesh.scale.set(25,25,25)
       // console.log(mesh)
       this.add(mesh)
       this.position.setY(0)

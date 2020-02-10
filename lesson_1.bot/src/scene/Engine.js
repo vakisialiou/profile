@@ -22,6 +22,10 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
 import DebugPanel from './DebugPanel'
 import PlayController from './PlayController'
+import Bot from './map/units/Bot'
+import Team from "./map/Team";
+import LoadingModels from "./LoadingModels";
+import Charge from "./map/units/Charge";
 
 class Engine {
   constructor() {
@@ -353,6 +357,53 @@ class Engine {
     this.renderer.start(this.camera)
     container.appendChild(this.stats.dom)
     container.appendChild(this.renderer.domElement)
+    return this
+  }
+
+  debugMD2Character(){
+
+  }
+
+  debugGltfCharacter() {
+    const teamA = new Team(this.scene, 'team-A', '#FF0000')
+    const teamB = new Team(this.scene, 'team-B', '#0000FF')
+
+    const gltfBotA = this.playController.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
+    const botA = new Bot(teamA, gltfBotA, [new Vector3(0, 0, 100)], new Vector3(0, 0, 0))
+
+    const gltfBotB = this.playController.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
+    const botB = new Bot(teamB, gltfBotB, [new Vector3(0, 0, 100)], new Vector3(0, 0, 100))
+
+    botA.shotEvent((shotOptions) => {
+      // console.log(bot.weaponPosition, bot.position)
+      const charge = new Charge(botA, botA.weaponPosition, shotOptions.direction)
+      charge.collisionEvent((options) => {
+        const hitBot = options.intersections[0]['object']
+        hitBot.hit(charge)
+        charge.dispatchDestroyEvent()
+      })
+      charge.destroyEvent(() => this.scene.remove(charge))
+
+      this.scene.add(charge)
+      this.updates.push((delta) => {
+        charge.update(delta, [botB])
+      })
+    })
+    teamA.addBot(botA)
+    this.scene.add(botA)
+    this.updates.push((delta) => {
+      botA.tryCaptureTarget(teamB.bots).update(delta)
+    })
+
+
+
+    teamB.addBot(botB)
+    this.scene.add(botB)
+    this.updates.push((delta) => {
+      botB.update(delta)
+    })
+
+
     return this
   }
 

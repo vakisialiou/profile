@@ -11,11 +11,12 @@ export default class Charge extends Mesh {
   constructor(bot, position, direction) {
     super()
     this.position.copy(position)
+    // this.position.setY(13)
     this.applyQuaternion(bot.quaternion)
 
     this.options = {
       distance: 200,
-      speed: 80,
+      speed: 300,
       // TODO: для дебага. Не забыть убрать.
       damage: bot.team.color === '#0000FF' ? 60 : 40
     }
@@ -48,7 +49,7 @@ export default class Charge extends Mesh {
      *
      * @type {SphereGeometry}
      */
-    this.geometry = new SphereGeometry(2)
+    this.geometry = new SphereGeometry(0.6)
 
     /**
      *
@@ -151,13 +152,14 @@ export default class Charge extends Mesh {
    * @returns {Intersection[]}
    */
   getIntersectionObjects(objects, recursive = false) {
-    if (this.prevPosition.equals(this.position)) {
+    if (this.prevPosition.equals(this.position) || objects.length === 0) {
       return []
     }
     this.raycaster.ray.origin.copy(this.prevPosition)
     this.raycaster.ray.direction.copy(this.direction)
     this.raycaster.near = 0
     this.raycaster.far = this.prevPosition.distanceTo(this.position)
+    // console.log(objects)
     return this.raycaster.intersectObjects(objects, recursive)
   }
 
@@ -173,8 +175,10 @@ export default class Charge extends Mesh {
     }
     this.prevPosition.copy(this.position)
     this.object3DMover.update(delta)
-    const intersections = this.getIntersectionObjects(objects)
+    const intersections = this.getIntersectionObjects(objects, true)
+    // console.log(intersections.length, intersections)
     if (intersections.length > 0) {
+      // console.log(intersections)
       this.event.dispatchEvent({ type: Charge.COLLISION_EVENT, intersections })
     }
     if (this.startPosition.distanceTo(this.position) >= this.options.distance) {

@@ -1,3 +1,5 @@
+import { Math as _Math } from 'three'
+
 export const TEAM_RED = 'red'
 export const TEAM_BLUE = 'blue'
 
@@ -21,11 +23,13 @@ export const map = {
       type: 'base',
       name: 'Base',
       position: {"x": -425, "y": 0, "z": -425},
+      rotation: {"x": 0, "y": _Math.degToRad(225), "z": 0},
     },
     [TEAM_BLUE]: {
       type: 'base',
       name: 'Base',
       position: {"x": 425, "y": 0, "z": 425},
+      rotation: {"x": 0, "y": _Math.degToRad(45), "z": 0},
     },
   },
   towers: {

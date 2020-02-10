@@ -2,6 +2,9 @@ import Map from './map/Map'
 import Bot from './map/units/Bot'
 import Charge from './map/units/Charge'
 import LoadingModels from './LoadingModels'
+import ModelBot from "./map/models/ModelBot";
+import ModelBase from "./map/models/ModelBase";
+import ModelTower from "./map/models/ModelTower";
 
 export default class PlayController {
   /**
@@ -80,6 +83,26 @@ export default class PlayController {
     return this
   }
 
+  enshureModelUnit(intersectObject) {
+    if (intersectObject instanceof ModelBot) {
+      return intersectObject
+    }
+
+    if (intersectObject instanceof ModelBase) {
+      return intersectObject
+    }
+
+    if (intersectObject instanceof ModelTower) {
+      return intersectObject
+    }
+
+    if (intersectObject.parent) {
+      return this.enshureModelUnit(intersectObject.parent)
+    }
+
+    return null
+  }
+
   /**
    *
    * @returns {PlayController}
@@ -94,9 +117,9 @@ export default class PlayController {
           const gltf = this.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
           const bot = new Bot(team, gltf, road.points, base.position)
           bot.shotEvent((shotOptions) => {
-            const charge = new Charge(bot, shotOptions.position, shotOptions.direction)
+            const charge = new Charge(bot, bot.weaponPosition, shotOptions.direction)
             charge.collisionEvent((options) => {
-              const hitBot = options.intersections[0]['object']
+              const hitBot = this.enshureModelUnit(options.intersections[0]['object'])
               hitBot.hit(charge)
               // console.log('collisionOptions', options, hitBot)
               charge.dispatchDestroyEvent()

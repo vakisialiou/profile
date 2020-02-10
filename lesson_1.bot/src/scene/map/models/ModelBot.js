@@ -1,7 +1,6 @@
-import { CylinderGeometry, MeshBasicMaterial, Group, ObjectLoader, AnimationMixer } from 'three'
+import { CylinderGeometry, MeshBasicMaterial, Vector3 } from 'three'
 import Model from './base/Model'
 import ModelOptionsBot from './base/ModelOptionsBot'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import AnimationBot from './animation/AnimationBot'
 
 export default class ModelBot extends Model {
@@ -11,19 +10,19 @@ export default class ModelBot extends Model {
    * @param {GLTF} gltf
    */
   constructor(team, gltf) {
-    super(team, new ModelOptionsBot().setHealth(200))
+    super(team, new ModelOptionsBot().setHealth(500))
 
     /**
      *
      * @type {CylinderGeometry}
      */
-    this.geometry = new CylinderGeometry(2, 2, 10)
+    this.geometry = new CylinderGeometry(2, 2, 30)
 
     /**
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: team.color, transparent: true, opacity: 0 })
+    this.material = new MeshBasicMaterial({ color: team.color, transparent: false, opacity: 1 })
 
     /**
      *
@@ -31,55 +30,92 @@ export default class ModelBot extends Model {
      */
     this.animation = new AnimationBot(gltf)
 
-    // this.updates = []
-
-//     const loader = new GLTFLoader()
-//     loader.load('/models/bot.glb', (gltf) => {
-//       const model = gltf.scene.children[0]
-//       model.scale.set(0.1, 0.1, 0.1)
-//       this.add(model)
-// // console.log(gltf.scene.children, gltf.animations)
-//       const mixer = new AnimationMixer(model)
-//       const actionWalk = mixer.clipAction(gltf.animations[0])
-//       actionWalk.enabled = true
-//       actionWalk.setEffectiveTimeScale(1)
-//       actionWalk.setEffectiveWeight(1)
-//       actionWalk.play()
-//
-//       const actionShot = mixer.clipAction(gltf.animations[1])
-//
-//       setTimeout(() => {
-//         actionWalk.paused = false
-//         actionShot.paused = false
-//         actionShot.enabled = true
-//         actionShot.setEffectiveTimeScale(1)
-//         actionShot.setEffectiveWeight(1)
-//         actionShot.time = 0
-//         actionWalk.crossFadeTo(actionShot, 0.4, true)
-//         actionShot.play()
-//       }, 10000)
-//
-//       const actionDying = mixer.clipAction(gltf.animations[2])
-//
-//       setTimeout(() => {
-//         actionShot.paused = false
-//         actionDying.paused = false
-//         actionDying.enabled = true
-//         actionDying.setEffectiveTimeScale(1)
-//         actionDying.setEffectiveWeight(1)
-//         actionDying.time = 0
-//         actionShot.crossFadeTo(actionDying, 0.4, true)
-//         actionDying.play()
-//       }, 20000)
-//
-//       this.updates.push((delta) => {
-//         mixer.update(delta)
-//       })
-//     })
-
     gltf.model.scale.set(0.1, 0.1, 0.1)
     this.add(gltf.model)
+
+    this.tmp = new Vector3()
+
+    /**
+     *
+     * @type {Object3D|Mesh}
+     */
+    this.weapon = this.findWeaponPosition(gltf.model)
+
+    this.weaponScalar = new Vector3(0, 1.6, 0)
+    if (!this.weapon) {
+      throw Error('Weapon is not found.')
+    }
   }
+
+  /**
+   *
+   * @returns {Vector3}
+   */
+  get weaponPosition() {
+    return this.weapon.getWorldPosition(this.tmp).add(this.weaponScalar)
+  }
+
+  /**
+   *
+   * @param {Object3D|Mesh} obj
+   * @returns {Object3D|Mesh|null}
+   */
+  findWeaponPosition(obj) {
+    for (const element of obj.children) {
+      if (element.name === 'Weapon') {
+        return element
+      }
+      const weapon = this.findWeaponPosition(element)
+      if (weapon) {
+        return weapon
+      }
+    }
+    return null
+  }
+
+  /**
+   *
+   * @returns {ModelBot}
+   */
+  dyingAnimation() {
+    this.animation.dyingAnimation()
+    return this
+  }
+
+  /**
+   *
+   * @returns {ModelBot}
+   */
+  walkingAnimation() {
+    this.animation.walkingAnimation()
+    return this
+  }
+
+  /**
+   *
+   * @returns {ModelBot}
+   */
+  shootingAnimation(callback) {
+    const shootingEvent = () => {
+      this.animation.pauseActiveAction().clearActiveAction()
+      this.animation.mixer.removeEventListener('loop', shootingEvent)
+    }
+    this.animation.mixer.addEventListener('loop', shootingEvent)
+    this.animation.shootingAnimation()
+    setTimeout(callback, 200)
+    return this
+  }
+
+  /**
+   *
+   * @returns {ModelBot}
+   */
+  idleAnimation() {
+    this.animation.idleAnimation()
+    return this
+  }
+
+
 
   update(delta) {
     this.animation.update(delta)

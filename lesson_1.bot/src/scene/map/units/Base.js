@@ -13,5 +13,10 @@ export default class Base extends ModelBase {
      *
      */
     this.name = name
+
+    this.dyingEvent(() => {
+      // create animation
+      setInterval(() => this.dispatchDestroyEvent(), 3000)
+    })
   }
 }

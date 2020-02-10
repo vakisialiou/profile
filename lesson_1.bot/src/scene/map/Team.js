@@ -66,7 +66,9 @@ export default class Team {
    */
   setBase(rawBases) {
     const rawBase = rawBases[this.name]
-    const base = new Base(this, rawBase['name']).setPosition(rawBase['position'])
+    const base = new Base(this, rawBase['name'])
+      .setPosition(rawBase['position'])
+      .setRotation(rawBase['rotation'])
     this.bases.push(base)
     this.scene.add(base)
     return this

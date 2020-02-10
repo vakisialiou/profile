@@ -1,4 +1,4 @@
-import { Mesh, EventDispatcher } from 'three'
+import {Object3D, EventDispatcher, Euler, Group, Mesh} from 'three'
 import { Object3DDirection } from '../../../lib'
 
 class Model extends Mesh {
@@ -39,6 +39,12 @@ class Model extends Mesh {
      * @type {boolean}
      */
     this.destroyed = false
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.disabled = false
   }
 
   /**
@@ -48,6 +54,16 @@ class Model extends Mesh {
    */
   setPosition(value) {
     this.position.copy(value)
+    return this
+  }
+
+  /**
+   *
+   * @param {Euler} value
+   * @return {Model}
+   */
+  setRotation(value) {
+    this.rotation.set(value.x, value.y, value.z)
     return this
   }
 
@@ -64,7 +80,7 @@ class Model extends Mesh {
 
   /**
    *
-   * @param destroyEventCallback
+   * @param {destroyEventCallback|Function} destroyEventCallback
    * @returns {Model}
    */
   destroyEvent(destroyEventCallback) {
@@ -85,13 +101,48 @@ class Model extends Mesh {
 
   /**
    *
+   * @type {string}
+   */
+  static DYING_EVENT = 'DYING_EVENT'
+
+  /**
+   * @param {Object} options
+   * @callback dyingEventCallback
+   */
+
+  /**
+   *
+   * @param {dyingEventCallback|Function} dyingEventCallback
+   * @returns {Model}
+   */
+  dyingEvent(dyingEventCallback) {
+    this.event.addEventListener(Model.DYING_EVENT, dyingEventCallback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Object} [options]
+   * @returns {Model}
+   */
+  dispatchDyingEvent(options = {}) {
+    this.disabled = true
+    this.event.dispatchEvent({ type: Model.DYING_EVENT, ...options })
+    return this
+  }
+
+  /**
+   *
    * @param {Object|{ options: (ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower) }} charge
    * @returns {Model}
    */
   hit(charge) {
+    if (this.destroyed || this.disabled) {
+      return this
+    }
     this.options.health -= charge.options.damage
     if (this.options.health <= 0) {
-      this.dispatchDestroyEvent()
+      this.dispatchDyingEvent()
     }
     return this
   }
@@ -109,7 +160,7 @@ class Model extends Mesh {
 
   /**
    *
-   * @param shotEventCallback
+   * @param {shotEventCallback|Function} shotEventCallback
    * @returns {Model}
    */
   shotEvent(shotEventCallback) {

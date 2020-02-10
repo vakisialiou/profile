@@ -60,7 +60,12 @@ export default class Bot extends ModelBot {
      *
      * @type {{expiredTime: number, interval: number}}
      */
-    this.weaponOptions = { interval: 2, expiredTime: 0 }
+    this.weaponOptions = { interval: 0.6000000238418579, expiredTime: 0 }
+
+    this.dyingEvent(() => {
+      this.dyingAnimation()
+      setInterval(() => this.dispatchDestroyEvent(), 3000)
+    })
   }
 
   /**
@@ -83,25 +88,30 @@ export default class Bot extends ModelBot {
 
   tryCaptureTarget(bots) {
     if (this.destroyed) {
-      return
+      return this
     }
 
-    if (this.attacTarget && this.attacTarget.destroyed) {
+    if (this.attacTarget && (this.attacTarget.destroyed || this.attacTarget.disabled)) {
       this.attacTarget = null
     }
 
     if (this.attacTarget && this.position.distanceTo(this.attacTarget.position) <= this.attackRadius) {
       // Has target. Do nothing.
-      return
+      return this
     }
 
     for (const bot of bots) {
+      if (bot.destroyed || bot.disabled) {
+        continue
+      }
       if (this.position.distanceTo(bot.position) <= this.attackRadius) {
         // Target captured.
         this.attacTarget = bot
-        return
+        return this
       }
     }
+
+    return this
   }
 
   /**
@@ -115,26 +125,39 @@ export default class Bot extends ModelBot {
    * @returns {Bot}
    */
   update(delta) {
-    if (this.destroyed) {
+    super.update(delta)
+    if (this.destroyed || this.disabled) {
       return this
     }
-    super.update(delta)
     this.weaponOptions.expiredTime += delta
     if (this.path.length > 0 && !this.attacTarget) {
       // Move on the road
       const target = this.path[0]
+
+      if (this.position.equals(target)) {
+        this.idleAnimation()
+        return this
+      }
+
       this.object3DMover.setTarget(target).update(delta)
       this.object3DFolower.setTarget(target).update(delta)
       if (this.object3DMover.isTargetReached) {
         this.path.splice(0, 1)
+        if (this.path.length === 0) {
+          this.idleAnimation()
+          return this
+        }
       }
+      this.walkingAnimation()
     }
 
     if (this.attacTarget) {
       this.object3DFolower.setTarget(this.attacTarget.position).update(delta)
-      if (this.weaponOptions.expiredTime >= this.weaponOptions.interval) {
+      if (this.weaponOptions.expiredTime >= this.weaponOptions.interval && !this.animation.actionShooting.isRunning()) {
         this.weaponOptions.expiredTime = 0
-        this.dispatchShotEvent(this.attacTarget)
+        this.shootingAnimation(() => {
+          this.dispatchShotEvent(this.attacTarget)
+        })
       }
     }
 
