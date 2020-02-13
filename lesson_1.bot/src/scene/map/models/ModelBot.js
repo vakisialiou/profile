@@ -22,7 +22,7 @@ export default class ModelBot extends Model {
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: team.color, transparent: false, opacity: 1 })
+    this.material = new MeshBasicMaterial({ color: team.color, transparent: true, opacity: 0 })
 
     /**
      *
@@ -77,7 +77,13 @@ export default class ModelBot extends Model {
    *
    * @returns {ModelBot}
    */
-  dyingAnimation() {
+  dyingAnimation(callback) {
+    const dyingEvent = () => {
+      callback()
+      this.animation.clearActiveAction()
+      this.animation.mixer.removeEventListener('loop', dyingEvent)
+    }
+    this.animation.mixer.addEventListener('loop', dyingEvent)
     this.animation.dyingAnimation()
     return this
   }
@@ -97,7 +103,7 @@ export default class ModelBot extends Model {
    */
   shootingAnimation(callback) {
     const shootingEvent = () => {
-      this.animation.pauseActiveAction().clearActiveAction()
+      this.animation.clearActiveAction()
       this.animation.mixer.removeEventListener('loop', shootingEvent)
     }
     this.animation.mixer.addEventListener('loop', shootingEvent)

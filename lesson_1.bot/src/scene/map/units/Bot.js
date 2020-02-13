@@ -63,8 +63,7 @@ export default class Bot extends ModelBot {
     this.weaponOptions = { interval: 0.6000000238418579, expiredTime: 0 }
 
     this.dyingEvent(() => {
-      this.dyingAnimation()
-      setInterval(() => this.dispatchDestroyEvent(), 3000)
+      this.dyingAnimation(() => this.dispatchDestroyEvent())
     })
   }
 

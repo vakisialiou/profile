@@ -58,8 +58,8 @@ class AnimationBot {
    *
    * @returns {AnimationBot}
    */
-  pauseActiveAction() {
-    this.activeAction.paused = true
+  pauseAction(action) {
+    action.paused = true
     return this
   }
 
@@ -68,7 +68,10 @@ class AnimationBot {
    * @returns {AnimationBot}
    */
   clearActiveAction() {
-    this.activeAction = null
+    if (this.activeAction) {
+      this.pauseAction(this.activeAction)
+      this.activeAction = null
+    }
     return this
   }
 
@@ -113,7 +116,7 @@ class AnimationBot {
    * @returns {AnimationBot}
    */
   dyingAnimation() {
-    this.enableAction(this.actionDying)
+    this.enableAction(this.actionDying, 0)
     return this
   }
 

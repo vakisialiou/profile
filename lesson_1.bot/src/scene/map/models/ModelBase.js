@@ -27,6 +27,7 @@ export default class ModelBase extends Model {
     loader.load('/models/base.glb', (glb) => {
       const mesh = glb.scene.children[0]
       mesh.scale.set(25,25,25)
+      mesh.material.metalness = 0
       // console.log(mesh)
       this.add(mesh)
       this.position.setY(0)

@@ -84,7 +84,7 @@ class Engine {
      *
      * @type {HemisphereLight}
      */
-    this.hemiLight = new HemisphereLight(0xffffff, 0xffffff, 0.6)
+    this.hemiLight = new HemisphereLight(0xffffff, 0x444444)
 
     /**
      *
@@ -96,7 +96,7 @@ class Engine {
      *
      * @type {DirectionalLight}
      */
-    this.dirLight = new DirectionalLight(0x000000, 2)
+    this.dirLight = new DirectionalLight(0xffffff)
 
     /**
      *
@@ -402,6 +402,7 @@ class Engine {
     this.updates.push((delta) => {
       botB.update(delta)
     })
+    botB.destroyEvent(() => this.scene.remove(botB))
 
 
     return this

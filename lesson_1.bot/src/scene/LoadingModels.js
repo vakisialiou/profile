@@ -21,8 +21,8 @@ export default class LoadingModels {
       },
       {
         name: 'tower',
-        path: '/models/tower.glb',
-      }
+        path: '/models/tower/tower.glb',
+      },
     ]
 
     /**
@@ -72,7 +72,11 @@ export default class LoadingModels {
    */
   async presetModels() {
     for (const item of this.items) {
-      this.loadedItems[item.name] = await this.loadModel(item.path)
+      try {
+        this.loadedItems[item.name] = await this.loadModel(item.path)
+      } catch (e) {
+        throw new Error(`Can not load model "${item.name}:${item.path}". Look at "LoadingModels"`)
+      }
     }
     return this.loadedItems
   }

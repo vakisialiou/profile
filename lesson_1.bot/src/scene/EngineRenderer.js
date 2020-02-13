@@ -11,6 +11,8 @@ class EngineRenderer extends WebGLRenderer {
       antialias: true,
       gammaInput: true,
       gammaOutput: true,
+      gammaFactor: 0.2,
+      physicallyCorrectLights: true,
       ...parameters
     })
 
