@@ -4,10 +4,11 @@ export default class Base extends ModelBase {
   /**
    *
    * @param {Team} team
+   * @param {GLTF} gltf
    * @param {string} name
    */
-  constructor(team, name) {
-    super(team)
+  constructor(team, gltf, name) {
+    super(team, gltf)
 
     /**
      *

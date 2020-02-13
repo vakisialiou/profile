@@ -13,11 +13,11 @@ export default class LoadingModels {
     this.items = [
       {
         name: 'bot',
-        path: '/models/bot.glb',
+        path: '/models/bot/bot.glb',
       },
       {
         name: 'base',
-        path: '/models/base.glb',
+        path: '/models/base/base.glb',
       },
       {
         name: 'tower',

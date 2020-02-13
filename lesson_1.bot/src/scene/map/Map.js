@@ -84,6 +84,30 @@ export default class Map {
 
   /**
    *
+   * @returns {Array.<Tower|ModelTower|Model>}
+   */
+  get towers() {
+    let towers = []
+    for (const team of this.getTeams()) {
+      towers = towers.concat(team.towers)
+    }
+    return towers
+  }
+
+  /**
+   *
+   * @returns {Array.<Base|ModelBase|Model>}
+   */
+  get bases() {
+    let bases = []
+    for (const team of this.getTeams()) {
+      bases = bases.concat(team.bases)
+    }
+    return bases
+  }
+
+  /**
+   *
    * @param {RigidBody} rigidBody
    * @param {Model} model
    */
@@ -227,17 +251,18 @@ export default class Map {
   /**
    *
    * @param {Object} rawMap
+   * @param {LoadingModels} loadingModels
    * @returns {Map}
    */
-  preset(rawMap) {
+  preset(rawMap, loadingModels) {
     this.type = rawMap.type
     this.name = rawMap.name
 
     for (let i = 0; i < rawMap.teams.length; i++) {
       const team = rawMap.teams[i]
       this.teams[i] = new Team(this.scene, team.name, team.color)
-        .setBase(rawMap.bases)
-        .setTowers(rawMap.towers)
+        .setBase(rawMap.bases, loadingModels)
+        .setTowers(rawMap.towers, loadingModels)
     }
 
     for (const rawRoad of rawMap.roads) {

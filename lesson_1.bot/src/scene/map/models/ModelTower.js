@@ -1,14 +1,15 @@
-import {BoxGeometry, MeshBasicMaterial, Vector2} from 'three'
+import { BoxGeometry, MeshBasicMaterial } from 'three'
 import Model from './base/Model'
 import ModelOptionsTower from './base/ModelOptionsTower'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import AnimationTower from './animation/AnimationTower'
 
 export default class ModelTower extends Model {
   /**
    *
    * @param {Team} team
+   * @param {GLTF} gltf
    */
-  constructor(team) {
+  constructor(team, gltf) {
     super(team, new ModelOptionsTower().setHealth(300))
 
     /**
@@ -23,12 +24,28 @@ export default class ModelTower extends Model {
      */
     this.material = new MeshBasicMaterial({ color: team.color, transparent: true, opacity: 0 })
 
-    const loader = new GLTFLoader()
-    loader.load('/models/tower/tower.glb', (glb) => {
-      const mesh = glb.scene.children[0]
-      mesh.material.metalness = 0.2
-      mesh.scale.set(8,8,8)
-      this.add(mesh)
-    })
+    /**
+     *
+     * @type {AnimationTower}
+     */
+    this.animation = new AnimationTower(gltf)
+
+    gltf.model.scale.set(8, 8, 8)
+    gltf.model.material.metalness = 0.2
+    this.add(gltf.model)
+    this.followingAnimation()
+  }
+
+  /**
+   *
+   * @returns {ModelTower}
+   */
+  followingAnimation() {
+    this.animation.followingAnimation()
+    return this
+  }
+
+  update(delta) {
+    this.animation.update(delta)
   }
 }

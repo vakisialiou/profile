@@ -1,5 +1,6 @@
 import Base from './units/Base'
 import Tower from './units/Tower'
+import LoadingModels from "../LoadingModels";
 
 export default class Team {
   /**
@@ -62,11 +63,13 @@ export default class Team {
   /**
    *
    * @param {Array.<Object>} rawBases
+   * @param {LoadingModels} loadingModels
    * @return {Team}
    */
-  setBase(rawBases) {
+  setBase(rawBases, loadingModels) {
     const rawBase = rawBases[this.name]
-    const base = new Base(this, rawBase['name'])
+    const gltf = loadingModels.getGLTF(LoadingModels.MODEL_BASE)
+    const base = new Base(this, gltf, rawBase['name'])
       .setPosition(rawBase['position'])
       .setRotation(rawBase['rotation'])
     this.bases.push(base)
@@ -77,11 +80,13 @@ export default class Team {
   /**
    *
    * @param {Array.<Object>} rawTowers
+   * @param {LoadingModels} loadingModels
    * @return {Team}
    */
-  setTowers(rawTowers) {
+  setTowers(rawTowers, loadingModels) {
     for (const item of rawTowers[this.name]) {
-      const tower = new Tower(this, item.name).setPosition(item.position)
+      const gltf = loadingModels.getGLTF(LoadingModels.MODEL_TOWER)
+      const tower = new Tower(this, gltf, item.name).setPosition(item.position)
       this.towers.push(tower)
       this.scene.add(tower)
     }

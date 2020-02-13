@@ -71,7 +71,7 @@ export default class PlayController {
    * @returns {PlayController}
    */
   renderMap(rawMap) {
-    this.map.preset(rawMap)
+    this.map.preset(rawMap, this.loadingModels)
     for (const team of this.map.teams) {
       for (const tower of team.towers) {
         tower.destroyEvent(() => this.map.removeTower(tower))
@@ -152,6 +152,14 @@ export default class PlayController {
       bot.update(delta)
       const units = this.map.getEnemyUnits(bot.team)
       bot.tryCaptureTarget(units)
+    }
+
+    for (const tower of this.map.towers) {
+      tower.update(delta)
+    }
+
+    for (const base of this.map.bases) {
+      base.update(delta)
     }
 
     for (const charge of this.map.charges) {

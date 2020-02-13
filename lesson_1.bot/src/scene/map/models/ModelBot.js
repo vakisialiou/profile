@@ -121,8 +121,6 @@ export default class ModelBot extends Model {
     return this
   }
 
-
-
   update(delta) {
     this.animation.update(delta)
   }
