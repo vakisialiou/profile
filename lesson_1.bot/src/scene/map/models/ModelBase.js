@@ -31,7 +31,7 @@ export default class ModelBase extends Model {
     this.animation = new AnimationBase(gltf)
 
     gltf.model.scale.set(25, 25, 25)
-    gltf.model.material.metalness = 0.2
+    // gltf.model.material.metalness = 0.2
     gltf.model.position.setY(1.5)
     this.add(gltf.model)
   }
