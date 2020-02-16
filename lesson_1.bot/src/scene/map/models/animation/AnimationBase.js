@@ -12,11 +12,11 @@ class AnimationBase {
      */
     this.mixer = new AnimationMixer(gltf.model)
 
-    // /**
-    //  *
-    //  * @type {AnimationAction}
-    //  */
-    // this.actionFollowing = this.mixer.clipAction(AnimationBase.findAction(gltf.animations, 'Following'))
+    /**
+     *
+     * @type {AnimationAction}
+     */
+    this.actionProcessing = this.mixer.clipAction(AnimationBase.findAction(gltf.animations, 'Processing'))
 
     /**
      *
@@ -86,8 +86,8 @@ class AnimationBase {
    *
    * @returns {AnimationBase}
    */
-  followingAnimation() {
-    // this.enableAction(this.actionFollowing)
+  processingAnimation() {
+    this.enableAction(this.actionProcessing)
     return this
   }
 

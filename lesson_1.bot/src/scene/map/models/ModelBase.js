@@ -34,6 +34,17 @@ export default class ModelBase extends Model {
     // gltf.model.material.metalness = 0.2
     gltf.model.position.setY(1.5)
     this.add(gltf.model)
+
+    this.processingAnimation()
+  }
+
+  /**
+   *
+   * @returns {ModelBase}
+   */
+  processingAnimation() {
+    this.animation.processingAnimation()
+    return this
   }
 
   update(delta) {
