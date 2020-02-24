@@ -10,7 +10,7 @@ export default class ModelBot extends Model {
    * @param {GLTF} gltf
    */
   constructor(team, gltf) {
-    super(team, new ModelOptionsBot().setHealth(500))
+    super(team, new ModelOptionsBot().setHealth(1500))
 
     /**
      *
@@ -39,7 +39,7 @@ export default class ModelBot extends Model {
      *
      * @type {Object3D|Mesh}
      */
-    this.weapon = this.findWeaponPosition(gltf.model)
+    this.weapon = gltf.model.getObjectByName('Weapon')
 
     this.weaponScalar = new Vector3(0, 1.6, 0)
     if (!this.weapon) {
@@ -53,24 +53,6 @@ export default class ModelBot extends Model {
    */
   get weaponPosition() {
     return this.weapon.getWorldPosition(this.tmp).add(this.weaponScalar)
-  }
-
-  /**
-   *
-   * @param {Object3D|Mesh} obj
-   * @returns {Object3D|Mesh|null}
-   */
-  findWeaponPosition(obj) {
-    for (const element of obj.children) {
-      if (element.name === 'Weapon') {
-        return element
-      }
-      const weapon = this.findWeaponPosition(element)
-      if (weapon) {
-        return weapon
-      }
-    }
-    return null
   }
 
   /**

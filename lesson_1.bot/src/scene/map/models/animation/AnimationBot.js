@@ -1,4 +1,4 @@
-import { AnimationMixer, AnimationAction } from 'three'
+import { AnimationMixer, AnimationAction, AnimationClip } from 'three'
 
 class AnimationBot {
   /**
@@ -16,42 +16,32 @@ class AnimationBot {
      *
      * @type {AnimationAction}
      */
-    this.actionWalking = this.mixer.clipAction(AnimationBot.findAction(gltf.animations, 'Walking'))
+    this.actionWalking = this.mixer.clipAction(AnimationClip.findByName(gltf.animations, 'Walking'))
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionShooting = this.mixer.clipAction(AnimationBot.findAction(gltf.animations, 'Shooting'))
+    this.actionShooting = this.mixer.clipAction(AnimationClip.findByName(gltf.animations, 'Shooting'))
     this.actionShooting.setDuration(0.6)
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionDying = this.mixer.clipAction(AnimationBot.findAction(gltf.animations, 'Dying'))
+    this.actionDying = this.mixer.clipAction(AnimationClip.findByName(gltf.animations, 'Dying'))
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionIdle = this.mixer.clipAction(AnimationBot.findAction(gltf.animations, 'Idle'))
+    this.actionIdle = this.mixer.clipAction(AnimationClip.findByName(gltf.animations, 'Idle'))
 
     /**
      *
      * @type {(AnimationAction|?)}
      */
     this.activeAction = null
-  }
-
-  /**
-   *
-   * @param {Array.<AnimationClip>} animations
-   * @param {string} name
-   * @returns {AnimationClip}
-   */
-  static findAction(animations, name) {
-    return animations.find((item) => item.name === name)
   }
 
   /**
@@ -116,7 +106,7 @@ class AnimationBot {
    * @returns {AnimationBot}
    */
   dyingAnimation() {
-    this.enableAction(this.actionDying, 0)
+    this.enableAction(this.actionDying)
     return this
   }
 
@@ -134,7 +124,7 @@ class AnimationBot {
    * @returns {AnimationBot}
    */
   shootingAnimation() {
-    this.enableAction(this.actionShooting, 0)
+    this.enableAction(this.actionShooting)
     return this
   }
 

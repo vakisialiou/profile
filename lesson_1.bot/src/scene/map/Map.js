@@ -142,7 +142,7 @@ export default class Map {
    * @returns {Map}
    */
   addCharge(charge) {
-    this.getTeam(charge.bot.team.name).addCharge(charge)
+    this.getTeam(charge.owner.team.name).addCharge(charge)
     return this
   }
 
@@ -172,7 +172,7 @@ export default class Map {
    * @returns {Map}
    */
   removeCharge(charge) {
-    this.getTeam(charge.bot.team.name).removeCharge(charge)
+    this.getTeam(charge.owner.team.name).removeCharge(charge)
     return this
   }
 

@@ -73,12 +73,24 @@ export default class PlayController {
   renderMap(rawMap) {
     this.map.preset(rawMap, this.loadingModels)
     for (const team of this.map.teams) {
-      for (const tower of team.towers) {
-        tower.destroyEvent(() => this.map.removeTower(tower))
-      }
       for (const base of team.bases) {
         base.destroyEvent(() => this.map.removeBase(base))
       }
+    }
+
+    // Добавляем логику событий для башни
+    for (const tower of this.map.towers) {
+      tower.shotEvent((shotOptions) => {
+        const charge = new Charge(tower, shotOptions.position, shotOptions.direction)
+        charge.collisionEvent((options) => {
+          const model = options.intersections[0]['object']
+          model.hit(charge)
+          charge.dispatchDestroyEvent()
+        })
+        charge.destroyEvent(() => this.map.removeCharge(charge))
+        this.map.addCharge(charge)
+      })
+      tower.destroyEvent(() => this.map.removeTower(tower))
     }
     return this
   }
@@ -116,12 +128,12 @@ export default class PlayController {
         for (const base of team.bases) {
           const gltf = this.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
           const bot = new Bot(team, gltf, road.points, base.position)
+          // Добавляем логику событий для ботов
           bot.shotEvent((shotOptions) => {
-            const charge = new Charge(bot, bot.weaponPosition, shotOptions.direction)
+            const charge = new Charge(bot, shotOptions.position, shotOptions.direction)
             charge.collisionEvent((options) => {
-              const hitBot = this.enshureModelUnit(options.intersections[0]['object'])
-              hitBot.hit(charge)
-              // console.log('collisionOptions', options, hitBot)
+              const model = this.enshureModelUnit(options.intersections[0]['object'])
+              model.hit(charge)
               charge.dispatchDestroyEvent()
             })
 
@@ -149,13 +161,13 @@ export default class PlayController {
     }
 
     for (const bot of this.map.bots) {
-      bot.update(delta)
       const units = this.map.getEnemyUnits(bot.team)
-      bot.tryCaptureTarget(units)
+      bot.tryCaptureTarget(units).update(delta)
     }
 
     for (const tower of this.map.towers) {
-      tower.update(delta)
+      const units = this.map.getEnemyUnits(tower.team)
+      tower.tryCaptureTarget(units).update(delta)
     }
 
     for (const base of this.map.bases) {
@@ -163,7 +175,7 @@ export default class PlayController {
     }
 
     for (const charge of this.map.charges) {
-      const units = this.map.getEnemyUnits(charge.bot.team)
+      const units = this.map.getEnemyUnits(charge.owner.team)
       charge.update(delta, units)
     }
 

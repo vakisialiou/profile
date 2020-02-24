@@ -1,6 +1,6 @@
 import { Object3DFollower, Object3DMover1, Object3DDirection } from '../../lib'
 import ModelBot from '../models/ModelBot'
-import {Math as _Math, CircleGeometry, Vector3} from 'three'
+import {Math as _Math, CircleGeometry, Vector3 } from 'three'
 
 export default class Bot extends ModelBot {
   /**
@@ -52,7 +52,7 @@ export default class Bot extends ModelBot {
 
     /**
      *
-     * @type {Object3D|Group|Mesh|null}
+     * @type {ModelBot|ModelBase|ModelTower|null}
      */
     this.attacTarget = null
 
@@ -85,7 +85,7 @@ export default class Bot extends ModelBot {
     return path
   }
 
-  tryCaptureTarget(bots) {
+  tryCaptureTarget(models) {
     if (this.destroyed) {
       return this
     }
@@ -99,13 +99,13 @@ export default class Bot extends ModelBot {
       return this
     }
 
-    for (const bot of bots) {
-      if (bot.destroyed || bot.disabled) {
+    for (const model of models) {
+      if (model.destroyed || model.disabled) {
         continue
       }
-      if (this.position.distanceTo(bot.position) <= this.attackRadius) {
+      if (this.position.distanceTo(model.position) <= this.attackRadius) {
         // Target captured.
-        this.attacTarget = bot
+        this.attacTarget = model
         return this
       }
     }
@@ -155,7 +155,7 @@ export default class Bot extends ModelBot {
       if (this.weaponOptions.expiredTime >= this.weaponOptions.interval && !this.animation.actionShooting.isRunning()) {
         this.weaponOptions.expiredTime = 0
         this.shootingAnimation(() => {
-          this.dispatchShotEvent(this.attacTarget)
+          this.dispatchShotEvent(this.attacTarget, { position: this.weaponPosition, direction: this.object3DDirection.get().clone() })
         })
       }
     }

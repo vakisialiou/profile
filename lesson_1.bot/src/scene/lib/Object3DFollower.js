@@ -41,8 +41,16 @@ export class Object3DFollower {
     /**
      *
      * @type {Vector3}
+     * @private
      */
-    this.tmp = new Vector3()
+    this._tmp1 = new Vector3()
+    this._tmp2 = new Vector3()
+
+    /**
+     *
+     * @type {Vector3}
+     */
+    this._useObjectAxis = new Vector3(0, 0, 0)
 
     /**
      *
@@ -59,16 +67,33 @@ export class Object3DFollower {
 
   /**
    *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   * @returns {Object3DFollower}
+   */
+  useObjectAxis(x, y, z) {
+    this._useObjectAxis.set(x, y, z)
+    return this
+  }
+
+  /**
+   *
    * @param {Object|Vector3} vector
    * @returns {Object3DFollower}
    */
   setTarget(vector) {
-    if (this.target.equals(vector)) {
+    const position = this.object.getWorldPosition(this._tmp1)
+    this._tmp2.setX(this._useObjectAxis.x === 1 ? position.x : vector.x)
+    this._tmp2.setY(this._useObjectAxis.y === 1 ? position.y : vector.y)
+    this._tmp2.setZ(this._useObjectAxis.z === 1 ? position.z : vector.z)
+
+    if (this.target.equals(this._tmp2)) {
       return this
     }
 
-    this.target.copy(vector)
-    this.rotationMatrix.lookAt(this.object.position, this.target, this.object.up)
+    this.target.copy(this._tmp2)
+    this.rotationMatrix.lookAt(position, this.target, this.object.up)
     this.targetRotation.setFromRotationMatrix(this.rotationMatrix)
     this.isRotationReached = false
     return this

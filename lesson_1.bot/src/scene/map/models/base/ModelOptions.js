@@ -13,6 +13,12 @@ class ModelOptions {
      *
      * @type {number}
      */
+    this.defaultHealth = 500
+
+    /**
+     *
+     * @type {number}
+     */
     this.speed = 0
 
     /**

@@ -1,31 +1,31 @@
-import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, Object3D, EventDispatcher } from 'three'
+import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, EventDispatcher } from 'three'
 import { Object3DMover2 } from '../../lib'
 
 export default class Charge extends Mesh {
   /**
    *
-   * @param {Bot} bot
+   * @param {(Bot|Tower|Base|Model)} owner
    * @param {Vector3} position
    * @param {Vector3} direction
    */
-  constructor(bot, position, direction) {
+  constructor(owner, position, direction) {
     super()
     this.position.copy(position)
     // this.position.setY(13)
-    this.applyQuaternion(bot.quaternion)
+    this.applyQuaternion(owner.quaternion)
 
     this.options = {
       distance: 200,
       speed: 300,
       // TODO: для дебага. Не забыть убрать.
-      damage: bot.team.color === '#0000FF' ? 60 : 40
+      damage: owner.team.color === '#0000FF' ? 60 : 40
     }
 
     /**
      *
-     * @type {Bot}
+     * @type {(Bot|Tower|Base|Model)}
      */
-    this.bot = bot
+    this.owner = owner
 
     /**
      *
@@ -55,7 +55,7 @@ export default class Charge extends Mesh {
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: bot.team.color })
+    this.material = new MeshBasicMaterial({ color: owner.team.color })
 
     /**
      *

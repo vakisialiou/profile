@@ -133,6 +133,17 @@ class Model extends Mesh {
 
   /**
    *
+   * @returns {Model}
+   */
+  restoreHealth() {
+    this.disabled = false
+    this.destroyed = false
+    this.options.health = this.options.defaultHealth
+    return this
+  }
+
+  /**
+   *
    * @param {Object|{ options: (ModelOptions|ModelOptionsBase|ModelOptionsBot|ModelOptionsCharge|ModelOptionsTower) }} charge
    * @returns {Model}
    */
@@ -175,13 +186,7 @@ class Model extends Mesh {
    * @returns {Model}
    */
   dispatchShotEvent(targetObject, options = {}) {
-    this.event.dispatchEvent({
-      ...options,
-      targetObject,
-      type: Model.SHOT_EVENT,
-      position: this.position.clone(),
-      direction: this.object3DDirection.get().clone(),
-    })
+    this.event.dispatchEvent({ ...options, targetObject, type: Model.SHOT_EVENT })
     return this
   }
 

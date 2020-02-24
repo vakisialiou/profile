@@ -1,0 +1,65 @@
+<script>
+  import {
+    BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItemButton, BIcon
+  } from 'bootstrap-vue'
+  import Vue from 'vue'
+  import VueRouter from 'vue-router'
+
+  Vue.use(VueRouter)
+
+  /**
+   * @typedef {Object} Route
+   * @property {string} path
+   * @package {(Object|VueComponent)} component
+   * @property {string|null} [icon]
+   * @property {string} name
+   * @property {Array} [children]
+   */
+
+  export default {
+    name: 'HorizontalMenu',
+    props: {
+      /**
+       * @type Route
+       */
+      routes: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      }
+    },
+    components: {
+      BNavbarNav, BNavItemDropdown, BDropdownItemButton, BIcon, BNavItem,
+    }
+  }
+</script>
+
+<template>
+  <BNavbarNav>
+    <template v-for="(route, index) in routes">
+      <BNavItemDropdown :key="index" :text="route.name" v-if="route.children && route.children.length > 0">
+        <template v-for="(subRoute, subIndex) in route.children">
+
+          <RouterLink :to="{ name: subRoute.name }" :key="subIndex" v-slot="{ href, navigate, isActive }">
+            <BDropdownItemButton :active="isActive" :href="href" @click="navigate">
+              <BIcon :icon="subRoute.icon" aria-hidden="true" v-if="subRoute.icon" />
+              {{ subRoute.name }}
+              <span class="sr-only">(Not selected)</span>
+            </BDropdownItemButton>
+          </RouterLink>
+
+        </template>
+      </BNavItemDropdown>
+
+      <RouterLink :to="{ name: route.name }" :key="index" v-slot="{ href, navigate, isActive }" v-if="!route.children">
+        <BNavItem :active="isActive" :href="href" @click="navigate">
+          <BIcon :icon="route.icon" aria-hidden="true" v-if="route.icon" />
+          {{ route.name }}
+          <span class="sr-only">(Not selected)</span>
+        </BNavItem>
+      </RouterLink>
+
+    </template>
+  </BNavbarNav>
+</template>

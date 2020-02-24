@@ -1,0 +1,9 @@
+#home-page-canvas {
+  background: #000000;
+}
+#home-page-canvas canvas {
+  outline: none;
+}
+.home-page-content {
+  pointer-events: none;
+}

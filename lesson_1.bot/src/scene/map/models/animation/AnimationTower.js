@@ -1,4 +1,4 @@
-import { AnimationMixer, AnimationAction } from 'three'
+import { AnimationMixer, AnimationClip } from 'three'
 
 class AnimationTower {
   /**
@@ -16,23 +16,13 @@ class AnimationTower {
      *
      * @type {AnimationAction}
      */
-    this.actionFollowing = this.mixer.clipAction(AnimationTower.findAction(gltf.animations, 'Following'))
+    this.actionFollowing = this.mixer.clipAction(AnimationClip.findByName(gltf.animations, 'Following'))
 
     /**
      *
      * @type {(AnimationAction|?)}
      */
     this.activeAction = null
-  }
-
-  /**
-   *
-   * @param {Array.<AnimationClip>} animations
-   * @param {string} name
-   * @returns {AnimationClip}
-   */
-  static findAction(animations, name) {
-    return animations.find((item) => item.name === name)
   }
 
   /**

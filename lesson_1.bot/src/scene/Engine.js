@@ -14,7 +14,7 @@ import {
   GridHelper,
   AxesHelper,
   Math as _Math,
-  MOUSE,
+  MOUSE, Matrix4, Mesh, Shape, ShapeBufferGeometry, MeshPhongMaterial, DoubleSide, Triangle, Geometry, Face3, Box3, Box3Helper, Quaternion
 } from 'three'
 
 import Stats from 'three/examples/jsm/libs/stats.module'
@@ -26,6 +26,8 @@ import Bot from './map/units/Bot'
 import Team from "./map/Team";
 import LoadingModels from "./LoadingModels";
 import Charge from "./map/units/Charge";
+import Tower from "./map/units/Tower";
+import ShapeHelper from './lib/ShapeHelper'
 
 class Engine {
   constructor() {
@@ -360,11 +362,125 @@ class Engine {
     return this
   }
 
-  debugMD2Character(){
+  debugGltfTower() {
+    const teamA = new Team(this.scene, 'team-A', '#FF0000')
 
+
+    // Add bot
+    const gltfBotA = this.playController.loadingModels.getGLTF(LoadingModels.MODEL_BOT)
+    const botPath = [
+      new Vector3(-50, 1, -50),
+      new Vector3(-20, 1, 40),
+      new Vector3(50, 1, -10),
+      new Vector3(40, 1, -50),
+      new Vector3(150, 1, -150),
+    ]
+    const botA = new Bot(teamA, gltfBotA, botPath, new Vector3(0, 1, 0))
+    botA.destroyEvent(() => {
+      botA.restoreHealth()
+    })
+
+    const box = new Box3()
+    const boxHelper = new Box3Helper(box, 0xff00ff)
+
+    this.scene.add(botA)
+    this.scene.add(boxHelper)
+
+
+    // Add tower
+    const gltfTowerA = this.playController.loadingModels.getGLTF(LoadingModels.MODEL_TOWER)
+    const tower = new Tower(teamA, gltfTowerA, 'Tower - A')
+    tower.position.set(10, 1, 15)
+
+    tower.shotEvent((shotOptions) => {
+      const charge = new Charge(shotOptions.targetObject, shotOptions.position, shotOptions.direction)
+      charge.collisionEvent((options) => {
+        const hitBot = options.intersections[0]['object']
+        hitBot.hit(charge)
+        charge.dispatchDestroyEvent()
+      })
+      charge.destroyEvent(() => this.scene.remove(charge))
+
+      this.scene.add(charge)
+      this.updates.push((delta) => {
+        charge.update(delta, [botA])
+      })
+    })
+
+
+    // debug
+    const tmp = new Vector3()
+    const shapeWTL = new ShapeHelper().renderSphere(0.2)
+    const shapeWTR = new ShapeHelper().renderSphere(0.2)
+    const shapeWBL = new ShapeHelper().renderSphere(0.2)
+    const shapeWBR = new ShapeHelper().renderSphere(0.2)
+    const shapeHead = new ShapeHelper().renderSphere(0.2)
+    const shapeHead1 = new ShapeHelper({ color: 0xFF00FF }).renderSphere(0.9)
+    const shapeHead2 = new ShapeHelper({ color: 0x0000FF }).renderSphere(0.9)
+
+    this.scene.add(shapeWTL)
+    this.scene.add(shapeWTR)
+    this.scene.add(shapeWBL)
+    this.scene.add(shapeWBR)
+    this.scene.add(shapeHead)
+    this.scene.add(shapeHead1)
+    this.scene.add(shapeHead2)
+
+    const nextPosition = (objA, objB, len) => {
+      const p = objA.getWorldPosition(tmp).clone()
+      const step = objB.getWorldDirection(tmp).clone().setLength(len).setY(1)
+      return p.add(step).clone()
+    }
+
+    this.updates.push((delta) => {
+
+
+
+      // tower
+      tower
+        .tryCaptureTarget([botA])
+        .update(delta)
+
+      // Debug
+      shapeWTL.position.copy(nextPosition(tower.weaponTopLeftTrap, tower.head, -80))
+      shapeWTR.position.copy(nextPosition(tower.weaponTopRightTrap, tower.head, -80))
+      shapeWBL.position.copy(nextPosition(tower.weaponBottomLeftTrap, tower.head, -80))
+      shapeWBR.position.copy(nextPosition(tower.weaponBottomRightTrap, tower.head, -80))
+      shapeHead.position.copy(nextPosition(tower.head, tower.head, -60))
+
+      const d = tower.head.getWorldDirection(tmp).clone()
+      const p = tower.head.getWorldPosition(tmp).clone()
+
+      // const rr = _Math.radToDeg(Math.PI) - _Math.radToDeg(tower.head.quaternion.angleTo(new Quaternion(0, 1, 0, 0)))
+      // const r = tower.head.rotation.y < 0 ? 180 + _Math.radToDeg(tower.head.quaternion.angleTo(new Quaternion(0, 1, 0, 0))) : rr
+      // console.log(r, r * 0.06944444444444445, tower.getQuaternionY360Deg(tower.head), tower.getHeadAnimationTime())
+
+      const a1 = new Vector3().copy(d)
+        .applyAxisAngle(new Vector3(0, 1, 0), _Math.degToRad(19))
+        .setLength(-60)
+        .setY(1)
+
+      const b1 = new Vector3().copy(p).add(a1)
+      shapeHead1.position.copy(b1)
+
+      const a2 = new Vector3().copy(d)
+        .applyAxisAngle(new Vector3(0, 1, 0), _Math.degToRad(- 19))
+        .setLength(- 60)
+        .setY(1)
+
+      const b2 = new Vector3().copy(p).add(a2)
+      shapeHead2.position.copy(b2)
+
+      // Bot
+      botA.update(delta)
+      box.setFromObject(botA)
+    })
+
+    this.scene.add(tower)
+    return this
   }
 
-  debugGltfCharacter() {
+  debugGltfBot() {
     const teamA = new Team(this.scene, 'team-A', '#FF0000')
     const teamB = new Team(this.scene, 'team-B', '#0000FF')
 
