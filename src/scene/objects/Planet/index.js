@@ -1,4 +1,4 @@
-import { FrontSide, Mesh, MeshStandardMaterial, SphereGeometry } from 'three'
+import { Mesh, MeshStandardMaterial, SphereGeometry } from 'three'
 
 export default class Planet extends Mesh {
   /**
@@ -19,7 +19,7 @@ export default class Planet extends Mesh {
      *
      * @type {MeshStandardMaterial}
      */
-    this.material = new MeshStandardMaterial({ map: texture, side: FrontSide })
+    this.material = new MeshStandardMaterial({ map: texture })
   }
 
   /**

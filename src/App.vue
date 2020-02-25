@@ -3,6 +3,7 @@
   import Vue from 'vue'
   import VueRouter from 'vue-router'
   import HorizontalMenu from './components/HorizontalMenu'
+  import HomePage from './pages/HomePage'
   import { routes } from './routes'
   import {
     BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
@@ -20,6 +21,11 @@
       },
       homePageRouter: () => {
         return routes.find((route) => route.types.includes('home'))
+      },
+      keepAliveRoutes: () => {
+        return routes
+          .filter((item) => item.keepAlive)
+          .map((route) => route.component.name)
       }
     },
     components: {
@@ -54,7 +60,9 @@
       </BCollapse>
     </BNavbar>
 
-    <RouterView />
+    <keep-alive :include="keepAliveRoutes">
+      <RouterView />
+    </keep-alive>
 
   </div>
 </template>

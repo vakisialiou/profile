@@ -9,6 +9,7 @@ export const routes = [
     component: HomePage,
     icon: null,
     name: 'Home',
+    keepAlive: true,
     types: ['horizontal', 'home']
   },
   {
