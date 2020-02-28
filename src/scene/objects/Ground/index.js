@@ -4,6 +4,7 @@ import { Raycaster, Vector2, GridHelper } from 'three'
 import { Group, Mesh, Points, Vector3 } from 'three'
 import { RepeatWrapping } from 'three'
 import GroundOptions from './GroundOptions'
+import BaseModelGround from './BaseModelGround'
 
 export default class Ground extends Group {
   /**
@@ -12,6 +13,12 @@ export default class Ground extends Group {
    */
   constructor(options = {}) {
     super()
+
+    /**
+     *
+     * @type {Vector3}
+     */
+    this.direction = new Vector3(1, 0, 0)
 
     /**
      *
@@ -27,12 +34,6 @@ export default class Ground extends Group {
 
     /**
      *
-     * @type {Vector3}
-     */
-    this.direction = new Vector3(1, 0, 0)
-
-    /**
-     *
      * @type {Raycaster}
      */
     this.raycaster = new Raycaster()
@@ -45,21 +46,9 @@ export default class Ground extends Group {
 
     /**
      *
-     * @type {PlaneGeometry}
+     * @type {(Mesh|BaseModelGround)}
      */
-    this.groundGeometry = new PlaneGeometry(this.options.width, this.options.height, this.options.widthSegments, this.options.heightSegments)
-
-    /**
-     *
-     * @type {MeshBasicMaterial}
-     */
-    this.groundMaterial = new MeshBasicMaterial()
-
-    /**
-     *
-     * @type {Mesh}
-     */
-    this.ground = new Mesh(this.groundGeometry, this.groundMaterial)
+    this.ground = new BaseModelGround(this.options)
 
     /**
      *
@@ -106,6 +95,19 @@ export default class Ground extends Group {
 
   /**
    *
+   * @param {(Object|Object3D|Mesh|BaseModelGround)} mesh
+   * @returns {Ground}
+   */
+  setGroundMesh(mesh) {
+    this.ground = mesh
+    this.ground.rotateOnAxis(this.direction, Math.PI / 2)
+    this.gridPointsGeometry.getAttribute('position').copy(mesh.geometry.getAttribute('position'))
+    this.gridPointsHelper.rotateOnAxis(this.direction, - Math.PI / 2)
+    return this
+  }
+
+  /**
+   *
    * @param {Texture} texture
    * @param {Vector2} [repeat]
    * @returns {Ground}
@@ -130,6 +132,7 @@ export default class Ground extends Group {
   }
 
   /**
+   * Use 'updateCellHelperPositionStrict' or 'updateCellHelperPositionOnEdge' inside 'onMouseChangePosition' to move it in other place.
    *
    * @returns {Ground}
    */
@@ -188,11 +191,18 @@ export default class Ground extends Group {
   }
 
   /**
+   * @param {Object} intersect
+   * @param {Vector2} mouse
+   * @callback GroundMouseClickEvent
+   */
+
+  /**
    * @param {MouseEvent} event
    * @param {Camera} camera
+   * @param {GroundMouseClickEvent} callback
    * @returns {void}
    */
-  onMouseEvent(event, camera) {
+  onMouseChangePosition(event, camera, callback) {
     event.preventDefault()
     const top = this.mouseOffset.y
     const left = this.mouseOffset.x
@@ -200,12 +210,34 @@ export default class Ground extends Group {
     this.raycaster.setFromCamera(this.mouse, camera)
     const intersects = this.raycaster.intersectObjects([this.ground])
     if (intersects.length > 0) {
-      const intersect = intersects[0]
-      const pointSize = this.options.pointSize
-      this.cellHelperMesh.position.copy(intersect.point).add(intersect.face.normal)
-      this.cellHelperMesh.position.divideScalar(pointSize).floor().multiplyScalar(pointSize).addScalar(pointSize / 2)
-      this.cellHelperMesh.position.setY(pointSize / 2)
+      callback(intersects[0], this.mouse)
     }
+  }
+
+  /**
+   *
+   * @param {Object} intersect
+   * @param {(number|?)} [pointSize]
+   */
+  updateCellHelperPositionStrict(intersect, pointSize = null) {
+    pointSize = pointSize || this.options.pointSize
+    this.cellHelperMesh.position.copy(intersect.point)
+    this.cellHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
+    return this
+  }
+
+  /**
+   *
+   * @param {Object} intersect
+   * @param {number|?} [pointSize]
+   * @returns {Ground}
+   */
+  updateCellHelperPositionOnEdge(intersect, pointSize = null) {
+    pointSize = pointSize || this.options.pointSize
+    this.cellHelperMesh.position.copy(intersect.point).add(intersect.face.normal)
+    this.cellHelperMesh.position.divideScalar(pointSize).floor().multiplyScalar(pointSize).addScalar(pointSize / 2)
+    this.cellHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
+    return this
   }
 
   /**

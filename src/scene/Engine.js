@@ -103,10 +103,17 @@ class Engine {
     this.physicsWorld = new World()
 
     /**
+     * List of units that must work with physics engine.
      *
      * @type {Array.<Unit>}
      */
     this.units = []
+
+    /**
+     *
+     * @type {{[categoryName]: Array.<(Mesh|Group|Object3D)>}}
+     */
+    this.storedItems = {}
 
     /**
      *
@@ -222,6 +229,12 @@ class Engine {
     }
     this.units.push(unit)
     this.scene.add(unit)
+    return this
+  }
+
+  add(category, mesh) {
+    this.scene.add(mesh)
+    // this.
     return this
   }
 

@@ -36,6 +36,12 @@ class GroundOptions {
      * @type {number}
      */
     this.heightSegments = this.height / this.pointSize
+
+    /**
+     *
+     * @type {number}
+     */
+    this.color = 0x222222
   }
 
   /**

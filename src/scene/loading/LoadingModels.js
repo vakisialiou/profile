@@ -25,6 +25,11 @@ export default class LoadingModels {
         path: '/models/tower/tower.glb',
         enabled: false,
       },
+      {
+        name: LoadingModels.MODEL_GROUND,
+        path: '/models/ground/ground.glb',
+        enabled: false,
+      },
     ]
 
     /**
@@ -60,11 +65,17 @@ export default class LoadingModels {
 
   /**
    *
+   * @type {string}
+   */
+  static MODEL_GROUND = 'ground'
+
+  /**
+   *
    * @param {string} name
    * @param {boolean} [value]
    * @returns {LoadingModels}
    */
-  enable(name, value = true) {
+  enableItem(name, value = true) {
     for (const item of this.items) {
       if (item.name === name) {
         item.enabled = value

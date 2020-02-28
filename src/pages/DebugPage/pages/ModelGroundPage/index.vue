@@ -1,5 +1,6 @@
 <script>
   import WrapperFreeArea from '@components/WrapperFreeArea'
+  import LoadingModels from '@scene/loading/LoadingModels'
   import LoadingTextures from '@scene/loading/LoadingTextures'
   import Ground from '@scene/objects/Ground'
   import Engine from '@scene/Engine'
@@ -22,14 +23,19 @@
       engine.destroy()
     },
     mounted() {
-      const loader = new LoadingTextures()
-      loader.addItem('ground-grass', '/textures/grass/1.jpg')
 
-      loader.presetTextures().then(() => {
+      const loader = new LoadingModels()
+      loader.enableItem(LoadingModels.MODEL_GROUND)
+      // loader.addItem('ground-grass', '/textures/grass/1.jpg')
+
+      loader.presetModels().then(() => {
 
         engine.preset().then(() => {
+
+          const rawObject = loader.getRawModel(LoadingModels.MODEL_GROUND)
+
           const ground = new Ground()
-            .setTexture(loader.get('ground-grass'), new Vector2(4, 4))
+            .setGroundMesh(rawObject.model)
             .setGridPointsHelper()
             .setGridHelper()
             .setCellHelper()
@@ -51,7 +57,9 @@
               ground
                 // This page has top menu. Need set mouse offset on height it menu.
                 .setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-                .onMouseEvent(event, engine.camera)
+                .onMouseChangePosition(event, engine.camera, (intersect) => {
+                  ground.updateCellHelperPositionStrict(intersect)
+                })
             })
         })
       })
