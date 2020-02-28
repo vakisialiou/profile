@@ -1,13 +1,13 @@
 <script>
 import './index.css'
-import WrapperFreeArea from './../../components/WrapperFreeArea'
-import Engine from './../../scene/Engine'
+import WrapperFreeArea from '@components/WrapperFreeArea'
+import Engine from '@scene/Engine'
 import { Color, Vector3 } from 'three'
-import Storm from '../../scene/objects/Storm'
-import SkyBox from '../../scene/objects/SkyBox'
-import Planet from '../../scene/objects/Planet'
-import Star from '../../scene/objects/Star'
-import LoadingTextures from './../../scene/loading/LoadingTextures'
+import Storm from '@scene/objects/Storm'
+import SkyBox from '@scene/objects/SkyBox'
+import Planet from '@scene/objects/Planet'
+import Star from '@scene/objects/Star'
+import LoadingTextures from '@scene/loading/LoadingTextures'
 
 const textures = new LoadingTextures()
 textures.addItem('sky-box-galaxy', '/images/galaxy/1.jpg')
@@ -20,7 +20,7 @@ textures.addItem('star-5', '/images/stars/5.png')
 textures.addItem('star-6', '/images/stars/6.png')
 textures.addItem('star-7', '/images/stars/7.png')
 
-const engine = Engine.get()
+const engine = Engine.get('home-page-canvas')
 
 export default {
   name: 'HomePage',

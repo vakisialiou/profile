@@ -1,10 +1,12 @@
 import { Fog, Color, Clock, Scene, PerspectiveCamera, Vector3, MOUSE, Math as _Math } from 'three'
 import { HemisphereLight, DirectionalLight, PointLight } from 'three'
 import { HemisphereLightHelper, DirectionalLightHelper, PointLightHelper, GridHelper, AxesHelper } from 'three'
+import { EventDispatcher } from 'three'
 
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
+import { World } from 'oimo'
 
 class Engine {
   constructor() {
@@ -27,8 +29,6 @@ class Engine {
      * @type {Scene}
      */
     this.scene = new Scene()
-    this.scene.background = new Color(0x050505)
-    this.scene.fog = new Fog(this.scene.background, 1, 3000)
 
     /**
      *
@@ -64,7 +64,7 @@ class Engine {
      *
      * @type {HemisphereLight}
      */
-    this.hemiLight = new HemisphereLight(0xffffff, 0xffffff)
+    this.hemiLight = new HemisphereLight(0xffffff, 0x444444)
 
     /**
      *
@@ -98,6 +98,24 @@ class Engine {
 
     /**
      *
+     * @type {World}
+     */
+    this.physicsWorld = new World()
+
+    /**
+     *
+     * @type {Array.<Unit>}
+     */
+    this.units = []
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.physicsEnabled = false
+
+    /**
+     *
      * @type {Object}
      */
     this.register = {
@@ -119,18 +137,29 @@ class Engine {
      * @type {*[]}
      */
     this.updates = []
+
+    /**
+     *
+     * @type {EventDispatcher}
+     */
+    this.events = new EventDispatcher()
   }
 
   /**
    *
+   * @param {string} [name]
    * @returns {Engine}
    */
-  static get() {
-    if (window.__engine__) {
-      window.__engine__.destroy()
+  static get(name) {
+    name = name || 'default'
+    if (!window.__engine__) {
+      window.__engine__ = {}
+    }
+    if (window.__engine__.hasOwnProperty(name)) {
+      window.__engine__[name].destroy()
     }
     const engine = new Engine()
-    window.__engine__ = engine
+    window.__engine__[name] = engine
     return engine
   }
 
@@ -158,6 +187,72 @@ class Engine {
     return new Promise((resolve) => {
       resolve()
     })
+  }
+
+  /**
+   *
+   * @param {boolean} [value]
+   * @returns {Engine}
+   */
+  enablePhysics(value = true) {
+    this.physicsEnabled = value
+    return this
+  }
+
+  /**
+   *
+   * @param {Object} [options]
+   * @returns {Engine}
+   */
+  setPhysicsGround(options = {}) {
+    this.physicsWorld.add({ size: [1000, 1, 1000], pos: [0, 0, 0], density: 1000, ...options })
+    return this
+  }
+
+  /**
+   *
+   * @param {Unit} unit
+   * @returns {Engine}
+   */
+  addPhysicsUnit(unit) {
+    for (const item of this.units) {
+      if (item.unit === unit) {
+       throw Error('Unit has already exists.')
+      }
+    }
+    this.units.push(unit)
+    this.scene.add(unit)
+    return this
+  }
+
+  /**
+   *
+   * @param {Unit} unit
+   * @returns {Engine}
+   */
+  removePhysicsUnit(unit) {
+    const index = this.units.indexOf(unit)
+    if (index !== -1) {
+      this.units.splice(index, 1)
+    }
+
+    if (unit.rigidBody) {
+      this.physicsWorld.removeRigidBody(unit.rigidBody)
+    }
+
+    this.scene.remove(unit)
+    return this
+  }
+
+  /**
+   *
+   * @param {Color} [color]
+   * @returns {Engine}
+   */
+  setFog(color) {
+    this.scene.background = color || new Color().setHSL(0.6, 0, 1)
+    this.scene.fog = new Fog(this.scene.background, 1, 3000)
+    return this
   }
 
   /**
@@ -246,7 +341,7 @@ class Engine {
    * @param {number} [color2]
    * @returns {Engine}
    */
-  setGridHelper(size = 1000, divisions = 40, color1, color2) {
+  setGridHelper(size = 4000, divisions = 10, color1, color2) {
     const grid = new GridHelper(size, divisions, color1, color2)
     this.scene.add(grid)
     return this
@@ -254,10 +349,10 @@ class Engine {
 
   /**
    *
-   * @param {number} size
+   * @param {number} [size]
    * @returns {Engine}
    */
-  setAxesHelper(size) {
+  setAxesHelper(size = 100) {
     const grid = new AxesHelper(size)
     this.scene.add(grid)
     return this
@@ -304,8 +399,21 @@ class Engine {
    */
   setCamera(position = new Vector3(100, 50, 100), lookAt = new Vector3()) {
     this.camera.position.copy(position)
-    // this.mapControls.target.copy(position)
     this.camera.lookAt(lookAt)
+    return this
+  }
+
+  static EVENT_MOUSE_DOWN = 'EVENT_MOUSE_DOWN'
+  static EVENT_MOUSE_MOVE = 'EVENT_MOUSE_MOVE'
+
+  /**
+   *
+   * @param {string} type
+   * @param {Function} callback
+   * @returns {Engine}
+   */
+  addEventListener(type, callback) {
+    this.events.addEventListener(type, callback)
     return this
   }
 
@@ -316,7 +424,10 @@ class Engine {
    * @private
    */
   _onMouseMove(event) {
-
+    if (event.path[0] !== this.renderer.domElement) {
+      return
+    }
+    this.events.dispatchEvent({ type: Engine.EVENT_MOUSE_MOVE, event })
   }
 
   /**
@@ -329,13 +440,7 @@ class Engine {
     if (event.path[0] !== this.renderer.domElement) {
       return
     }
-    switch (event.button) {
-      case 0:
-        if (this.register.activeKeyCode === 17) { // Control
-
-        }
-        break
-    }
+    this.events.dispatchEvent({ type: Engine.EVENT_MOUSE_DOWN, event })
   }
 
   /**
@@ -362,6 +467,7 @@ class Engine {
    */
   registerEvents() {
     this.renderer.registerEvents()
+    this.register.activeKeyCode = null
     this.register.mouseMoveEvent = (event) => this._onMouseMove(event)
     document.addEventListener('mousemove', this.register.mouseMoveEvent, false)
     this.register.mouseDownEvent = (event) => this._onMouseDown(event)
@@ -379,6 +485,7 @@ class Engine {
    */
   unregisterEvents() {
     this.renderer.unregisterEvents()
+    this.register.activeKeyCode = null
     if (this.register.mouseMoveEvent) {
       document.removeEventListener('mousemove', this.register.mouseMoveEvent, false)
       this.register.mouseMoveEvent = null
@@ -415,6 +522,16 @@ class Engine {
   animate() {
     this.register.requestAnimationId = requestAnimationFrame(() => this.animate())
     const delta = this.clock.getDelta()
+    if (this.physicsEnabled) {
+      this.physicsWorld.step()
+      for (const unit of this.units) {
+        if (!unit.rigidBody) {
+          continue
+        }
+        unit.position.copy(unit.rigidBody.getPosition())
+        unit.quaternion.copy(unit.rigidBody.getQuaternion())
+      }
+    }
     this.mapControls.update()
     for (const updateCallback of this.updates) {
       updateCallback(delta)

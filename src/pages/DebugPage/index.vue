@@ -4,10 +4,12 @@
   Vue.use(VueRouter)
 
   export default {
-    name: 'ThreeJSPage',
+    name: 'DebugPage',
   }
 </script>
 
 <template>
-  <RouterView />
+  <keep-alive :include="['ModelGroundPage', 'ModelTowerPage']">
+    <RouterView />
+  </keep-alive>
 </template>

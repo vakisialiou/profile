@@ -13,14 +13,17 @@ export default class LoadingModels {
       {
         name: LoadingModels.MODEL_BOT,
         path: '/models/bot/bot.glb',
+        enabled: false,
       },
       {
         name: LoadingModels.MODEL_BASE,
         path: '/models/base/base.glb',
+        enabled: false,
       },
       {
         name: LoadingModels.MODEL_TOWER,
         path: '/models/tower/tower.glb',
+        enabled: false,
       },
     ]
 
@@ -54,6 +57,22 @@ export default class LoadingModels {
    * @type {string}
    */
   static MODEL_TOWER = 'tower'
+
+  /**
+   *
+   * @param {string} name
+   * @param {boolean} [value]
+   * @returns {LoadingModels}
+   */
+  enable(name, value = true) {
+    for (const item of this.items) {
+      if (item.name === name) {
+        item.enabled = value
+        break
+      }
+    }
+    return this
+  }
 
   /**
    *
@@ -92,6 +111,9 @@ export default class LoadingModels {
    */
   async presetModels() {
     for (const item of this.items) {
+      if (!item.enabled) {
+        continue
+      }
       try {
         this.loadedItems[item.name] = await this.load(item.path)
       } catch (e) {
@@ -102,8 +124,8 @@ export default class LoadingModels {
   }
 
   /**
-   * @typedef {Object} GLTF
-   * @property {Object3D} model
+   * @typedef {Object} RawModel
+   * @property {(Object3D|Group|Mesh)} model
    * @property {Array.<AnimationClip>} animations
    */
 
@@ -112,7 +134,7 @@ export default class LoadingModels {
    * @param {string} name
    * @returns {GLTF}
    */
-  get(name) {
+  getRawModel(name) {
     const gltf = cloneGltf(this.loadedItems[name])
     const obj = objectPath.get(gltf, ['scene', 'children', 0], null)
     const animations = objectPath.get(gltf, ['animations'], [])
