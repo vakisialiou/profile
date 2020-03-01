@@ -41,7 +41,7 @@ class GroundOptions {
      *
      * @type {number}
      */
-    this.color = 0x222222
+    this.color = 0xC4D8B7
   }
 
   /**

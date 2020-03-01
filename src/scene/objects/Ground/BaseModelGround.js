@@ -14,6 +14,6 @@ export default class BaseModelGround extends Mesh {
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: options.color })
+    this.material = new MeshBasicMaterial({ color: options.color, transparent: true, opacity: 0.8 })
   }
 }

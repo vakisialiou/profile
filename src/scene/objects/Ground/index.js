@@ -1,8 +1,7 @@
-import { BufferGeometry, BoxBufferGeometry, PlaneGeometry } from 'three'
+import { BufferGeometry, BoxBufferGeometry } from 'three'
 import { MeshBasicMaterial, PointsMaterial } from 'three'
 import { Raycaster, Vector2, GridHelper } from 'three'
 import { Group, Mesh, Points, Vector3 } from 'three'
-import { RepeatWrapping } from 'three'
 import GroundOptions from './GroundOptions'
 import BaseModelGround from './BaseModelGround'
 
@@ -50,23 +49,11 @@ export default class Ground extends Group {
      */
     this.ground = new BaseModelGround(this.options)
 
-    /**
-     *
-     * @type {BoxBufferGeometry}
-     */
-    this.cellHelperGeometry = new BoxBufferGeometry(this.options.pointSize, this.options.pointSize, this.options.pointSize)
-
-    /**
-     *
-     * @type {MeshBasicMaterial}
-     */
-    this.cellHelperMaterial = new MeshBasicMaterial({color: 0xFF0000, opacity: 0.5, transparent: true})
-
-    /**
-     *
-     * @type {Mesh}
-     */
-    this.cellHelperMesh = new Mesh(this.cellHelperGeometry, this.cellHelperMaterial)
+    const clickHelperGeometry = new BoxBufferGeometry(this.options.pointSize, this.options.pointSize, this.options.pointSize)
+    const clickHelperMaterial = new MeshBasicMaterial({color: 0xFF0000, opacity: 0.5, transparent: true})
+    this.clickHelperMesh = new Mesh(clickHelperGeometry, clickHelperMaterial)
+    this.clickHelperType = Ground.CLICK_HELPER_EDGE
+    this.needAddClickHelper = false
 
     /**
      *
@@ -78,61 +65,28 @@ export default class Ground extends Group {
      *
      * @type {PointsMaterial}
      */
-    this.gridPointsMaterial = new PointsMaterial({color: 0x0080ff, size: 1, alphaTest: 0.5})
-
-    /**
-     *
-     * @type {BufferGeometry}
-     */
-    this.gridPointsGeometry = new BufferGeometry().setFromPoints(this.ground.geometry.vertices)
-
-    /**
-     *
-     * @type {Points}
-     */
-    this.gridPointsHelper = new Points(this.gridPointsGeometry, this.gridPointsMaterial)
+    const vertexMaterial = new PointsMaterial({color: 0x0080ff, size: 1, alphaTest: 0.5})
+    const vertexGeometry = new BufferGeometry().setFromPoints(this.ground.geometry.vertices)
+    this.vertexHelper = new Points(vertexGeometry, vertexMaterial)
   }
+
+  static CLICK_HELPER_STRICT = 1
+  static CLICK_HELPER_EDGE = 2
 
   /**
    *
-   * @param {(Object|Object3D|Mesh|BaseModelGround)} mesh
+   * @param {Number} [type]
    * @returns {Ground}
    */
-  setGroundMesh(mesh) {
-    this.ground = mesh
-    this.ground.rotateOnAxis(this.direction, Math.PI / 2)
-    this.gridPointsGeometry.getAttribute('position').copy(mesh.geometry.getAttribute('position'))
-    this.gridPointsHelper.rotateOnAxis(this.direction, - Math.PI / 2)
-    return this
-  }
-
-  /**
-   *
-   * @param {Texture} texture
-   * @param {Vector2} [repeat]
-   * @returns {Ground}
-   */
-  setTexture(texture, repeat) {
-    texture.wrapS = RepeatWrapping
-    texture.wrapT = RepeatWrapping
-    if (repeat) {
-      texture.repeat.copy(repeat)
+  setClickHelper(type) {
+    if (type) {
+      this.clickHelperType = type
     }
-    this.groundMaterial.map = texture
+    this.needAddClickHelper = true
     return this
   }
 
   /**
-   *
-   * @returns {Ground}
-   */
-  setCellHelper() {
-    this.add(this.cellHelperMesh)
-    return this
-  }
-
-  /**
-   * Use 'updateCellHelperPositionStrict' or 'updateCellHelperPositionOnEdge' inside 'onMouseChangePosition' to move it in other place.
    *
    * @returns {Ground}
    */
@@ -145,8 +99,8 @@ export default class Ground extends Group {
    *
    * @returns {Ground}
    */
-  setGridPointsHelper() {
-    this.add(this.gridPointsHelper)
+  setVertexHelper() {
+    this.add(this.vertexHelper)
     return this
   }
 
@@ -154,8 +108,8 @@ export default class Ground extends Group {
    *
    * @returns {Ground}
    */
-  removeCellHelper() {
-    this.remove(this.cellHelperMesh)
+  removeClickHelper() {
+    this.remove(this.clickHelperMesh)
     return this
   }
 
@@ -172,8 +126,8 @@ export default class Ground extends Group {
    *
    * @returns {Ground}
    */
-  removeGridPointsHelper() {
-    this.remove(this.gridPointsHelper)
+  removeVertexHelper() {
+    this.remove(this.vertexHelper)
     return this
   }
 
@@ -191,26 +145,43 @@ export default class Ground extends Group {
   }
 
   /**
-   * @param {Object} intersect
-   * @param {Vector2} mouse
+   * @param {{ intersect: Object, click: Vector3, mouse: Vector2 }} params
    * @callback GroundMouseClickEvent
    */
 
   /**
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {GroundMouseClickEvent} callback
+   * @param {GroundMouseClickEvent} [callback]
    * @returns {void}
    */
-  onMouseChangePosition(event, camera, callback) {
+  mouseUpdate(event, camera, callback) {
     event.preventDefault()
     const top = this.mouseOffset.y
     const left = this.mouseOffset.x
     this.mouse.set(((event.clientX - left) / window.innerWidth) * 2 - 1, - ((event.clientY - top) / window.innerHeight) * 2 + 1)
     this.raycaster.setFromCamera(this.mouse, camera)
     const intersects = this.raycaster.intersectObjects([this.ground])
-    if (intersects.length > 0) {
-      callback(intersects[0], this.mouse)
+    if (intersects.length === 0) {
+      return
+    }
+
+    switch (this.clickHelperType) {
+      case Ground.CLICK_HELPER_STRICT:
+        this._updateCellHelperPositionStrict(intersects[0], this.options.pointSize)
+        break
+      case Ground.CLICK_HELPER_EDGE:
+        this._updateCellHelperPositionEdge(intersects[0], this.options.pointSize)
+        break
+    }
+
+    if (this.needAddClickHelper) {
+      this.needAddClickHelper = false
+      this.add(this.clickHelperMesh)
+    }
+
+    if (callback) {
+      callback({ intersect: intersects[0], mouse: this.mouse, click: this.clickHelperMesh.position })
     }
   }
 
@@ -218,11 +189,13 @@ export default class Ground extends Group {
    *
    * @param {Object} intersect
    * @param {(number|?)} [pointSize]
+   * @returns {Ground}
+   * @private
    */
-  updateCellHelperPositionStrict(intersect, pointSize = null) {
+  _updateCellHelperPositionStrict(intersect, pointSize = null) {
     pointSize = pointSize || this.options.pointSize
-    this.cellHelperMesh.position.copy(intersect.point)
-    this.cellHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
+    this.clickHelperMesh.position.copy(intersect.point)
+    this.clickHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
     return this
   }
 
@@ -231,12 +204,13 @@ export default class Ground extends Group {
    * @param {Object} intersect
    * @param {number|?} [pointSize]
    * @returns {Ground}
+   * @private
    */
-  updateCellHelperPositionOnEdge(intersect, pointSize = null) {
+  _updateCellHelperPositionEdge(intersect, pointSize = null) {
     pointSize = pointSize || this.options.pointSize
-    this.cellHelperMesh.position.copy(intersect.point).add(intersect.face.normal)
-    this.cellHelperMesh.position.divideScalar(pointSize).floor().multiplyScalar(pointSize).addScalar(pointSize / 2)
-    this.cellHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
+    this.clickHelperMesh.position.copy(intersect.point).add(intersect.face.normal)
+    this.clickHelperMesh.position.divideScalar(pointSize).floor().multiplyScalar(pointSize).addScalar(pointSize / 2)
+    this.clickHelperMesh.position.setY(intersect.point.y + (pointSize / 2))
     return this
   }
 
@@ -246,7 +220,7 @@ export default class Ground extends Group {
   render() {
     this.add(this.ground)
     this.ground.rotateOnAxis(this.direction, - Math.PI / 2)
-    this.gridPointsHelper.rotateOnWorldAxis(this.direction, Math.PI / 2)
+    this.vertexHelper.rotateOnWorldAxis(this.direction, Math.PI / 2)
     return this
   }
 }

@@ -1,17 +1,25 @@
 <script>
-  import WrapperFreeArea from '@components/WrapperFreeArea'
-  import LoadingModels from '@scene/loading/LoadingModels'
-  import LoadingTextures from '@scene/loading/LoadingTextures'
+  import { BBadge } from 'bootstrap-vue'
+  import WrapperView from '@components/WrapperView'
   import Ground from '@scene/objects/Ground'
   import Engine from '@scene/Engine'
-  import { Vector3, Vector2 } from 'three'
+  import { Vector3 } from 'three'
 
   const engine = Engine.get('model-ground-page-canvas')
 
   export default {
     name: 'ModelGroundPage',
+    data: () => {
+      return {
+        click: JSON.stringify(new Vector3()),
+      }
+    },
+    computed: {
+
+    },
     components: {
-      WrapperFreeArea
+      WrapperView,
+      BBadge
     },
     activated() {
       engine.registerEvents().animate()
@@ -23,52 +31,42 @@
       engine.destroy()
     },
     mounted() {
+      engine.preset().then(() => {
+        const ground = new Ground()
+          .setGridHelper()
+          .setVertexHelper()
+          .setClickHelper()
+          .render()
 
-      const loader = new LoadingModels()
-      loader.enableItem(LoadingModels.MODEL_GROUND)
-      // loader.addItem('ground-grass', '/textures/grass/1.jpg')
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3(0, 0, 0)
+        const cameraPosition = new Vector3(-600, 0, 600)
 
-      loader.presetModels().then(() => {
-
-        engine.preset().then(() => {
-
-          const rawObject = loader.getRawModel(LoadingModels.MODEL_GROUND)
-
-          const ground = new Ground()
-            .setGroundMesh(rawObject.model)
-            .setGridPointsHelper()
-            .setGridHelper()
-            .setCellHelper()
-            .render()
-          engine.scene.add(ground)
-
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-600, 0, 600)
-
-          engine
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setPointLight(lightPosition)
-            .setAxesHelper()
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(document.getElementById('model-ground-page-canvas'))
-            .addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
-              ground
-                // This page has top menu. Need set mouse offset on height it menu.
-                .setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-                .onMouseChangePosition(event, engine.camera, (intersect) => {
-                  ground.updateCellHelperPositionStrict(intersect)
-                })
-            })
-        })
+        engine
+          .add('ground', ground)
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setAxesHelper()
+          .setCamera(cameraPosition, cameraLookAt)
+          .render(document.getElementById('model-ground-page-canvas'))
+          .addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
+            ground
+              // This page has top menu. Need set mouse offset on height it menu.
+              .setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
+              .mouseUpdate(event, engine.camera, ({ click }) => {
+                this.click = JSON.stringify(new Vector3().copy(click).round())
+              })
+          })
       })
     }
   }
 </script>
 
 <template>
-  <WrapperFreeArea>
-    <WrapperFreeArea id="model-ground-page-canvas" />
-  </WrapperFreeArea>
+  <WrapperView :autofill="true">
+    <WrapperView id="model-ground-page-canvas" :autofill="true" />
+    <WrapperView class="px-2 py-1">
+      <BBadge>Click: {{click}}</BBadge>
+    </WrapperView>
+  </WrapperView>
 </template>

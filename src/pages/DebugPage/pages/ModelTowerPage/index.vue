@@ -1,16 +1,16 @@
 <script>
-  import WrapperFreeArea from '@components/WrapperFreeArea'
+  import WrapperView from '@components/WrapperView'
   import LoadingModels from '@scene/loading/LoadingModels'
   import Engine from '@scene/Engine'
   import Unit from '@scene/units/Unit'
-  import { Vector3, BoxGeometry, Mesh, MeshBasicMaterial } from 'three'
+  import { Vector3 } from 'three'
 
   const engine = Engine.get('model-tower-page-canvas')
 
   export default {
     name: 'ModelTowerPage',
     components: {
-      WrapperFreeArea
+      WrapperView
     },
     activated() {
       engine.registerEvents().animate()
@@ -23,7 +23,7 @@
     },
     mounted() {
       const loader = new LoadingModels()
-        .enable(LoadingModels.MODEL_TOWER, true)
+        .enableItem(LoadingModels.MODEL_TOWER, true)
 
       loader.presetModels().then(() => {
         engine.preset().then(() => {
@@ -47,7 +47,7 @@
             .setCamera(cameraPosition, cameraLookAt)
             .setPhysicsGround()
             .enablePhysics(true)
-            .addPhysicsUnit(unit)
+            .add('tower', unit)
             .render(document.getElementById('model-tower-page-canvas'))
 
           engine.updates.push((delta) => {
@@ -60,7 +60,7 @@
 </script>
 
 <template>
-  <WrapperFreeArea>
-    <WrapperFreeArea id="model-tower-page-canvas" />
-  </WrapperFreeArea>
+  <WrapperView :autofill="true">
+    <WrapperView id="model-tower-page-canvas" :autofill="true" />
+  </WrapperView>
 </template>

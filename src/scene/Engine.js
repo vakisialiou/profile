@@ -7,6 +7,7 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
 import { World } from 'oimo'
+import Unit from './units/Unit'
 
 class Engine {
   constructor() {
@@ -105,15 +106,11 @@ class Engine {
     /**
      * List of units that must work with physics engine.
      *
-     * @type {Array.<Unit>}
+     * @type {{[Engine.CATEGORY_PHYSICS]: Array.<Unit>, [string]: Array}}
      */
-    this.units = []
-
-    /**
-     *
-     * @type {{[categoryName]: Array.<(Mesh|Group|Object3D)>}}
-     */
-    this.storedItems = {}
+    this.units = {
+      [Engine.CATEGORY_PHYSICS]: []
+    }
 
     /**
      *
@@ -151,6 +148,12 @@ class Engine {
      */
     this.events = new EventDispatcher()
   }
+
+  /**
+   *
+   * @type {string}
+   */
+  static CATEGORY_PHYSICS = 'physics'
 
   /**
    *
@@ -218,42 +221,54 @@ class Engine {
 
   /**
    *
-   * @param {Unit} unit
+   * @param {string} category
+   * @param {(Mesh|Group|Object3D|Unit)} mesh
    * @returns {Engine}
    */
-  addPhysicsUnit(unit) {
-    for (const item of this.units) {
-      if (item.unit === unit) {
-       throw Error('Unit has already exists.')
+  add(category, mesh) {
+    if (!this.units.hasOwnProperty(category)) {
+      this.units[category] = []
+    }
+
+    for (const category in this.units) {
+      if (!this.units.hasOwnProperty(category)) {
+        continue
+      }
+      const itemIndex = this.units[category].indexOf(mesh)
+      if (itemIndex !== -1) {
+        throw Error(`Model has already added to scene and relate to ${category} category`)
       }
     }
-    this.units.push(unit)
-    this.scene.add(unit)
-    return this
-  }
 
-  add(category, mesh) {
+    if (this.physicsEnabled && mesh instanceof Unit) {
+      this.units[Engine.CATEGORY_PHYSICS].push(mesh)
+    }
+
     this.scene.add(mesh)
-    // this.
+    this.units[category].push(mesh)
     return this
   }
 
   /**
    *
-   * @param {Unit} unit
+   * @param {(Object3D|Mesh|Group|Unit)} mesh
    * @returns {Engine}
    */
-  removePhysicsUnit(unit) {
-    const index = this.units.indexOf(unit)
-    if (index !== -1) {
-      this.units.splice(index, 1)
+  remove(mesh) {
+    for (const category in this.units) {
+      if (!this.units.hasOwnProperty(category)) {
+        continue
+      }
+      const itemIndex = this.units[category].indexOf(mesh)
+      if (itemIndex !== -1) {
+        this.units[category].splice(itemIndex, 1)
+      }
+      if (category !== Engine.CATEGORY_PHYSICS && this.units[category].length === 0) {
+        delete this.units[category]
+      }
     }
 
-    if (unit.rigidBody) {
-      this.physicsWorld.removeRigidBody(unit.rigidBody)
-    }
-
-    this.scene.remove(unit)
+    this.scene.remove(mesh)
     return this
   }
 
@@ -537,7 +552,7 @@ class Engine {
     const delta = this.clock.getDelta()
     if (this.physicsEnabled) {
       this.physicsWorld.step()
-      for (const unit of this.units) {
+      for (const unit of this.units[Engine.CATEGORY_PHYSICS]) {
         if (!unit.rigidBody) {
           continue
         }

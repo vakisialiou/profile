@@ -1,6 +1,6 @@
 <script>
 import './index.css'
-import WrapperFreeArea from '@components/WrapperFreeArea'
+import WrapperView from '@components/WrapperView'
 import Engine from '@scene/Engine'
 import { Color, Vector3 } from 'three'
 import Storm from '@scene/objects/Storm'
@@ -80,16 +80,16 @@ export default {
     })
   },
   components: {
-    WrapperFreeArea
+    WrapperView
   }
 }
 </script>
 
 <template>
-  <WrapperFreeArea>
-    <WrapperFreeArea id="home-page-canvas" />
-    <WrapperFreeArea class="home-page-content">
+  <WrapperView :autofill="true">
+    <WrapperView id="home-page-canvas" :autofill="true" />
+    <WrapperView class="home-page-content" :autofill="true">
       Home page
-    </WrapperFreeArea>
-  </WrapperFreeArea>
+    </WrapperView>
+  </WrapperView>
 </template>
