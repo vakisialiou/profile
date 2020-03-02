@@ -5,7 +5,7 @@
   import Engine from '@scene/Engine'
   import { Vector3 } from 'three'
 
-  const engine = Engine.get('model-ground-page-canvas')
+  let engine = null
 
   export default {
     name: 'ModelGroundPage',
@@ -22,15 +22,16 @@
       BBadge
     },
     activated() {
-      engine.registerEvents().animate()
+      engine.pause(false)
     },
     deactivated() {
-      engine.destroy()
+      engine.pause(true)
     },
     destroyed() {
       engine.destroy()
     },
     mounted() {
+      engine = Engine.create('model-ground-page-canvas')
       engine.preset().then(() => {
         const ground = new Ground()
           .setGridHelper()
@@ -49,6 +50,8 @@
           .setAxesHelper()
           .setCamera(cameraPosition, cameraLookAt)
           .render(document.getElementById('model-ground-page-canvas'))
+          .registerEvents()
+          .animate()
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
             ground
               // This page has top menu. Need set mouse offset on height it menu.

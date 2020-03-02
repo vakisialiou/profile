@@ -3,9 +3,10 @@
   import LoadingModels from '@scene/loading/LoadingModels'
   import Engine from '@scene/Engine'
   import Unit from '@scene/units/Unit'
+  import Ground from '@scene/objects/Ground'
   import { Vector3 } from 'three'
 
-  const engine = Engine.get('model-tower-page-canvas')
+  let engine = null
 
   export default {
     name: 'ModelTowerPage',
@@ -13,15 +14,16 @@
       WrapperView
     },
     activated() {
-      engine.registerEvents().animate()
+      engine.pause(false)
     },
     deactivated() {
-      engine.destroy()
+      engine.pause(true)
     },
     destroyed() {
       engine.destroy()
     },
     mounted() {
+      engine = Engine.create('model-tower-page-canvas')
       const loader = new LoadingModels()
         .enableItem(LoadingModels.MODEL_TOWER, true)
 
@@ -31,10 +33,15 @@
           const cameraLookAt = new Vector3(0, 0, 0)
           const cameraPosition = new Vector3(-600, 0, 600)
 
+          const ground = new Ground()
+            .setGridHelper()
+            .setVertexHelper()
+            .render()
+
           const rawModel = loader.getRawModel(LoadingModels.MODEL_TOWER)
           const unit = new Unit(rawModel)
-            .setScale(10)
-            .setPosition(new Vector3(0, 60, 100))
+            .setScale(20)
+            .setPosition(new Vector3(0, 60, 500))
             .setRigidBody(engine.physicsWorld)
             .showRigidBodyHelper()
 
@@ -43,19 +50,21 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setAxesHelper()
-            .setGridHelper(1000)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround()
+            .setPhysicsGround({ size: [ground.options.width, 1, ground.options.height] })
             .enablePhysics(true)
             .add('tower', unit)
+            .add('ground', ground)
             .render(document.getElementById('model-tower-page-canvas'))
+            .registerEvents()
+            .animate()
 
           engine.updates.push((delta) => {
 
           })
         })
       })
-    }
+    },
   }
 </script>
 

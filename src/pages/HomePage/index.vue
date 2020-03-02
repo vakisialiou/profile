@@ -20,7 +20,7 @@ textures.addItem('star-5', '/images/stars/5.png')
 textures.addItem('star-6', '/images/stars/6.png')
 textures.addItem('star-7', '/images/stars/7.png')
 
-const engine = Engine.get('home-page-canvas')
+let engine = null
 
 export default {
   name: 'HomePage',
@@ -30,15 +30,16 @@ export default {
     }
   },
   activated() {
-    engine.registerEvents().animate()
+    engine.pause(false)
   },
   deactivated() {
-    engine.destroy()
+    engine.pause(true)
   },
   destroyed() {
     engine.destroy()
   },
   mounted() {
+    engine = Engine.create('home-page-canvas')
     textures.presetTextures().then(() => {
       const storm = new Storm(new Color(0x6A9EE6))
       const sky = new SkyBox(textures.get('sky-box-galaxy'))
@@ -65,6 +66,8 @@ export default {
           .enableMouseRotate(false)
           .enableMouseZoom(false)
           .render(document.getElementById('home-page-canvas'))
+          .registerEvents()
+          .animate()
 
         engine.scene.add(sky)
         engine.scene.add(storm)

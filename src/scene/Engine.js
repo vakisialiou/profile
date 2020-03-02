@@ -14,6 +14,12 @@ class Engine {
 
     /**
      *
+     * @type {Element|?}
+     */
+    this.container = null
+
+    /**
+     *
      * @type {Stats}
      */
     this.stats = new Stats()
@@ -108,9 +114,7 @@ class Engine {
      *
      * @type {{[Engine.CATEGORY_PHYSICS]: Array.<Unit>, [string]: Array}}
      */
-    this.units = {
-      [Engine.CATEGORY_PHYSICS]: []
-    }
+    this.units = {}
 
     /**
      *
@@ -144,6 +148,12 @@ class Engine {
 
     /**
      *
+     * @type {boolean}
+     */
+    this.stopped = false
+
+    /**
+     *
      * @type {EventDispatcher}
      */
     this.events = new EventDispatcher()
@@ -160,7 +170,7 @@ class Engine {
    * @param {string} [name]
    * @returns {Engine}
    */
-  static get(name) {
+  static create(name) {
     name = name || 'default'
     if (!window.__engine__) {
       window.__engine__ = {}
@@ -241,6 +251,9 @@ class Engine {
     }
 
     if (this.physicsEnabled && mesh instanceof Unit) {
+      if (!this.units.hasOwnProperty(Engine.CATEGORY_PHYSICS)) {
+        this.units[Engine.CATEGORY_PHYSICS] = []
+      }
       this.units[Engine.CATEGORY_PHYSICS].push(mesh)
     }
 
@@ -538,8 +551,19 @@ class Engine {
    */
   render(container) {
     this.renderer.preset()
-    container.appendChild(this.stats.dom)
-    container.appendChild(this.renderer.domElement)
+    this.container = container
+    this.container.appendChild(this.stats.dom)
+    this.container.appendChild(this.renderer.domElement)
+    return this
+  }
+
+  /**
+   *
+   * @param {boolean} value
+   * @returns {Engine}
+   */
+  pause(value) {
+    this.stopped = value
     return this
   }
 
@@ -548,11 +572,16 @@ class Engine {
    * @returns {Engine}
    */
   animate() {
+    this.stats.update()
     this.register.requestAnimationId = requestAnimationFrame(() => this.animate())
     const delta = this.clock.getDelta()
+    if (this.stopped) {
+      return this
+    }
     if (this.physicsEnabled) {
       this.physicsWorld.step()
-      for (const unit of this.units[Engine.CATEGORY_PHYSICS]) {
+      const units = this.units[Engine.CATEGORY_PHYSICS] || []
+      for (const unit of units) {
         if (!unit.rigidBody) {
           continue
         }
@@ -565,7 +594,6 @@ class Engine {
       updateCallback(delta)
     }
     this.renderer.update()
-    this.stats.update()
     return this
   }
 
@@ -578,6 +606,18 @@ class Engine {
     if (this.register.requestAnimationId) {
       cancelAnimationFrame(this.register.requestAnimationId)
     }
+
+    while(this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0])
+    }
+
+    const units = this.units[Engine.CATEGORY_PHYSICS] || []
+    for (const unit of units) {
+      if (unit.rigidBody) {
+        this.physicsWorld.remove(unit.rigidBody)
+      }
+    }
+
     this.mapControls.dispose()
     return this
   }

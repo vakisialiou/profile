@@ -17,13 +17,13 @@ class GroundOptions {
      *
      * @type {number}
      */
-    this.width = 1000
+    this.width = 2000
 
     /**
      *
      * @type {number}
      */
-    this.height = 1000
+    this.height = 2000
 
     /**
      *
