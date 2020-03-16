@@ -11,19 +11,19 @@ class GroundOptions {
      *
      * @type {number}
      */
-    this.pointSize = 10
+    this.pointSize = 20
 
     /**
      *
      * @type {number}
      */
-    this.width = 2000
+    this.width = 1000
 
     /**
      *
      * @type {number}
      */
-    this.height = 2000
+    this.height = 1000
 
     /**
      *

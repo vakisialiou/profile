@@ -1,4 +1,5 @@
-import { Object3D, EventDispatcher, Euler, Group, Mesh, Box3, Box3Helper, Vector3 } from 'three'
+import { Object3D, Group, Mesh, Box3, Box3Helper, Vector3 } from 'three'
+import UnitAnimation from './../animations/UnitAnimation'
 
 export default class Unit extends Object3D {
   constructor(rawModel) {
@@ -10,6 +11,12 @@ export default class Unit extends Object3D {
     this.model = rawModel.model
     this.model.material.metalness = 0
     this.add(this.model)
+
+    /**
+     *
+     * @type {UnitAnimation}
+     */
+    this.animation = new UnitAnimation(rawModel)
 
     /**
      * Use method "setRigidBody" to create RigidBody
@@ -34,15 +41,16 @@ export default class Unit extends Object3D {
   /**
    *
    * @param {World} physicsWorld
+   * @param {Vector3} [size]
    * @returns {Unit}
    */
-  setRigidBody(physicsWorld) {
+  setRigidBody(physicsWorld, size = null) {
     if (this.rigidBody) {
       throw Error('Rigid body has already exists.')
     }
     this.box.setFromObject(this.model)
     const pos = this.position.toArray()
-    const size = this.box.getSize(new Vector3()).toArray()
+    size = size || this.box.getSize(new Vector3()).toArray()
     const physicsOptions = { type: 'box', size, pos, move: true }
     this.rigidBody = physicsWorld.add(physicsOptions)
     return this
@@ -80,9 +88,11 @@ export default class Unit extends Object3D {
 
   /**
    *
+   * @param {(Object|{ delta: number })} options
    * @returns {Unit}
    */
-  update() {
+  update(options) {
+    this.animation.update(options.delta)
     if (this.rigidBody) {
       this.position.copy(this.rigidBody.getPosition())
       this.quaternion.copy(this.rigidBody.getQuaternion())

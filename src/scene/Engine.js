@@ -240,13 +240,13 @@ class Engine {
       this.units[category] = []
     }
 
-    for (const category in this.units) {
-      if (!this.units.hasOwnProperty(category)) {
+    for (const createdCategory in this.units) {
+      if (!this.units.hasOwnProperty(createdCategory)) {
         continue
       }
-      const itemIndex = this.units[category].indexOf(mesh)
+      const itemIndex = this.units[createdCategory].indexOf(mesh)
       if (itemIndex !== -1) {
-        throw Error(`Model has already added to scene and relate to ${category} category`)
+        throw Error(`Model has already added to scene and relate to ${createdCategory} category`)
       }
     }
 

@@ -143,7 +143,7 @@ export default class LoadingModels {
   /**
    *
    * @param {string} name
-   * @returns {GLTF}
+   * @returns {RawModel}
    */
   getRawModel(name) {
     const gltf = cloneGltf(this.loadedItems[name])

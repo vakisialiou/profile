@@ -1,7 +1,7 @@
 import { PlaneBufferGeometry } from 'three'
 import { Fire } from 'three/examples/jsm/objects/Fire'
 
-export default class Bonfire extends Fire {
+export default class Torch extends Fire {
   constructor() {
     const plane = new PlaneBufferGeometry( 20, 20 )
     super(plane, {
