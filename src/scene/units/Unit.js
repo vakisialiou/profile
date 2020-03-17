@@ -88,11 +88,11 @@ export default class Unit extends Object3D {
 
   /**
    *
-   * @param {(Object|{ delta: number })} options
+   * @param {number} delta
    * @returns {Unit}
    */
-  update(options) {
-    this.animation.update(options.delta)
+  update(delta) {
+    this.animation.update(delta)
     if (this.rigidBody) {
       this.position.copy(this.rigidBody.getPosition())
       this.quaternion.copy(this.rigidBody.getQuaternion())

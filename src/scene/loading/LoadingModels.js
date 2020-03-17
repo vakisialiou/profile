@@ -87,11 +87,16 @@ export default class LoadingModels {
 
   /**
    *
-   * @param {Array.<{name: string, path: string}>} items
+   * @param {Array.<{name: string, path: string, [enabled]: boolean}>} items
    * @returns {LoadingModels}
    */
   setItems(items) {
-    this.items = items
+    for (const item of items) {
+       if (item.enabled === undefined) {
+         item.enabled = true
+       }
+       this.addItem(item.name, item.path, item.enabled)
+    }
     return this
   }
 
@@ -99,10 +104,11 @@ export default class LoadingModels {
    *
    * @param {string} name
    * @param {string} path
+   * @param {boolean} [enabled]
    * @returns {LoadingModels}
    */
-  addItem(name, path) {
-    this.items.push({ name, path })
+  addItem(name, path, enabled = true) {
+    this.items.push({ name, path, enabled })
     return this
   }
 

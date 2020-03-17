@@ -1,4 +1,4 @@
-import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3 } from 'three'
+import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, Color, TextureLoader, AdditiveBlending } from 'three'
 import Unit from './Unit'
 
 const geometry = new SphereGeometry(0.6)
@@ -17,7 +17,7 @@ export default class Bullet extends Unit {
      *
      * @type {{damage: number, distance: number, speed: number}}
      */
-    this.options = { distance: 600, speed: 40, damage: 60 }
+    this.options = { distance: 600, speed: 800, damage: 60 }
 
     /**
      *
@@ -49,6 +49,22 @@ export default class Bullet extends Unit {
      * @type {{collided: boolean, destroyed: boolean}}
      */
     this.status = { collided: false, destroyed: false }
+
+    /**
+     *
+     * @type {(Object3D|Mesh|Group)[]}
+     */
+    this.collisionObjects = []
+  }
+
+  /**
+   *
+   * @param {(Object3D|Mesh|Group)[]} objects
+   * @returns {Bullet}
+   */
+  setCollisionObjects(objects) {
+    this.collisionObjects = objects
+    return this
   }
 
   static EVENT_COLLISION = 'EVENT_COLLISION'
@@ -73,16 +89,16 @@ export default class Bullet extends Unit {
 
   /**
    *
-   * @param {(Object|{ delta: number, collisionObjects: Array.<(Object3D|Mesh|Group)> })} options
+   * @param {number} delta
    * @returns {Bullet}
    */
-  update(options) {
-    super.update(options)
+  update(delta) {
+    super.update(delta)
     this.prevPosition.copy(this.position)
-    this.position.addScaledVector(this.direction, this.options.speed * options.delta)
+    this.position.addScaledVector(this.direction, this.options.speed * delta)
 
-    if (Array.isArray(options.collisionObjects) && !this.status.collided) {
-      const intersections = this.getIntersectionObjects(options.collisionObjects, true)
+    if (Array.isArray(this.collisionObjects) && !this.status.collided) {
+      const intersections = this.getIntersectionObjects(this.collisionObjects, true)
       if (intersections.length > 0) {
         this.status.collided = true
         this.dispatchEvent({type: Bullet.EVENT_COLLISION, intersections})

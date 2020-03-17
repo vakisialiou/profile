@@ -118,12 +118,6 @@ class Engine {
 
     /**
      *
-     * @type {boolean}
-     */
-    this.physicsEnabled = false
-
-    /**
-     *
      * @type {Object}
      */
     this.register = {
@@ -211,16 +205,6 @@ class Engine {
 
   /**
    *
-   * @param {boolean} [value]
-   * @returns {Engine}
-   */
-  enablePhysics(value = true) {
-    this.physicsEnabled = value
-    return this
-  }
-
-  /**
-   *
    * @param {Object} [options]
    * @returns {Engine}
    */
@@ -250,7 +234,7 @@ class Engine {
       }
     }
 
-    if (this.physicsEnabled && mesh instanceof Unit) {
+    if (mesh instanceof Unit) {
       if (!this.units.hasOwnProperty(Engine.CATEGORY_PHYSICS)) {
         this.units[Engine.CATEGORY_PHYSICS] = []
       }
@@ -578,17 +562,13 @@ class Engine {
     if (this.stopped) {
       return this
     }
-    if (this.physicsEnabled) {
-      this.physicsWorld.step()
-      const units = this.units[Engine.CATEGORY_PHYSICS] || []
-      for (const unit of units) {
-        if (!unit.rigidBody) {
-          continue
-        }
-        unit.position.copy(unit.rigidBody.getPosition())
-        unit.quaternion.copy(unit.rigidBody.getQuaternion())
-      }
+
+    this.physicsWorld.step()
+    const units = this.units[Engine.CATEGORY_PHYSICS] || []
+    for (const unit of units) {
+      unit.update(delta)
     }
+
     this.mapControls.update()
     for (const updateCallback of this.updates) {
       updateCallback(delta)

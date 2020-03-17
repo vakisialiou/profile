@@ -1,7 +1,6 @@
 import Unit from './Unit'
 import { Vector3, Matrix4, Quaternion } from 'three'
 import MathObject from '@scene/helper/MathObject'
-import Bullet from '@scene/units/Bullet'
 
 export default class Tower extends Unit {
   constructor(gltf) {
@@ -32,25 +31,25 @@ export default class Tower extends Unit {
     this.chargeOptions = [
       {
         model: gltf.model.getObjectByName('Weapon_Top_Left_Trap'),
-        reloadTime: 4000,
+        reloadTime: 1000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Top_Right_Trap'),
-        reloadTime: 4000,
+        reloadTime: 1000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Bottom_Left_Trap'),
-        reloadTime: 4000,
+        reloadTime: 1000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Bottom_Right_Trap'),
-        reloadTime: 4000,
+        reloadTime: 1000,
         lastShotTime: 0,
         enabled: true,
       }
@@ -91,17 +90,9 @@ export default class Tower extends Unit {
      * @type {MathObject}
      */
     this.mathWeaponHinge = new MathObject(this.weaponHinge)
-
-    /**
-     *
-     * @type {Bullet[]}
-     */
-    this.bullets = []
   }
 
   static EVENT_ADD_BULLET = 'EVENT_ADD_BULLET'
-  static EVENT_REMOVE_BULLET = 'EVENT_REMOVE_BULLET'
-  static EVENT_COLLISION_BULLET = 'EVENT_COLLISION_BULLET'
 
   /**
    *
@@ -155,31 +146,22 @@ export default class Tower extends Unit {
 
   /**
    *
-   * @param {(Object|{ delta: number, collisionObjects: Array.<(Object3D|Mesh|Group)> })} options
-   * @returns {Bullet}
+   * @param {number} delta
+   * @returns {Tower}
    */
-  update(options) {
-    super.update(options.delta)
+  update(delta) {
+    super.update(delta)
 
     if (this.target) {
       const speedHead = 1.5
-      this.head.quaternion.rotateTowards(this.targetRotationHead, speedHead * options.delta)
+      this.head.quaternion.rotateTowards(this.targetRotationHead, speedHead * delta)
 
       const speedWeaponHinge = 0.3
-      this.weaponHinge.quaternion.rotateTowards(this.targetRotationWeaponHinge, speedWeaponHinge * options.delta)
-
-      for (const bullet of this.bullets) {
-        bullet.update(options)
-      }
+      this.weaponHinge.quaternion.rotateTowards(this.targetRotationWeaponHinge, speedWeaponHinge * delta)
 
       if (this.head.quaternion.equals(this.targetRotationHead) && this.weaponHinge.quaternion.equals(this.targetRotationWeaponHinge)) {
         this._charge((gunOptions) => {
-          const direction = gunOptions.model.getWorldDirection(new Vector3()).multiplyScalar(-1)
-          const position = gunOptions.model.getWorldPosition(new Vector3())
-          const bullet = new Bullet(position, direction)
-          bullet.addEventListener(Bullet.EVENT_DESTROY, () => this._removeBullet(bullet))
-          bullet.addEventListener(Bullet.EVENT_COLLISION, () => this._collisionBullet(bullet))
-          this._addBullet(bullet)
+          this.dispatchEvent({ type: Tower.EVENT_ADD_BULLET, gunOptions })
         })
       }
     }
@@ -207,45 +189,6 @@ export default class Tower extends Unit {
       gunOptions.lastShotTime = now
       callback(gunOptions)
     }
-    return this
-  }
-
-  /**
-   *
-   * @param {Bullet} bullet
-   * @returns {Tower}
-   * @private
-   */
-  _addBullet(bullet) {
-    this.bullets.push(bullet)
-    this.dispatchEvent({ type: Tower.EVENT_ADD_BULLET, bullet })
-    return this
-  }
-
-  /**
-   *
-   * @param {Bullet} bullet
-   * @returns {Tower}
-   * @private
-   */
-  _removeBullet(bullet) {
-    const index = this.bullets.indexOf(bullet)
-    if (index > -1) {
-      this.bullets.splice(index, 1)
-      this.dispatchEvent({ type: Tower.EVENT_REMOVE_BULLET, bullet })
-    }
-    return this
-  }
-
-  /**
-   *
-   * @param {Bullet} bullet
-   * @returns {Tower}
-   * @private
-   */
-  _collisionBullet(bullet) {
-    this._removeBullet(bullet)
-    this.dispatchEvent({ type: Tower.EVENT_COLLISION_BULLET, bullet })
     return this
   }
 }
