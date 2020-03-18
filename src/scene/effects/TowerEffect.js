@@ -28,20 +28,21 @@ export default class TowerEffect {
       maxAge: {
         value: 0.5
       }
-    };
+    }
 
     this.groups = {}
   }
 
+  static EFFECT_SHOT = 'EFFECT_SHOT'
+
   /**
    *
-   * @param {string} groupName
    * @param {Texture} texture
    * @returns {TowerEffect}
    */
-  createShootEffect(groupName, texture) {
-    if (this.groups.hasOwnProperty(groupName)) {
-      throw new Error(`Effect '${groupName}' has already created in TowerEffects`)
+  createShootEffect(texture) {
+    if (this.groups.hasOwnProperty(TowerEffect.EFFECT_SHOT)) {
+      throw new Error(`Effect '${TowerEffect.EFFECT_SHOT}' has already created in TowerEffect`)
     }
     const particleGroup = new SPE.Group({
       texture: { value: texture },
@@ -50,36 +51,34 @@ export default class TowerEffect {
     })
 
     particleGroup.addPool(10, this.shootEffectSettings, false)
-    this.groups[groupName] = particleGroup
+    this.groups[TowerEffect.EFFECT_SHOT] = particleGroup
     return this
   }
 
   /**
    *
-   * @param {string} groupName
    * @param {Vector3} position
    * @returns {TowerEffect}
    */
-  emmitEffect(groupName, position) {
-    if (!this.groups.hasOwnProperty(groupName)) {
-      throw Error(`Unknown group ${groupName}. Look at TowerEffects.emmitEffect`)
+  emmitShootEffect(position) {
+    if (!this.groups.hasOwnProperty(TowerEffect.EFFECT_SHOT)) {
+      throw Error(`Unknown group ${TowerEffect.EFFECT_SHOT}. Before call method 'emmitShootEffect' you must create shootEffect. Please try to use method 'createShootEffect'`)
     }
 
-    const particleGroup = this.groups[groupName]
+    const particleGroup = this.groups[TowerEffect.EFFECT_SHOT]
     particleGroup.triggerPoolEmitter(1, position)
     return this
   }
 
   /**
    *
-   * @param groupName
    * @returns {Mesh}
    */
-  getMesh(groupName) {
-    if (!this.groups.hasOwnProperty(groupName)) {
-      throw Error(`Unknown group ${groupName}. Look at TowerEffects.getMesh`)
+  getShootEffectMesh() {
+    if (!this.groups.hasOwnProperty(TowerEffect.EFFECT_SHOT)) {
+      throw Error(`Unknown group ${TowerEffect.EFFECT_SHOT}. Before call method 'getShootEffectMesh' you must create shootEffect. Please try to use method 'createShootEffect'`)
     }
-    return this.groups[groupName]['mesh']
+    return this.groups[TowerEffect.EFFECT_SHOT]['mesh']
   }
 
   /**

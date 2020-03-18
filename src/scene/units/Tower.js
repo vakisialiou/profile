@@ -31,25 +31,25 @@ export default class Tower extends Unit {
     this.chargeOptions = [
       {
         model: gltf.model.getObjectByName('Weapon_Top_Left_Trap'),
-        reloadTime: 1000,
+        reloadTime: 4000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Top_Right_Trap'),
-        reloadTime: 1000,
+        reloadTime: 4000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Bottom_Left_Trap'),
-        reloadTime: 1000,
+        reloadTime: 4000,
         lastShotTime: 0,
         enabled: true,
       },
       {
         model: gltf.model.getObjectByName('Weapon_Bottom_Right_Trap'),
-        reloadTime: 1000,
+        reloadTime: 4000,
         lastShotTime: 0,
         enabled: true,
       }

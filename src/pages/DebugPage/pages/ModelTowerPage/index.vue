@@ -6,6 +6,7 @@
   import Bullet from '@scene/units/Bullet'
   import Tower from '@scene/units/Tower'
   import TowerEffect from '@scene/effects/TowerEffect'
+  import BulletEffect from '@scene/effects/BulletEffect'
   import Ground from '@scene/objects/Ground'
   import { Vector3 } from 'three'
 
@@ -48,9 +49,8 @@
           const towersMap = [ new Vector3(-120, 10, 120), new Vector3(120, 10, 120), new Vector3(120, 10, -120), new Vector3(-120, 10, -120) ]
 
           for (let i = 0; i < towersMap.length; i++) {
-            const EFFECT_TOWER = 'shot'
             const EFFECT_TEXTURE = loader.getTexture(TEXTURE_SMOKE_PARTICLE)
-            const towerEffect = new TowerEffect().createShootEffect(EFFECT_TOWER, EFFECT_TEXTURE)
+            const towerEffect = new TowerEffect().createShootEffect(EFFECT_TEXTURE)
 
             const rawModelTower = loader.getRawModel(LoadingModels.MODEL_TOWER)
             const tower = new Tower(rawModelTower)
@@ -59,9 +59,12 @@
               .setRigidBody(engine.physicsWorld)
               .showRigidBodyHelper()
 
+            const bulletEffect = new BulletEffect().createShockWaveEffect(EFFECT_TEXTURE)
+
             engine
               .add('tower', tower) // Добавить на сцену баню.
-              .add('tower-effect', towerEffect.getMesh(EFFECT_TOWER)) // Добавить на сцену эффекты
+              .add('tower-effect', towerEffect.getShootEffectMesh()) // Добавить на сцену эффекты
+              .add('bullet-effect', bulletEffect.getShockWaveMesh()) // Добавить на сцену эффекты
 
             tower.addEventListener(Tower.EVENT_ADD_BULLET, (event) => {
               const direction = event.gunOptions.model.getWorldDirection(new Vector3()).multiplyScalar(-1)
@@ -69,14 +72,21 @@
               const bullet = new Bullet(position, direction)
               bullet.setCollisionObjects([ ground.clickHelperMesh ])
               bullet.addEventListener(Bullet.EVENT_DESTROY, () => engine.remove(bullet))
-              bullet.addEventListener(Bullet.EVENT_COLLISION, () => engine.remove(bullet))
+              bullet.addEventListener(Bullet.EVENT_COLLISION, () => {
+                // Провацировать эффек взрывной волны.
+                bulletEffect.emmitShockWaveEffect(bullet.position)
+                engine.remove(bullet)
+              })
 
               engine.add('tower-bullet', bullet) // Добавить на сцену снаряд
               // Провацировать эффек выстрела.
-              towerEffect.emmitEffect(EFFECT_TOWER, bullet.position)
+              towerEffect.emmitShootEffect(bullet.position)
             })
 
-            engine.updates.push((delta) => towerEffect.update(delta))
+            engine.updates.push((delta) => {
+              towerEffect.update(delta)
+              bulletEffect.update(delta)
+            })
 
             engine.addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
               ground.mouseUpdate(event, engine.camera)
