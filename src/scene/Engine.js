@@ -449,7 +449,7 @@ class Engine {
    * @private
    */
   _onMouseMove(event) {
-    if (event.path[0] !== this.renderer.domElement) {
+    if (!this._isDomElementEvent(event)) {
       return
     }
     this.events.dispatchEvent({ type: Engine.EVENT_MOUSE_MOVE, event })
@@ -462,10 +462,21 @@ class Engine {
    * @private
    */
   _onMouseDown(event) {
-    if (event.path[0] !== this.renderer.domElement) {
+    if (!this._isDomElementEvent(event)) {
       return
     }
     this.events.dispatchEvent({ type: Engine.EVENT_MOUSE_DOWN, event })
+  }
+
+  /**
+   *
+   * @param {MouseEvent} event
+   * @returns {boolean}
+   * @private
+   */
+  _isDomElementEvent(event) {
+    const path = event.path || (event.composedPath && event.composedPath()) || []
+    return (path && path[0] === this.renderer.domElement)
   }
 
   /**

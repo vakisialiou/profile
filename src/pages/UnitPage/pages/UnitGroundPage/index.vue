@@ -8,7 +8,7 @@
   let engine = null
 
   export default {
-    name: 'ModelGroundPage',
+    name: 'UnitGroundPage',
     data: () => {
       return {
         click: JSON.stringify(new Vector3()),

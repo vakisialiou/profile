@@ -3,7 +3,6 @@
   import Vue from 'vue'
   import VueRouter from 'vue-router'
   import HorizontalMenu from './components/HorizontalMenu'
-  import HomePage from './pages/HomePage'
   import { routes } from './routes'
   import {
     BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
@@ -28,10 +27,12 @@
           .map((route) => route.component.name)
       }
     },
+    methods: {
+
+    },
     components: {
       HorizontalMenu,
-      BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
-      BNavForm, BFormInput, BButton, BImg, BIcon
+      BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BImg
     }
   }
 </script>
@@ -52,7 +53,9 @@
 
         <!-- Right aligned nav items -->
         <BNavbarNav class="ml-auto">
-          <BIcon icon="info" variant="light" aria-hidden="true" />
+          <a href="/cv/Valery_Kiseliou_CV.pdf" target="_blank" class="text-light">
+            <BImg src="/images/pages/home-page/pdf.svg" />
+          </a>
         </BNavbarNav>
       </BCollapse>
     </BNavbar>

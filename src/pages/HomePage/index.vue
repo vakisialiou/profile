@@ -84,7 +84,6 @@ export default {
         })
 
         engine.createOutline(storm.lightningsMeshes, new Color(0x6A9EE6))
-        engine.createOutline(sky.planets, new Color(0xFFFFFF))
       })
     })
   },
@@ -97,7 +96,7 @@ export default {
 <template>
   <WrapperView :autofill="true">
     <WrapperView id="home-page-canvas" :autofill="true" />
-    <WrapperView class="home-page-content" :autofill="true">
+    <WrapperView class="home-page-content d-none d-md-block" :autofill="true">
       <Carousel />
     </WrapperView>
   </WrapperView>

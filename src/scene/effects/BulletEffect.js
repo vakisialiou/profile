@@ -5,7 +5,7 @@ export default class BulletEffect {
   constructor() {
 
     this.shockWaveEffectSettings = {
-      particleCount: 4,
+      particleCount: 20,
       type: SPE.distributions.SPHERE,
       position: {
         radius: 0.1,
@@ -17,13 +17,13 @@ export default class BulletEffect {
       activeMultiplier: 10,
 
       velocity: {
-        value: new Vector3( 100 )
+        value: new Vector3( 10 )
       },
       acceleration: {
-        value: new Vector3( 0, -20, 0 ),
+        value: new Vector3( 0, -2, 0 ),
         distribution: SPE.distributions.BOX
       },
-      size: { value: 4 },
+      size: { value: 14 },
       drag: {
         value: 1
       },
@@ -80,8 +80,8 @@ export default class BulletEffect {
       blending: NormalBlending,
       maxParticleCount: 2000
     })
-    // particleGroup.addPool(20, this.shockWaveEffectSettings, false)
-    particleGroup.addPool(20, this.shockMistSettings, false)
+    particleGroup.addPool(20, this.shockWaveEffectSettings, false)
+    // particleGroup.addPool(20, this.shockMistSettings, false)
     this.groups[BulletEffect.EFFECT_SHOCK_WAVE] = particleGroup
     return this
   }

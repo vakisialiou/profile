@@ -18,7 +18,7 @@
     .enableItem(Loading.TYPE_MODEL, LoadingModels.MODEL_TOWER, true)
 
   export default {
-    name: 'ModelTowerPage',
+    name: 'UnitTowerPage',
     components: {
       WrapperView
     },
@@ -46,7 +46,7 @@
             .setVertexHelper()
             .render()
 
-          const towersMap = [ new Vector3(-120, 10, 120), new Vector3(120, 10, 120), new Vector3(120, 10, -120), new Vector3(-120, 10, -120) ]
+          const towersMap = [ new Vector3(-420, 10, 420), new Vector3(420, 10, 420), new Vector3(420, 10, -420), new Vector3(-420, 10, -420) ]
 
           for (let i = 0; i < towersMap.length; i++) {
             const EFFECT_TEXTURE = loader.getTexture(TEXTURE_SMOKE_PARTICLE)

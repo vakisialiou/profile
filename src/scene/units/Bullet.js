@@ -17,7 +17,7 @@ export default class Bullet extends Unit {
      *
      * @type {{damage: number, distance: number, speed: number}}
      */
-    this.options = { distance: 600, speed: 800, damage: 60 }
+    this.options = { distance: 1200, speed: 800, damage: 60 }
 
     /**
      *

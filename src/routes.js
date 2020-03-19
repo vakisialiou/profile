@@ -1,12 +1,8 @@
 import HomePage from './pages/HomePage'
 
-import GamePage from './pages/GamePage'
-import GameDemoPage from './pages/GamePage/pages/DemoPage'
-import GamePresentationPage from './pages/GamePage/pages/PresentationPage'
-
-import DebugPage from './pages/DebugPage'
-import ModelGroundPage from './pages/DebugPage/pages/ModelGroundPage'
-import ModelTowerPage from './pages/DebugPage/pages/ModelTowerPage'
+import UnitPage from './pages/UnitPage'
+import UnitGroundPage from './pages/UnitPage/pages/UnitGroundPage'
+import UnitTowerPage from './pages/UnitPage/pages/UnitTowerPage'
 
 export const routes = [
   {
@@ -17,47 +13,26 @@ export const routes = [
     keepAlive: true,
     types: ['horizontal', 'home']
   },
-  // {
-  //   path: '/game',
-  //   component: GamePage,
-  //   icon: null,
-  //   name: 'Game',
-  //   types: ['horizontal'],
-  //   children: [
-  //     {
-  //       path: '/game/demo',
-  //       component: GameDemoPage,
-  //       icon: 'plug',
-  //       name: 'Demo'
-  //     },
-  //     {
-  //       path: '/game/presentation',
-  //       component: GamePresentationPage,
-  //       icon: 'folder-fill',
-  //       name: 'Presentation'
-  //     },
-  //   ]
-  // },
   {
     path: '/debug',
-    component: DebugPage,
+    component: UnitPage,
     icon: null,
-    name: 'Debug',
+    name: 'Unit',
     types: ['horizontal'],
     children: [
       {
-        path: '/model/ground',
-        component: ModelGroundPage,
+        path: '/unit/ground',
+        component: UnitGroundPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Model Ground'
+        name: 'Unit Ground'
       },
       {
-        path: '/model/tower',
-        component: ModelTowerPage,
+        path: '/unit/tower',
+        component: UnitTowerPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Model Tower'
+        name: 'Unit Tower'
       },
     ]
   },
