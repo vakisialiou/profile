@@ -20,5 +20,20 @@ yarn build
 yarn lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Docker build
+```
+docker build . -t profile
+```
+
+### Docker run
+```
+docker run -d -p 8080:80 profile
+```
+
+### Docker stop running container
+```
+// list running containers
+docker ps
+// CONTAINER ID - your running container
+docker stop {CONTAINER ID}
+```
