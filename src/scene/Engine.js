@@ -536,8 +536,17 @@ class Engine {
   render(container) {
     this.renderer.preset()
     this.container = container
-    this.container.appendChild(this.stats.dom)
     this.container.appendChild(this.renderer.domElement)
+    return this
+  }
+
+  /**
+   *
+   * @param {Element} container
+   * @returns {Engine}
+   */
+  renderStats(container) {
+    container.appendChild(this.stats.dom)
     return this
   }
 

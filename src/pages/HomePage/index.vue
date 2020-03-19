@@ -1,5 +1,6 @@
 <script>
 import './index.css'
+import Carousel from './containers/Carousel'
 import WrapperView from '@components/WrapperView'
 import Engine from '@scene/Engine'
 import { Color, Vector3 } from 'three'
@@ -44,7 +45,8 @@ export default {
       const storm = new Storm(new Color(0x6A9EE6))
       const sky = new SkyBox(textures.get('sky-box-galaxy'))
 
-      sky.addParticle(new Planet(textures.get('planet-1')))
+      const planet = new Planet(textures.get('planet-1')).setPosition(new Vector3(- 200, - 300, 300))
+      sky.addParticle(planet)
       sky.addParticle(new Star(textures.get('star-1')).setScale(45).setPosition(new Vector3(600, 100, 200)))
       sky.addParticle(new Star(textures.get('star-2')).setScale(45).setPosition(new Vector3(600, 100, -600)))
       sky.addParticle(new Star(textures.get('star-3')).setScale(85).setPosition(new Vector3(300, -400, -900)))
@@ -54,12 +56,11 @@ export default {
       sky.addParticle(new Star(textures.get('star-7')).setScale(80).setPosition(new Vector3(-900, -200, 800)))
 
       const stormPosition = new Vector3(0, 0, 0)
-      const cameraPosition = new Vector3(-600, 0, 600)
+      const cameraPosition = new Vector3(0, 0, -600)
       engine.preset().then(() => {
         engine
-          .setDirLight()
-          .setHemiLight()
-          .setPointLight()
+          .setDirLight(cameraPosition)
+          .setPointLight(cameraPosition)
           .setCamera(cameraPosition, stormPosition)
           .enableAutoRotate(true)
           .enableMousePan(false)
@@ -72,9 +73,14 @@ export default {
         engine.scene.add(sky)
         engine.scene.add(storm)
         storm.position.copy(stormPosition)
+
+        let i = 0
         engine.updates.push((delta) => {
           storm.update(delta)
           sky.setPosition(engine.mapControls.target).update(delta)
+
+          engine.dirLight.position.copy(engine.camera.position)
+          engine.pointLight.position.copy(engine.camera.position)
         })
 
         engine.createOutline(storm.lightningsMeshes, new Color(0x6A9EE6))
@@ -83,7 +89,7 @@ export default {
     })
   },
   components: {
-    WrapperView
+    WrapperView, Carousel
   }
 }
 </script>
@@ -92,7 +98,7 @@ export default {
   <WrapperView :autofill="true">
     <WrapperView id="home-page-canvas" :autofill="true" />
     <WrapperView class="home-page-content" :autofill="true">
-      Home page
+      <Carousel />
     </WrapperView>
   </WrapperView>
 </template>

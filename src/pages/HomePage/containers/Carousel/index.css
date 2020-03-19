@@ -1,0 +1,29 @@
+#hp-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#hp-container-carousel {
+  width: 100%;
+  margin: 20px;
+}
+
+.hp-carousel-slide {
+  height: 500px;
+  background: transparent;
+}
+
+.hp-carousel-slide-content {
+  height: 350px;
+}
+
+.hp-carousel-slide-content svg {
+  fill: hsl(0, 0%, 100%);
+}
+
+.hp-carousel-slide-content svg path {
+  fill: none;
+  stroke: hsl(0, 0%, 93%);
+}

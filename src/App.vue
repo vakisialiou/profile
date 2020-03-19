@@ -7,7 +7,7 @@
   import { routes } from './routes'
   import {
     BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
-    BNavForm, BFormInput, BButton, BImg
+    BNavForm, BFormInput, BButton, BImg, BIcon
   } from 'bootstrap-vue'
 
   Vue.use(VueRouter)
@@ -31,7 +31,7 @@
     components: {
       HorizontalMenu,
       BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
-      BNavForm, BFormInput, BButton, BImg
+      BNavForm, BFormInput, BButton, BImg, BIcon
     }
   }
 </script>
@@ -52,10 +52,7 @@
 
         <!-- Right aligned nav items -->
         <BNavbarNav class="ml-auto">
-          <BNavForm>
-            <BFormInput size="sm" class="mr-sm-2" placeholder="Search" />
-            <BButton size="sm" class="my-2 my-sm-0" type="submit">Search</BButton>
-          </BNavForm>
+          <BIcon icon="info" variant="light" aria-hidden="true" />
         </BNavbarNav>
       </BCollapse>
     </BNavbar>

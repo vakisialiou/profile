@@ -17,27 +17,27 @@ export const routes = [
     keepAlive: true,
     types: ['horizontal', 'home']
   },
-  {
-    path: '/game',
-    component: GamePage,
-    icon: null,
-    name: 'Game',
-    types: ['horizontal'],
-    children: [
-      {
-        path: '/game/demo',
-        component: GameDemoPage,
-        icon: 'plug',
-        name: 'Demo'
-      },
-      {
-        path: '/game/presentation',
-        component: GamePresentationPage,
-        icon: 'folder-fill',
-        name: 'Presentation'
-      },
-    ]
-  },
+  // {
+  //   path: '/game',
+  //   component: GamePage,
+  //   icon: null,
+  //   name: 'Game',
+  //   types: ['horizontal'],
+  //   children: [
+  //     {
+  //       path: '/game/demo',
+  //       component: GameDemoPage,
+  //       icon: 'plug',
+  //       name: 'Demo'
+  //     },
+  //     {
+  //       path: '/game/presentation',
+  //       component: GamePresentationPage,
+  //       icon: 'folder-fill',
+  //       name: 'Presentation'
+  //     },
+  //   ]
+  // },
   {
     path: '/debug',
     component: DebugPage,
@@ -48,14 +48,14 @@ export const routes = [
       {
         path: '/model/ground',
         component: ModelGroundPage,
-        icon: 'plug',
+        icon: 'folder',
         keepAlive: true,
         name: 'Model Ground'
       },
       {
         path: '/model/tower',
         component: ModelTowerPage,
-        icon: 'plug',
+        icon: 'folder',
         keepAlive: true,
         name: 'Model Tower'
       },
