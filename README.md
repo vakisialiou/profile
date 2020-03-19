@@ -1,4 +1,4 @@
-# lesson_1.bot
+# profile
 
 ## Project setup
 ```
