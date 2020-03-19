@@ -41,19 +41,19 @@ export default {
   },
   mounted() {
     engine = Engine.create('home-page-canvas')
-    textures.presetTextures().then(() => {
+    textures.preset().then(() => {
       const storm = new Storm(new Color(0x6A9EE6))
-      const sky = new SkyBox(textures.get('sky-box-galaxy'))
+      const sky = new SkyBox(textures.getTexture('sky-box-galaxy'))
 
-      const planet = new Planet(textures.get('planet-1')).setPosition(new Vector3(- 200, - 300, 300))
+      const planet = new Planet(textures.getTexture('planet-1')).setPosition(new Vector3(- 200, - 300, 300))
       sky.addParticle(planet)
-      sky.addParticle(new Star(textures.get('star-1')).setScale(45).setPosition(new Vector3(600, 100, 200)))
-      sky.addParticle(new Star(textures.get('star-2')).setScale(45).setPosition(new Vector3(600, 100, -600)))
-      sky.addParticle(new Star(textures.get('star-3')).setScale(85).setPosition(new Vector3(300, -400, -900)))
-      sky.addParticle(new Star(textures.get('star-4')).setScale(65).setPosition(new Vector3(-300, 200, -900)))
-      sky.addParticle(new Star(textures.get('star-5')).setScale(75).setPosition(new Vector3(-700, 300, 700)))
-      sky.addParticle(new Star(textures.get('star-6')).setScale(400).setPosition(new Vector3(-200, -100, -900)))
-      sky.addParticle(new Star(textures.get('star-7')).setScale(80).setPosition(new Vector3(-900, -200, 800)))
+      sky.addParticle(new Star(textures.getTexture('star-1')).setScale(45).setPosition(new Vector3(600, 100, 200)))
+      sky.addParticle(new Star(textures.getTexture('star-2')).setScale(45).setPosition(new Vector3(600, 100, -600)))
+      sky.addParticle(new Star(textures.getTexture('star-3')).setScale(85).setPosition(new Vector3(300, -400, -900)))
+      sky.addParticle(new Star(textures.getTexture('star-4')).setScale(65).setPosition(new Vector3(-300, 200, -900)))
+      sky.addParticle(new Star(textures.getTexture('star-5')).setScale(75).setPosition(new Vector3(-700, 300, 700)))
+      sky.addParticle(new Star(textures.getTexture('star-6')).setScale(400).setPosition(new Vector3(-200, -100, -900)))
+      sky.addParticle(new Star(textures.getTexture('star-7')).setScale(80).setPosition(new Vector3(-900, -200, 800)))
 
       const stormPosition = new Vector3(0, 0, 0)
       const cameraPosition = new Vector3(0, 0, -600)

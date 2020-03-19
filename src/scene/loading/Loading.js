@@ -1,23 +1,19 @@
 import LoadingTextures from '@scene/loading/LoadingTextures'
 import LoadingModels from '@scene/loading/LoadingModels'
+import LoadingAudio from '@scene/loading/LoadingAudio'
 
 export default class Loading {
   constructor() {
-    /**
-     *
-     * @type {LoadingTextures}
-     */
-    this.loadingTextures = new LoadingTextures()
-
-    /**
-     *
-     * @type {LoadingModels}
-     */
-    this.loadingModels = new LoadingModels()
+    this.loaders = {
+      [Loading.TYPE_TEXTURE]: new LoadingTextures(),
+      [Loading.TYPE_MODEL]: new LoadingModels(),
+      [Loading.TYPE_AUDIO]: new LoadingAudio()
+    }
   }
 
   static TYPE_TEXTURE = 'texture'
   static TYPE_MODEL = 'model'
+  static TYPE_AUDIO = 'audio'
 
   /**
    *
@@ -27,13 +23,11 @@ export default class Loading {
    * @returns {Loading}
    */
   enableItem(type, name, value = true) {
-    switch (type) {
-      case Loading.TYPE_TEXTURE:
-        this.loadingTextures.enableItem(name, value)
-        break
-      case Loading.TYPE_MODEL:
-        this.loadingModels.enableItem(name, value)
+    const loader = this.loaders[type]
+    if (!loader) {
+      throw new Error('Unknown type loading.')
     }
+    loader.enableItem(name, value)
     return this
   }
 
@@ -44,13 +38,11 @@ export default class Loading {
    * @returns {Loading}
    */
   setItems(type, items) {
-    switch (type) {
-      case Loading.TYPE_TEXTURE:
-        this.loadingTextures.setItems(items)
-        break
-      case Loading.TYPE_MODEL:
-        this.loadingModels.setItems(items)
+    const loader = this.loaders[type]
+    if (!loader) {
+      throw new Error('Unknown type loading.')
     }
+    loader.setItems(items)
     return this
   }
 
@@ -63,13 +55,11 @@ export default class Loading {
    * @returns {Loading}
    */
   addItem(type, name, path, enabled = true) {
-    switch (type) {
-      case Loading.TYPE_TEXTURE:
-        this.loadingTextures.addItem(name, path, enabled)
-        break
-      case Loading.TYPE_MODEL:
-        this.loadingModels.addItem(name, path, enabled)
+    const loader = this.loaders[type]
+    if (!loader) {
+      throw new Error('Unknown type loading.')
     }
+    loader.addItem(name, path, enabled)
     return this
   }
 
@@ -78,8 +68,13 @@ export default class Loading {
    * @returns {Promise<void>}
    */
   async preset() {
-    await this.loadingTextures.presetTextures()
-    await this.loadingModels.presetModels()
+    for (const type in this.loaders) {
+      if (!this.loaders.hasOwnProperty(type)) {
+        continue
+      }
+      const loader = this.loaders[type]
+      await loader.preset()
+    }
   }
 
   /**
@@ -88,7 +83,8 @@ export default class Loading {
    * @returns {RawModel}
    */
   getRawModel(name) {
-    return this.loadingModels.getRawModel(name)
+    const loader = this.loaders[Loading.TYPE_MODEL]
+    return loader.getRawModel(name)
   }
 
   /**
@@ -97,6 +93,17 @@ export default class Loading {
    * @returns {Texture}
    */
   getTexture(name) {
-    return this.loadingTextures.get(name)
+    const loader = this.loaders[Loading.TYPE_TEXTURE]
+    return loader.getTexture(name)
+  }
+
+  /**
+   *
+   * @param {string} name
+   * @returns {AudioBuffer}
+   */
+  getAudioBuffer(name) {
+    const loader = this.loaders[Loading.TYPE_AUDIO]
+    return loader.getAudioBuffer(name)
   }
 }

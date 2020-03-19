@@ -92,6 +92,29 @@ export default class Tower extends Unit {
     this.mathWeaponHinge = new MathObject(this.weaponHinge)
   }
 
+  // /**
+  //  *
+  //  * @param {PositionalAudio} audio
+  //  * @returns {Tower}
+  //  */
+  // setShotAudio(audio) {
+  //   this.audioShot = audio
+  //   this.add(audio)
+  //   return this
+  // }
+  //
+  // /**
+  //  *
+  //  * @returns {Tower}
+  //  */
+  // playShotAudio() {
+  //   if (this.audioShot && !this.audioShot.isPlaying) {
+  //     this.audioShot.setVolume(50)
+  //     this.audioShot.play()
+  //   }
+  //   return this
+  // }
+
   static EVENT_ADD_BULLET = 'EVENT_ADD_BULLET'
 
   /**

@@ -248,6 +248,21 @@ class Engine {
 
   /**
    *
+   * @param {Array.<string>} categories
+   * @returns {Array.<(Mesh|Group|Object3D|Unit)>}
+   */
+  getUnits(categories) {
+    let units = []
+    for (const category of categories) {
+      if (this.units.hasOwnProperty(category)) {
+        units = units.concat(this.units[category])
+      }
+    }
+    return units
+  }
+
+  /**
+   *
    * @param {(Object3D|Mesh|Group|Unit)} mesh
    * @returns {Engine}
    */

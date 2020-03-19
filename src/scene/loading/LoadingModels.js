@@ -1,143 +1,11 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import objectPath from 'object-path'
 import { cloneGltf } from './clone-gltf'
+import LoadingItems from './LoadingItems'
 
-export default class LoadingModels {
+export default class LoadingModels extends LoadingItems {
   constructor() {
-
-    /**
-     *
-     * @type {Array}
-     */
-    this.items = [
-      {
-        name: LoadingModels.MODEL_BOT,
-        path: '/models/bot/bot.glb',
-        enabled: false,
-      },
-      {
-        name: LoadingModels.MODEL_BASE,
-        path: '/models/base/base.glb',
-        enabled: false,
-      },
-      {
-        name: LoadingModels.MODEL_TOWER,
-        path: '/models/tower/tower.glb',
-        enabled: false,
-      },
-      {
-        name: LoadingModels.MODEL_GROUND,
-        path: '/models/ground/ground.glb',
-        enabled: false,
-      },
-    ]
-
-    /**
-     *
-     * @type {Object}
-     */
-    this.loadedItems = {}
-
-    /**
-     *
-     * @type {GLTFLoader}
-     */
-    this.loader = new GLTFLoader()
-  }
-
-  /**
-   *
-   * @type {string}
-   */
-  static MODEL_BOT = 'bot'
-
-  /**
-   *
-   * @type {string}
-   */
-  static MODEL_BASE = 'base'
-
-  /**
-   *
-   * @type {string}
-   */
-  static MODEL_TOWER = 'tower'
-
-  /**
-   *
-   * @type {string}
-   */
-  static MODEL_GROUND = 'ground'
-
-  /**
-   *
-   * @param {string} name
-   * @param {boolean} [value]
-   * @returns {LoadingModels}
-   */
-  enableItem(name, value = true) {
-    for (const item of this.items) {
-      if (item.name === name) {
-        item.enabled = value
-        break
-      }
-    }
-    return this
-  }
-
-  /**
-   *
-   * @param {Array.<{name: string, path: string, [enabled]: boolean}>} items
-   * @returns {LoadingModels}
-   */
-  setItems(items) {
-    for (const item of items) {
-       if (item.enabled === undefined) {
-         item.enabled = true
-       }
-       this.addItem(item.name, item.path, item.enabled)
-    }
-    return this
-  }
-
-  /**
-   *
-   * @param {string} name
-   * @param {string} path
-   * @param {boolean} [enabled]
-   * @returns {LoadingModels}
-   */
-  addItem(name, path, enabled = true) {
-    this.items.push({ name, path, enabled })
-    return this
-  }
-
-  /**
-   *
-   * @returns {Promise<Object>}
-   */
-  async load(path) {
-    return new Promise((resolve, reject) => {
-      this.loader.load(path, resolve, null, reject)
-    })
-  }
-
-  /**
-   *
-   * @returns {Promise<Object>}
-   */
-  async presetModels() {
-    for (const item of this.items) {
-      if (!item.enabled) {
-        continue
-      }
-      try {
-        this.loadedItems[item.name] = await this.load(item.path)
-      } catch (e) {
-        throw new Error(`Can not load model "${item.name}:${item.path}". Look at "LoadingModels"`)
-      }
-    }
-    return this.loadedItems
+    super(GLTFLoader)
   }
 
   /**
@@ -152,7 +20,8 @@ export default class LoadingModels {
    * @returns {RawModel}
    */
   getRawModel(name) {
-    const gltf = cloneGltf(this.loadedItems[name])
+    const item = this.getItem(name)
+    const gltf = cloneGltf(item)
     const obj = objectPath.get(gltf, ['scene', 'children', 0], null)
     const animations = objectPath.get(gltf, ['animations'], [])
     if (!obj) {
