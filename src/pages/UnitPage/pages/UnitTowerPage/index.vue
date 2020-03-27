@@ -34,7 +34,6 @@
           const cameraPosition = new Vector3(-600, 0, 600)
 
           const ground = new Ground()
-            .setGridHelper()
             .setClickHelper()
             .setVertexHelper()
             .render()
