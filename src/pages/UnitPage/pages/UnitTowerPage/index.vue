@@ -2,13 +2,15 @@
   import WrapperView from '@components/WrapperView'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
-  import Ground from '@scene/objects/Ground'
   import { Vector3 } from 'three'
-  import { loading, ControllerTower } from '@scene/controllers/ControllerTower'
+  import { loading as loadingTower, ControllerTower } from '@scene/controllers/ControllerTower'
+  import { loading as loadingGround, ControllerGround } from '@scene/controllers/ControllerGround'
 
   let engine = null
 
-  const loader = new Loading().addLoading(loading)
+  const loader = new Loading()
+    .addLoading(loadingTower)
+    .addLoading(loadingGround)
 
   export default {
     name: 'UnitTowerPage',
@@ -26,6 +28,7 @@
     },
     mounted() {
       engine = Engine.create('model-tower-page-canvas')
+      const container = document.getElementById('model-tower-page-canvas')
 
       loader.preset().then(() => {
         engine.preset().then(() => {
@@ -33,10 +36,8 @@
           const cameraLookAt = new Vector3(0, 0, 0)
           const cameraPosition = new Vector3(-600, 0, 600)
 
-          const ground = new Ground()
-            .setClickHelper()
-            .setVertexHelper()
-            .render()
+          const ground = new ControllerGround(loader)
+            .preset(engine, container.offsetTop, container.offsetLeft)
 
           const towersMap = [ new Vector3(-420, 0, 420), new Vector3(420, 0, 420), new Vector3(420, 0, -420), new Vector3(-420, 0, -420) ]
 
@@ -45,8 +46,7 @@
             tower.setPosition(towersMap[i])
             tower.preset(engine, [ ground.clickHelperMesh ])
 
-            engine.addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
-              ground.mouseUpdate(event, engine.camera)
+            ground.onMouseDown(() => {
               tower.setTarget(ground.clickHelperMesh)
             })
           }
@@ -56,16 +56,10 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround({ size: [ground.options.width, 1, ground.options.height] })
-            .add('ground', ground)
-            .render(document.getElementById('model-tower-page-canvas'))
+            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
+            .render(container)
             .registerEvents()
             .animate()
-
-          engine.addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-          })
         })
       })
     },
