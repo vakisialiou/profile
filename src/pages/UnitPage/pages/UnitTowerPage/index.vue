@@ -55,7 +55,6 @@
             .setDirLight(lightPosition)
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
-            .setAxesHelper()
             .setCamera(cameraPosition, cameraLookAt)
             .setPhysicsGround({ size: [ground.options.width, 1, ground.options.height] })
             .add('ground', ground)
