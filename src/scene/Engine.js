@@ -1,4 +1,15 @@
-import { Fog, Color, Clock, Scene, PerspectiveCamera, Vector3, MOUSE, Math as _Math } from 'three'
+import {
+  Fog,
+  Color,
+  Clock,
+  Scene,
+  PerspectiveCamera,
+  Vector3,
+  MOUSE,
+  Math as _Math,
+  AudioListener,
+  PositionalAudio,
+} from 'three'
 import { HemisphereLight, DirectionalLight, PointLight } from 'three'
 import { HemisphereLightHelper, DirectionalLightHelper, PointLightHelper, GridHelper, AxesHelper } from 'three'
 import { EventDispatcher } from 'three'
@@ -151,6 +162,12 @@ class Engine {
      * @type {EventDispatcher}
      */
     this.events = new EventDispatcher()
+
+    /**
+     *
+     * @type {AudioListener}
+     */
+    this.audioListener = new AudioListener()
   }
 
   /**
@@ -195,6 +212,16 @@ class Engine {
 
   /**
    *
+   * @param {AudioBuffer} audioBuffer
+   */
+  createPositionalAudio(audioBuffer) {
+    const audio = new PositionalAudio(this.audioListener)
+    audio.setBuffer(audioBuffer)
+    return audio
+  }
+
+  /**
+   *
    * @returns {Promise}
    */
   preset() {
@@ -214,6 +241,7 @@ class Engine {
   }
 
   /**
+   * Add element to scene and distribute to different category to quick search.
    *
    * @param {string} category
    * @param {(Mesh|Group|Object3D|Unit)} mesh
@@ -314,7 +342,7 @@ class Engine {
    * @returns {Engine}
    */
   enableMousePan(value = true, speed = 1.0) {
-    this.mapControls.enablePan = false
+    this.mapControls.enablePan = value
     this.mapControls.panSpeed = speed
     return this
   }
@@ -508,7 +536,7 @@ class Engine {
    * @param {KeyboardEvent} event
    * @private
    */
-  _boardKeyUp(event) {
+  _boardKeyUp() {
     this.register.activeKeyCode = null
   }
 
@@ -563,6 +591,7 @@ class Engine {
     this.renderer.preset()
     this.container = container
     this.container.appendChild(this.renderer.domElement)
+    this.camera.add(this.audioListener)
     return this
   }
 
@@ -599,11 +628,6 @@ class Engine {
     }
 
     this.physicsWorld.step()
-    const units = this.units[Engine.CATEGORY_PHYSICS] || []
-    for (const unit of units) {
-      unit.update(delta)
-    }
-
     this.mapControls.update()
     for (const updateCallback of this.updates) {
       updateCallback(delta)

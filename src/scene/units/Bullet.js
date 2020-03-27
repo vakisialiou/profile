@@ -1,4 +1,4 @@
-import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3, Color, TextureLoader, AdditiveBlending } from 'three'
+import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3 } from 'three'
 import Unit from './Unit'
 
 const geometry = new SphereGeometry(0.6)
@@ -7,10 +7,8 @@ const material = new MeshBasicMaterial({ color: 0xFF0000 })
 export default class Bullet extends Unit {
   /**
    *
-   * @param {Vector3} position
-   * @param {Vector3} direction
    */
-  constructor(position, direction) {
+  constructor() {
     super({ model: new Mesh(geometry, material), animations: [] })
 
     /**
@@ -23,20 +21,19 @@ export default class Bullet extends Unit {
      *
      * @type {Vector3}
      */
-    this.direction = new Vector3().copy(direction)
+    this.direction = new Vector3()
 
     /**
      *
      * @type {Vector3}
      */
-    this.prevPosition = new Vector3().copy(position)
+    this.prevPosition = new Vector3()
 
     /**
      *
      * @type {Vector3}
      */
-    this.startPosition = new Vector3().copy(position)
-    this.position.copy(position)
+    this.startPosition = new Vector3()
 
     /**
      *
@@ -55,6 +52,28 @@ export default class Bullet extends Unit {
      * @type {(Object3D|Mesh|Group)[]}
      */
     this.collisionObjects = []
+  }
+
+  /**
+   *
+   * @param {Vector3} direction
+   * @returns {Bullet}
+   */
+  setDirection(direction) {
+    this.direction.copy(direction)
+    return this
+  }
+
+  /**
+   *
+   * @param {Vector3} position
+   * @returns {Bullet}
+   */
+  setPosition(position) {
+    this.prevPosition.copy(position)
+    this.startPosition.copy(position)
+    super.setPosition(position)
+    return this
   }
 
   /**

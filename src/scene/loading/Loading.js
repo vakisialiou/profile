@@ -17,6 +17,25 @@ export default class Loading {
 
   /**
    *
+   * @param {Loading} loading
+   * @returns {Loading}
+   */
+  addLoading(loading) {
+    if (! (loading instanceof Loading)) {
+      throw new Error('First argument is not correct. Loading.addLoading')
+    }
+    for (const type in loading.loaders) {
+      if (!loading.loaders.hasOwnProperty(type)) {
+        continue
+      }
+      this.setItems(type, loading.loaders[type]['items'])
+    }
+
+    return this
+  }
+
+  /**
+   *
    * @param {string} type
    * @param {string} name
    * @param {boolean} [value]

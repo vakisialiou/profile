@@ -2,25 +2,13 @@
   import WrapperView from '@components/WrapperView'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
-  import Bullet from '@scene/units/Bullet'
-  import Tower from '@scene/units/Tower'
-  import TowerEffect from '@scene/effects/TowerEffect'
-  import BulletEffect from '@scene/effects/BulletEffect'
   import Ground from '@scene/objects/Ground'
-  import { Vector3, AudioListener, PositionalAudio } from 'three'
+  import { Vector3 } from 'three'
+  import { loading, ControllerTower } from '@scene/controllers/ControllerTower'
 
   let engine = null
 
-  const MODEL_TOWER = 'MODEL_TOWER'
-  const AUDIO_TOWER_SHOT = 'AUDIO_TOWER_SHOT'
-  const AUDIO_BULLET_COLLISION = 'AUDIO_BULLET_COLLISION'
-  const TEXTURE_SMOKE_PARTICLE = 'TEXTURE_SMOKE_PARTICLE'
-
-  const loader = new Loading()
-    .addItem(Loading.TYPE_MODEL, MODEL_TOWER, '/models/tower/tower.glb')
-    .addItem(Loading.TYPE_AUDIO, AUDIO_TOWER_SHOT, '/mp3/tower-shot.mp3')
-    .addItem(Loading.TYPE_AUDIO, AUDIO_BULLET_COLLISION, '/mp3/bullet-collision.mp3')
-    .addItem(Loading.TYPE_TEXTURE, TEXTURE_SMOKE_PARTICLE, '/images/spe/smokeparticle.png')
+  const loader = new Loading().addLoading(loading)
 
   export default {
     name: 'UnitTowerPage',
@@ -51,70 +39,12 @@
             .setVertexHelper()
             .render()
 
-          const listener = new AudioListener()
-          engine.camera.add(listener)
-
-          const towersMap = [ new Vector3(-420, 10, 420), new Vector3(420, 10, 420), new Vector3(420, 10, -420), new Vector3(-420, 10, -420) ]
+          const towersMap = [ new Vector3(-420, 0, 420), new Vector3(420, 0, 420), new Vector3(420, 0, -420), new Vector3(-420, 0, -420) ]
 
           for (let i = 0; i < towersMap.length; i++) {
-            const EFFECT_TEXTURE = loader.getTexture(TEXTURE_SMOKE_PARTICLE)
-            const towerEffect = new TowerEffect().createShootEffect(EFFECT_TEXTURE)
-
-            const rawModelTower = loader.getRawModel(MODEL_TOWER)
-            const tower = new Tower(rawModelTower)
-              .setScale(20)
-              .setPosition(towersMap[i])
-              .setRigidBody(engine.physicsWorld)
-              .showRigidBodyHelper()
-
-            const bulletEffect = new BulletEffect().createShockWaveEffect(EFFECT_TEXTURE)
-
-            engine
-              .add('tower', tower) // Добавить на сцену баню.
-              .add('tower-effect', towerEffect.getShootEffectMesh()) // Добавить на сцену эффекты
-              .add('bullet-effect', bulletEffect.getShockWaveMesh()) // Добавить на сцену эффекты
-
-            const towerShotAudio = new PositionalAudio(listener)
-            towerShotAudio.setBuffer(loader.getAudioBuffer(AUDIO_TOWER_SHOT))
-            tower.add(towerShotAudio)
-
-            tower.addEventListener(Tower.EVENT_ADD_BULLET, (event) => {
-              const direction = event.gunOptions.model.getWorldDirection(new Vector3()).multiplyScalar(-1)
-              const position = event.gunOptions.model.getWorldPosition(new Vector3())
-              const bullet = new Bullet(position, direction)
-              bullet.setCollisionObjects([ ground.clickHelperMesh ])
-              bullet.addEventListener(Bullet.EVENT_DESTROY, () => engine.remove(bullet))
-
-              const bulletCollisionAudio = new PositionalAudio(listener)
-              bulletCollisionAudio.setBuffer(loader.getAudioBuffer(AUDIO_BULLET_COLLISION))
-              bullet.add(bulletCollisionAudio)
-
-              bullet.addEventListener(Bullet.EVENT_COLLISION, () => {
-                // Провацировать эффек взрывной волны.
-                bulletEffect.emmitShockWaveEffect(bullet.position)
-                engine.remove(bullet)
-                // Добавить звук попадания
-                if (!bulletCollisionAudio.isPlaying) {
-                  bulletCollisionAudio.setVolume(50)
-                  bulletCollisionAudio.play()
-                }
-              })
-
-              engine.add('tower-bullet', bullet) // Добавить на сцену снаряд
-              // Провацировать эффек выстрела.
-              towerEffect.emmitShootEffect(bullet.position)
-
-              // Добавить звук выстрела
-              if (!towerShotAudio.isPlaying) {
-                towerShotAudio.setVolume(50)
-                towerShotAudio.play()
-              }
-            })
-
-            engine.updates.push((delta) => {
-              towerEffect.update(delta)
-              bulletEffect.update(delta)
-            })
+            const tower = new ControllerTower(loader)
+            tower.setPosition(towersMap[i])
+            tower.preset(engine, [ ground.clickHelperMesh ])
 
             engine.addEventListener(Engine.EVENT_MOUSE_DOWN, ({ event }) => {
               ground.mouseUpdate(event, engine.camera)
