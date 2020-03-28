@@ -6,7 +6,7 @@ const AUDIO_BULLET_COLLISION = 'BULLET_AUDIO_BULLET_COLLISION'
 const TEXTURE_SMOKE_PARTICLE = 'BULLET_TEXTURE_SMOKE_PARTICLE'
 
 export const loading = new Loading()
-  .addItem(Loading.TYPE_AUDIO, AUDIO_BULLET_COLLISION, '/mp3/bullet-collision.mp3')
+  .addItem(Loading.TYPE_AUDIO, AUDIO_BULLET_COLLISION, '/mp3/collision-1.mp3')
   .addItem(Loading.TYPE_TEXTURE, TEXTURE_SMOKE_PARTICLE, '/images/spe/smokeparticle.png')
 
 export class ControllerBullet {

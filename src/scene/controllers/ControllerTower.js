@@ -11,7 +11,7 @@ const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
 
 export const loading = new Loading()
   .addItem(Loading.TYPE_MODEL, MODEL_TOWER, '/models/tower/tower.glb')
-  .addItem(Loading.TYPE_AUDIO, AUDIO_TOWER_SHOT, '/mp3/tower-shot.mp3')
+  .addItem(Loading.TYPE_AUDIO, AUDIO_TOWER_SHOT, '/mp3/shot-1.mp3')
   .addItem(Loading.TYPE_TEXTURE, TEXTURE_SMOKE_PARTICLE, '/images/spe/smokeparticle.png')
   .addLoading(loadingBullet)
 
