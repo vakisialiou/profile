@@ -27,7 +27,9 @@ export class ControllerTower {
      *
      * @type {TowerEffect}
      */
-    this.towerEffect = new TowerEffect().createShootEffect(this.loader.getTexture(TEXTURE_SMOKE_PARTICLE))
+    this.towerEffect = new TowerEffect()
+      .createShotEffect(this.loader.getTexture(TEXTURE_SMOKE_PARTICLE))
+      .createMistEffect(this.loader.getTexture(TEXTURE_SMOKE_PARTICLE))
 
     /**
      *
@@ -45,7 +47,8 @@ export class ControllerTower {
   preset(engine, collisionObjects = []) {
     engine
       .add('tower', this.tower) // Добавить на сцену башню.
-      .add('tower-effect', this.towerEffect.getShootEffectMesh()) // Добавить на сцену эффекты
+      .add('tower-effect', this.towerEffect.getShotMesh()) // Добавить на сцену эффекты
+      .add('tower-effect', this.towerEffect.getMistMesh()) // Добавить на сцену эффекты
 
     const towerShotAudio = engine.createPositionalAudio(this.loader.getAudioBuffer(AUDIO_TOWER_SHOT))
     this.tower.add(towerShotAudio)
@@ -55,7 +58,8 @@ export class ControllerTower {
       const position = event.gunOptions.model.getWorldPosition(new Vector3())
 
       // Провацировать эффек выстрела.
-      this.towerEffect.emmitShootEffect(position)
+      this.towerEffect.emmitShotEffect(position)
+      this.towerEffect.emmitMistEffect(position)
 
       new ControllerBullet(this.loader)
         .setPosition(position)

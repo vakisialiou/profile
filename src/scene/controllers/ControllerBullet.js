@@ -27,6 +27,7 @@ export class ControllerBullet {
      */
     this.bulletEffect = new BulletEffect()
       .createShockWaveEffect(loader.getTexture(TEXTURE_SMOKE_PARTICLE))
+      .createMistEffect(loader.getTexture(TEXTURE_SMOKE_PARTICLE))
 
     /**
      *
@@ -50,11 +51,13 @@ export class ControllerBullet {
     this.bullet.addEventListener(Bullet.EVENT_COLLISION, () => {
       // Провацировать эффек взрывной волны.
       this.bulletEffect.emmitShockWaveEffect(this.bullet.position)
+      // Провацировать дыма.
+      this.bulletEffect.emmitMistEffect(this.bullet.position)
       // Удалить снаряд, он уже не нужен.
       engine.remove(this.bullet)
       // Добавить звук попадания
       if (!bulletCollisionAudio.isPlaying) {
-        bulletCollisionAudio.setVolume(100)
+        bulletCollisionAudio.setVolume(60)
         bulletCollisionAudio.play()
       }
     })
@@ -62,6 +65,7 @@ export class ControllerBullet {
     engine
       .add('bullet', this.bullet)
       .add('bullet-effect', this.bulletEffect.getShockWaveMesh())
+      .add('bullet-effect', this.bulletEffect.getMistMesh())
 
     engine.updates.push((delta) => {
       this.bullet.update(delta)
