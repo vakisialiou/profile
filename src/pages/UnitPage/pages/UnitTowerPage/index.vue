@@ -58,6 +58,7 @@
             .setCamera(cameraPosition, cameraLookAt)
             .setPhysicsGround({ size: [ground.width, 1, ground.height] })
             .render(container)
+            .renderStats(container)
             .registerEvents()
             .animate()
         })
