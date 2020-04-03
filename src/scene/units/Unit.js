@@ -1,4 +1,4 @@
-import { Object3D, Group, Mesh, Box3, Box3Helper, Vector3 } from 'three'
+import { Object3D, Box3, Box3Helper, Vector3 } from 'three'
 import UnitAnimation from './../animations/UnitAnimation'
 
 export default class Unit extends Object3D {
@@ -9,7 +9,11 @@ export default class Unit extends Object3D {
      * @type {Mesh|Group}
      */
     this.model = rawModel.model
-    this.model.material.metalness = 0
+
+    if (this.model.hasOwnProperty('material')) {
+      this.model.material.metalness = 0
+    }
+
     this.add(this.model)
 
     /**
