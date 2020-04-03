@@ -38,7 +38,7 @@ export default class BulletEffect {
       opacity: { value: [0.4, 0] }
     }
 
-    this.shockMistSettings = {
+    this.mistEffectSettings = {
       particleCount: 1,
       position: {
         distribution: SPE.distributions.SPHERE
@@ -63,10 +63,30 @@ export default class BulletEffect {
       opacity: { value: [0, 0.2, 0.1, 0] }
     }
 
+    this.traceEffectSettings = {
+      particleCount: 100,
+      maxAge: {
+        value: 2.5,
+        spread: 0
+      },
+      alive: true,
+      size: {
+        value: [60, 10, 0],
+      },
+      color: {
+        value: [
+          new Color( 1, 1, 1 ),
+        ],
+      },
+      opacity: { value: [0, 0, 0.1, 0.2, 0.1, 0] }
+    }
+
     this.groups = {}
+    this.emitters = {}
   }
 
   static EFFECT_SHOCK_WAVE = 'EFFECT_SHOCK_WAVE'
+  static EFFECT_TRACE = 'EFFECT_TRACE'
   static EFFECT_MIST = 'EFFECT_MIST'
 
   /**
@@ -108,8 +128,33 @@ export default class BulletEffect {
       maxParticleCount: 2000
     })
 
-    particleGroup.addPool(1, this.shockMistSettings, false)
+    particleGroup.addPool(1, this.mistEffectSettings, false)
     this.groups[BulletEffect.EFFECT_MIST] = particleGroup
+
+    return this
+  }
+
+  /**
+   *
+   * @param {Texture} texture
+   * @returns {BulletEffect}
+   */
+  createTraceEffect(texture) {
+    if (this.groups.hasOwnProperty(BulletEffect.EFFECT_TRACE)) {
+      throw new Error(`Effect '${BulletEffect.EFFECT_TRACE}' has already created in BulletEffect`)
+    }
+    const particleGroup = new SPE.Group({
+      texture: { value: texture },
+      depthTest: false,
+      depthWrite: true,
+      blending: NormalBlending,
+      maxParticleCount: 2000
+    })
+
+    const emitter = new SPE.Emitter(this.traceEffectSettings)
+    particleGroup.addEmitter(emitter)
+    this.groups[BulletEffect.EFFECT_TRACE] = particleGroup
+    this.emitters[BulletEffect.EFFECT_TRACE] = emitter
 
     return this
   }
@@ -120,7 +165,7 @@ export default class BulletEffect {
    * @returns {BulletEffect}
    */
   emmitShockWaveEffect(position) {
-    this._emmitEffect(BulletEffect.EFFECT_SHOCK_WAVE, position)
+    this._getGroup(BulletEffect.EFFECT_SHOCK_WAVE).triggerPoolEmitter(1, position)
     return this
   }
 
@@ -130,7 +175,30 @@ export default class BulletEffect {
    * @returns {BulletEffect}
    */
   emmitMistEffect(position) {
-    this._emmitEffect(BulletEffect.EFFECT_MIST, position)
+    this._getGroup(BulletEffect.EFFECT_MIST).triggerPoolEmitter(1, position)
+    return this
+  }
+
+  /**
+   *
+   * @param {Vector3} position
+   * @returns {BulletEffect}
+   */
+  emmitTraceEffect(position) {
+    const emitter = this.emitters[BulletEffect.EFFECT_TRACE]
+    emitter.position.value.copy(position)
+    emitter.position.value = emitter.position.value
+    return this
+  }
+
+  /**
+   *
+   * @returns {BulletEffect}
+   */
+  stopTraceEffect() {
+    const emitter = this.emitters[BulletEffect.EFFECT_TRACE]
+    emitter.duration = 0
+    emitter.duration = emitter.duration
     return this
   }
 
@@ -154,6 +222,15 @@ export default class BulletEffect {
 
   /**
    *
+   * @returns {Mesh}
+   */
+  getTraceMesh() {
+    const particleGroup = this._getGroup(BulletEffect.EFFECT_TRACE)
+    return particleGroup['mesh']
+  }
+
+  /**
+   *
    * @param {number} delta
    * @returns {BulletEffect}
    */
@@ -171,23 +248,12 @@ export default class BulletEffect {
   /**
    *
    * @param {string} type
-   * @param {Vector3} position
-   * @returns {BulletEffect}
-   */
-  _emmitEffect(type, position) {
-    this._getGroup(type).triggerPoolEmitter(1, position)
-    return this
-  }
-
-  /**
-   *
-   * @param {string} type
    * @returns {SPE.Group}
    * @private
    */
   _getGroup(type) {
     if (!this.groups.hasOwnProperty(type)) {
-      throw Error(`Unknown group ${type}. Before emmit effect you must create it. Look at BulletEffect._emmitEffect`)
+      throw Error(`Unknown group ${type}. Before emmit effect you must create it. Look at BulletEffect._emmitGroup`)
     }
     return this.groups[type]
   }

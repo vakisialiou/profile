@@ -78,7 +78,7 @@ export default class TowerEffect {
       maxParticleCount: 2000
     })
 
-    particleGroup.addPool(1, this.shotEffectSettings, false)
+    particleGroup.addPool(10, this.shotEffectSettings, false)
     this.groups[TowerEffect.EFFECT_SHOT] = particleGroup
     return this
   }
@@ -100,7 +100,7 @@ export default class TowerEffect {
       maxParticleCount: 2000
     })
 
-    particleGroup.addPool(1, this.shockMistSettings, false)
+    particleGroup.addPool(10, this.shockMistSettings, false)
     this.groups[TowerEffect.EFFECT_MIST] = particleGroup
 
     return this
