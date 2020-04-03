@@ -85,7 +85,8 @@ export default class BulletEffect {
       blending: NormalBlending,
       maxParticleCount: 2000
     })
-    particleGroup.addPool(20, this.shockWaveEffectSettings, false)
+
+    particleGroup.addPool(1, this.shockWaveEffectSettings, false)
     this.groups[BulletEffect.EFFECT_SHOCK_WAVE] = particleGroup
     return this
   }
@@ -107,7 +108,7 @@ export default class BulletEffect {
       maxParticleCount: 2000
     })
 
-    particleGroup.addPool(20, this.shockMistSettings, false)
+    particleGroup.addPool(1, this.shockMistSettings, false)
     this.groups[BulletEffect.EFFECT_MIST] = particleGroup
 
     return this

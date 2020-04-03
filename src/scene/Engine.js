@@ -276,6 +276,29 @@ class Engine {
 
   /**
    *
+   * @param {Function|UpdateCallback} callback
+   * @returns {Engine}
+   */
+  addUpdate(callback) {
+    this.updates.push(callback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function|UpdateCallback} callback
+   * @returns {Engine}
+   */
+  removeUpdate(callback) {
+    const index = this.updates.indexOf(callback)
+    if (index !== -1) {
+      this.updates.splice(index, 1)
+    }
+    return this
+  }
+
+  /**
+   *
    * @param {Array.<string>} categories
    * @returns {Array.<(Mesh|Group|Object3D|Unit)>}
    */

@@ -42,6 +42,11 @@ export class ControllerBullet {
    * @returns {ControllerBullet}
    */
   preset(engine, collisionObjects = []) {
+    const update = (delta) => {
+      this.bullet.update(delta)
+      this.bulletEffect.update(delta)
+    }
+
     this.bullet.setCollisionObjects(collisionObjects)
     this.bullet.addEventListener(Bullet.EVENT_DESTROY, () => engine.remove(this.bullet))
 
@@ -51,15 +56,24 @@ export class ControllerBullet {
     this.bullet.addEventListener(Bullet.EVENT_COLLISION, () => {
       // Провацировать эффек взрывной волны.
       this.bulletEffect.emmitShockWaveEffect(this.bullet.position)
-      // Провацировать дыма.
+      // Провацировать дым.
       this.bulletEffect.emmitMistEffect(this.bullet.position)
-      // Удалить снаряд, он уже не нужен.
+      // Удалить снаряд со сцены.
       engine.remove(this.bullet)
-      // Добавить звук попадания
+      // Добавить звук попадания.
       if (!bulletCollisionAudio.isPlaying) {
         bulletCollisionAudio.setVolume(60)
         bulletCollisionAudio.play()
       }
+
+      setTimeout(() => {
+        // После завершения всех анимаций:
+        // 1. Удалить обновление анимации эффектов т.к. снаряд уничтожен.
+        engine.removeUpdate(update)
+        // 2. Удалить объекты эффектов со сцены.
+        engine.remove(this.bulletEffect.getShockWaveMesh())
+        engine.remove(this.bulletEffect.getMistMesh())
+      }, 6000)
     })
 
     engine
@@ -67,11 +81,7 @@ export class ControllerBullet {
       .add('bullet-effect', this.bulletEffect.getShockWaveMesh())
       .add('bullet-effect', this.bulletEffect.getMistMesh())
 
-    engine.updates.push((delta) => {
-      this.bullet.update(delta)
-      this.bulletEffect.update(delta)
-    })
-
+    engine.addUpdate(update)
     return this
   }
 
