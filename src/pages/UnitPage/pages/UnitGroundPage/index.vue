@@ -1,6 +1,7 @@
 <script>
   import { BBadge } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import GitHubIcon from '@components/GitHubIcon'
   import Ground from '@scene/objects/Ground'
   import Engine from '@scene/Engine'
   import { Vector3 } from 'three'
@@ -19,6 +20,7 @@
     },
     components: {
       WrapperView,
+      GitHubIcon,
       BBadge
     },
     activated() {
@@ -67,7 +69,9 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="model-ground-page-canvas" :autofill="true" />
+    <WrapperView id="model-ground-page-canvas" :autofill="true">
+      <GitHubIcon path="/src/pages/UnitPage/pages/UnitGroundPage" class="m-2" />
+    </WrapperView>
     <WrapperView class="px-2 py-1">
       <BBadge>Click: {{click}}</BBadge>
     </WrapperView>

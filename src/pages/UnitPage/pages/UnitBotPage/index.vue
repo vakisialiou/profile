@@ -4,6 +4,7 @@
     BFormGroup, BFormRadioGroup
   } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import Bot from '@scene/units/Bot'
@@ -21,7 +22,7 @@
   export default {
     name: 'UnitBotPage',
     components: {
-      WrapperView, BFormGroup, BFormRadioGroup
+      WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup
     },
     data() {
       return {
@@ -133,8 +134,8 @@
             name="checkbox-btn-default"
           />
         </BFormGroup>
-
       </div>
+      <GitHubIcon path="/src/pages/UnitPage/pages/UnitBotPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

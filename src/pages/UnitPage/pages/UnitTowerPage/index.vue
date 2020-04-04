@@ -1,5 +1,6 @@
 <script>
   import WrapperView from '@components/WrapperView'
+  import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import { Vector3 } from 'three'
@@ -15,7 +16,7 @@
   export default {
     name: 'UnitTowerPage',
     components: {
-      WrapperView
+      WrapperView, GitHubIcon
     },
     activated() {
       engine.pause(false)
@@ -69,6 +70,8 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="model-tower-page-canvas" :autofill="true" />
+    <WrapperView id="model-tower-page-canvas" :autofill="true">
+      <GitHubIcon path="/src/pages/UnitPage/pages/UnitTowerPage" class="m-2" />
+    </WrapperView>
   </WrapperView>
 </template>
