@@ -12,6 +12,8 @@
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.5.0",
     "core-js": "^3.4.4",
+    "less": "^3.11.1",
+    "less-loader": "^5.0.0",
     "object-path": "^0.11.4",
     "oimo": "^1.0.9",
     "three": "^0.112.1",

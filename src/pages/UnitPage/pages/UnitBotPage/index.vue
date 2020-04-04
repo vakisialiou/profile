@@ -1,12 +1,18 @@
 <script>
+  import './index.less'
+  import {
+    BFormGroup, BFormRadioGroup
+  } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
+  import Bot from '@scene/units/Bot'
   import { Vector3 } from 'three'
   import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
   import { loading as loadingGround, ControllerGround } from '@scene/controllers/ControllerGround'
 
   let engine = null
+  let botController = null
 
   const loader = new Loading()
     .addLoading(loadingBot)
@@ -15,7 +21,24 @@
   export default {
     name: 'UnitBotPage',
     components: {
-      WrapperView
+      WrapperView, BFormGroup, BFormRadioGroup
+    },
+    data() {
+      return {
+        selectedAnimation: Bot.ANIMATION_KEY_IDLE,
+        animations: [
+          { text: Bot.ANIMATION_KEY_IDLE , value: Bot.ANIMATION_KEY_IDLE },
+          { text: Bot.ANIMATION_KEY_DYING, value: Bot.ANIMATION_KEY_DYING },
+          { text: Bot.ANIMATION_KEY_WALKING, value: Bot.ANIMATION_KEY_WALKING },
+          { text: Bot.ANIMATION_KEY_RUNNING, value: Bot.ANIMATION_KEY_RUNNING, disabled: true },
+          { text: Bot.ANIMATION_KEY_SHOOTING, value: Bot.ANIMATION_KEY_SHOOTING }
+        ]
+      }
+    },
+    methods: {
+      toggleAnimation: function () {
+        botController.bot.enableAnimation(this.selectedAnimation)
+      },
     },
     activated() {
       engine.pause(false)
@@ -34,12 +57,12 @@
         engine.preset().then(() => {
           const lightPosition = new Vector3(70, 70, 70)
           const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-600, 0, 600)
+          const cameraPosition = new Vector3(-100, 0, 100)
 
           const ground = new ControllerGround(loader)
             .preset(engine, container.offsetTop, container.offsetLeft)
 
-          const bot = new ControllerBot(loader)
+          botController = new ControllerBot(loader)
             .preset(engine, [ ground.clickHelperMesh ])
 
           engine
@@ -60,6 +83,19 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="model-bot-page-canvas" :autofill="true" />
+    <WrapperView id="model-bot-page-canvas" :autofill="true" class="unit-bot-page">
+      <div class="unit-bot-page__controls mx-4 my-2">
+        <BFormGroup label="Анимация">
+          <BFormRadioGroup
+            id="bot-animations"
+            v-on:input="toggleAnimation"
+            v-model="selectedAnimation"
+            :options="animations"
+            buttons
+            name="radios-btn-default"
+          />
+        </BFormGroup>
+      </div>
+    </WrapperView>
   </WrapperView>
 </template>

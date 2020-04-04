@@ -9,54 +9,54 @@ export default class Bot extends Unit {
      *
      * @type {AnimationAction}
      */
-    this.actionShooting = this.animation.findAction('Shooting')
+    this.actionShooting = this.animation.findAction(Bot.ANIMATION_KEY_SHOOTING)
     this.actionShooting.setDuration(0.6)
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionWalking = this.animation.findAction('Walking')
+    this.actionWalking = this.animation.findAction(Bot.ANIMATION_KEY_WALKING)
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionDying = this.animation.findAction('Dying')
+    this.actionRunning = this.animation.findAction(Bot.ANIMATION_KEY_RUNNING)
 
     /**
      *
      * @type {AnimationAction}
      */
-    this.actionIdle = this.animation.findAction('Idle')
+    this.actionDying = this.animation.findAction(Bot.ANIMATION_KEY_DYING)
 
     /**
      *
-     * @type {Object3D|Mesh}
+     * @type {AnimationAction}
      */
-    this.weapon = gltf.model.getObjectByName('Weapon')
-    if (!this.weapon) {
-      throw Error('Could not find weapon.')
-    }
+    this.actionIdle = this.animation.findAction(Bot.ANIMATION_KEY_IDLE)
 
-    this._tmp = new Vector3()
-    this._weaponScalar = new Vector3(0, 1.6, 0)
+    this.animationItems = [
+      { key: Bot.ANIMATION_KEY_IDLE, action: this.actionIdle },
+      { key: Bot.ANIMATION_KEY_DYING, action: this.actionDying },
+      { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking },
+      { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: true },
+      { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting }
+    ]
   }
 
-  /**
-   *
-   * @returns {Vector3}
-   */
-  get weaponTrapPosition() {
-    return this.weapon.getWorldPosition(this._tmp).add(this._weaponScalar)
-  }
+  static ANIMATION_KEY_IDLE = 'Idle'
+  static ANIMATION_KEY_DYING = 'Dying'
+  static ANIMATION_KEY_WALKING = 'Walking'
+  static ANIMATION_KEY_RUNNING = 'Running'
+  static ANIMATION_KEY_SHOOTING = 'Shooting'
 
   /**
    *
    * @returns {Bot}
    */
   idleAnimation() {
-    this.animation.enableAction(this.actionIdle)
+    this.enableAnimation(Bot.ANIMATION_KEY_IDLE)
     return this
   }
 
@@ -65,7 +65,7 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   dyingAnimation() {
-    this.animation.enableAction(this.actionDying)
+    this.enableAnimation(Bot.ANIMATION_KEY_DYING)
     return this
   }
 
@@ -74,7 +74,16 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   walkingAnimation() {
-    this.animation.enableAction(this.actionWalking)
+    this.enableAnimation(Bot.ANIMATION_KEY_WALKING)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  runningAnimation() {
+    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING)
     return this
   }
 
@@ -83,7 +92,25 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   shootingAnimation() {
-    this.animation.enableAction(this.actionShooting)
+    this.enableAnimation(Bot.ANIMATION_KEY_SHOOTING)
+    return this
+  }
+
+  /**
+   *
+   * @param {string} key
+   * @returns {Bot}
+   */
+  enableAnimation(key) {
+    for (const item of this.animationItems) {
+      if (item.key !== key) {
+        continue
+      }
+      if (item.disabled) {
+        break
+      }
+      this.animation.enableAction(item.action)
+    }
     return this
   }
 }
