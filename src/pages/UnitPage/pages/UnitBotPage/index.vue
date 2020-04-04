@@ -30,15 +30,35 @@
           { text: Bot.ANIMATION_KEY_IDLE , value: Bot.ANIMATION_KEY_IDLE },
           { text: Bot.ANIMATION_KEY_DYING, value: Bot.ANIMATION_KEY_DYING },
           { text: Bot.ANIMATION_KEY_WALKING, value: Bot.ANIMATION_KEY_WALKING },
-          { text: Bot.ANIMATION_KEY_RUNNING, value: Bot.ANIMATION_KEY_RUNNING, disabled: true },
+          { text: Bot.ANIMATION_KEY_RUNNING, value: Bot.ANIMATION_KEY_RUNNING },
           { text: Bot.ANIMATION_KEY_SHOOTING, value: Bot.ANIMATION_KEY_SHOOTING }
+        ],
+        selectedAnimationAction: 'Active',
+        animationActions: [
+          { text: 'Active', value: 'Active' },
+          { text: 'Pause', value: 'Pause' },
+          { text: 'Stop', value: 'Stop' },
         ]
       }
     },
     methods: {
       toggleAnimation: function () {
+        this.selectedAnimationAction = 'Active'
         botController.bot.enableAnimation(this.selectedAnimation)
       },
+      toggleAnimationAction: function () {
+        switch (this.selectedAnimationAction) {
+          case 'Pause':
+            botController.bot.pauseAnimation()
+            break
+          case 'Stop':
+            botController.bot.stopAnimation()
+            break
+          case 'Active':
+          default:
+            botController.bot.unpauseAnimation()
+        }
+      }
     },
     activated() {
       engine.pause(false)
@@ -64,6 +84,14 @@
 
           botController = new ControllerBot(loader)
             .preset(engine, [ ground.clickHelperMesh ])
+
+          // botController.bot.animation.mixer.addEventListener('loop', (e, r) => {
+          //   console.log('loop', e, r)
+          // })
+          //
+          // botController.bot.animation.mixer.addEventListener('finished', (e, r) => {
+          //   console.log('finished', e, r)
+          // })
 
           engine
             .setDirLight(lightPosition)
@@ -94,7 +122,18 @@
             buttons
             name="radios-btn-default"
           />
+
+          <BFormRadioGroup
+            class="mx-2"
+            id="bot-animation-actions"
+            v-on:input="toggleAnimationAction"
+            v-model="selectedAnimationAction"
+            :options="animationActions"
+            buttons
+            name="checkbox-btn-default"
+          />
         </BFormGroup>
+
       </div>
     </WrapperView>
   </WrapperView>

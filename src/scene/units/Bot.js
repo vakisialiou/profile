@@ -1,5 +1,4 @@
 import Unit from '@scene/units/Unit'
-import { Vector3 } from 'three'
 
 export default class Bot extends Unit {
   constructor(gltf) {
@@ -10,7 +9,6 @@ export default class Bot extends Unit {
      * @type {AnimationAction}
      */
     this.actionShooting = this.animation.findAction(Bot.ANIMATION_KEY_SHOOTING)
-    this.actionShooting.setDuration(0.6)
 
     /**
      *
@@ -37,12 +35,31 @@ export default class Bot extends Unit {
     this.actionIdle = this.animation.findAction(Bot.ANIMATION_KEY_IDLE)
 
     this.animationItems = [
-      { key: Bot.ANIMATION_KEY_IDLE, action: this.actionIdle },
-      { key: Bot.ANIMATION_KEY_DYING, action: this.actionDying },
-      { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking },
-      { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: true },
-      { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting }
+      { key: Bot.ANIMATION_KEY_IDLE, action: this.actionIdle, disabled: false, duration: null },
+      { key: Bot.ANIMATION_KEY_DYING, action: this.actionDying, disabled: false, duration: null },
+      { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking, disabled: false, duration: null },
+      { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: false, duration: null },
+      { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting, disabled: false, duration: null }
     ]
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  preset() {
+    for (const item of this.animationItems) {
+      if (!item.action) {
+        throw new Error(`Could not find action "${item.key}"`)
+      }
+      if (item.disabled) {
+        continue
+      }
+      if (item.duration) {
+        item.action.setDuration(0.6)
+      }
+    }
+    return this
   }
 
   static ANIMATION_KEY_IDLE = 'Idle'
@@ -93,6 +110,34 @@ export default class Bot extends Unit {
    */
   shootingAnimation() {
     this.enableAnimation(Bot.ANIMATION_KEY_SHOOTING)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function} [callback]
+   * @returns {Bot}
+   */
+  pauseAnimation(callback) {
+    this.animation.pause(callback)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  stopAnimation() {
+    this.animation.stop()
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  unpauseAnimation() {
+    this.animation.play()
     return this
   }
 

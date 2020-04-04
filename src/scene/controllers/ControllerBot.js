@@ -22,7 +22,7 @@ export class ControllerBot {
      *
      * @type {(Bot|Unit)}
      */
-    this.bot = new Bot(this.loader.getRawModel(MODEL_BOT)).setScale(20)
+    this.bot = new Bot(this.loader.getRawModel(MODEL_BOT))
     this.bot.position.setY(2)
 
   }
@@ -33,7 +33,10 @@ export class ControllerBot {
    * @returns {ControllerBot}
    */
   preset(engine, collisionObjects = []) {
-    this.bot.idleAnimation()
+    this.bot
+      .setScale(20)
+      .preset()
+      .idleAnimation()
 
     engine.add('bot', this.bot)
 
