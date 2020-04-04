@@ -85,7 +85,7 @@
   <WrapperView :autofill="true">
     <WrapperView id="model-bot-page-canvas" :autofill="true" class="unit-bot-page">
       <div class="unit-bot-page__controls mx-4 my-2">
-        <BFormGroup label="Анимация">
+        <BFormGroup label="Animations">
           <BFormRadioGroup
             id="bot-animations"
             v-on:input="toggleAnimation"
