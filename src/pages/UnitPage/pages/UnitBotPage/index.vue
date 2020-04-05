@@ -38,7 +38,6 @@
         animationActions: [
           { text: 'Active', value: 'Active' },
           { text: 'Pause', value: 'Pause' },
-          { text: 'Stop', value: 'Stop' },
         ]
       }
     },
@@ -51,9 +50,6 @@
         switch (this.selectedAnimationAction) {
           case 'Pause':
             botController.bot.pauseAnimation()
-            break
-          case 'Stop':
-            botController.bot.stopAnimation()
             break
           case 'Active':
           default:
@@ -86,13 +82,15 @@
           botController = new ControllerBot(loader)
             .preset(engine, [ ground.clickHelperMesh ])
 
-          // botController.bot.animation.mixer.addEventListener('loop', (e, r) => {
-          //   console.log('loop', e, r)
-          // })
-          //
-          // botController.bot.animation.mixer.addEventListener('finished', (e, r) => {
-          //   console.log('finished', e, r)
-          // })
+          botController.bot.animation.mixer.addEventListener('loop', (event) => {
+            console.log('loop', event)
+          })
+
+          botController.bot.animation.mixer.addEventListener('finished', (event) => {
+            if (event.action === botController.bot.actionShooting && this.selectedAnimation === Bot.ANIMATION_KEY_SHOOTING) {
+              botController.bot.shootingAnimation()
+            }
+          })
 
           engine
             .setDirLight(lightPosition)

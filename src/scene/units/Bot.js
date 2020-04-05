@@ -1,5 +1,5 @@
 import Unit from '@scene/units/Unit'
-
+import { LoopOnce } from 'three'
 export default class Bot extends Unit {
   constructor(gltf) {
     super(gltf)
@@ -35,11 +35,11 @@ export default class Bot extends Unit {
     this.actionIdle = this.animation.findAction(Bot.ANIMATION_KEY_IDLE)
 
     this.animationItems = [
-      { key: Bot.ANIMATION_KEY_IDLE, action: this.actionIdle, disabled: false, duration: null },
-      { key: Bot.ANIMATION_KEY_DYING, action: this.actionDying, disabled: false, duration: null },
-      { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking, disabled: false, duration: null },
-      { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: false, duration: null },
-      { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting, disabled: false, duration: null }
+      { key: Bot.ANIMATION_KEY_IDLE, action: this.actionIdle, disabled: false, duration: null, loopOnce: false },
+      { key: Bot.ANIMATION_KEY_DYING, action: this.actionDying, disabled: false, duration: null, loopOnce: true },
+      { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking, disabled: false, duration: null, loopOnce: false },
+      { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: false, duration: null, loopOnce: false },
+      { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting, disabled: false, duration: null, loopOnce: true },
     ]
   }
 
@@ -57,6 +57,11 @@ export default class Bot extends Unit {
       }
       if (item.duration) {
         item.action.setDuration(0.6)
+      }
+
+      if (item.loopOnce) {
+        item.action.clampWhenFinished = true
+        item.action.loop = LoopOnce
       }
     }
     return this
@@ -115,20 +120,10 @@ export default class Bot extends Unit {
 
   /**
    *
-   * @param {Function} [callback]
    * @returns {Bot}
    */
-  pauseAnimation(callback) {
-    this.animation.pause(callback)
-    return this
-  }
-
-  /**
-   *
-   * @returns {Bot}
-   */
-  stopAnimation() {
-    this.animation.stop()
+  pauseAnimation() {
+    this.animation.pause()
     return this
   }
 
@@ -137,7 +132,7 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   unpauseAnimation() {
-    this.animation.play()
+    this.animation.unpause()
     return this
   }
 
@@ -155,6 +150,25 @@ export default class Bot extends Unit {
         break
       }
       this.animation.enableAction(item.action)
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {string} key
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  iterateAnimation(key, callback) {
+    for (const item of this.animationItems) {
+      if (item.key !== key) {
+        continue
+      }
+      if (item.disabled) {
+        break
+      }
+      this.animation.iterateAction(item.action, callback)
     }
     return this
   }

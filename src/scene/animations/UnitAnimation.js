@@ -23,13 +23,6 @@ class UnitAnimation {
      * @type {(AnimationAction|?)}
      */
     this.activeAction = null
-
-    /**
-     *
-     * @type {Function|?}
-     * @private
-     */
-    this._pause = null
   }
 
   /**
@@ -42,9 +35,8 @@ class UnitAnimation {
   }
 
   /**
-   * Stop action immediately.
    */
-  stop() {
+  pause() {
     if (this.activeAction) {
       this.activeAction.paused = true
     }
@@ -52,40 +44,9 @@ class UnitAnimation {
   }
 
   /**
-   * Stop action after execution.
-   *
-   * @param {Function} [callback]
    * @returns {UnitAnimation}
    */
-  pause(callback) {
-    if (!this.activeAction) {
-      // action is not selected
-      return this
-    }
-    if (this.activeAction.paused) {
-      // action has already passed
-      return this
-    }
-    if (this._pause) {
-      // action in pause process
-      return this
-    }
-    this._pause = (event) => {
-      this.stop()
-      this.mixer.removeEventListener('loop', this._pause)
-      this._pause = null
-      if (callback) {
-        callback(event)
-      }
-    }
-    this.mixer.addEventListener('loop', this._pause)
-    return this
-  }
-
-  /**
-   * @returns {UnitAnimation}
-   */
-  play() {
+  unpause() {
     if (this.activeAction) {
       this.activeAction.paused = false
     }
@@ -99,22 +60,32 @@ class UnitAnimation {
    * @returns {UnitAnimation}
    */
   enableAction(action, duration = 0.4) {
+    if (this.activeAction === action && !this.activeAction.isRunning()) {
+      // Restart completed action
+      this.activeAction.reset().play()
+      return this
+    }
+
     for (const animation of this.animations) {
       const anyAction = this.findAction(animation.name)
       anyAction.paused = false
     }
+
     if (this.activeAction === action) {
       return this
     }
 
-    action.enabled = true
-    action.setEffectiveTimeScale(1)
-    action.setEffectiveWeight(1)
-    action.time = 0
     if (this.activeAction) {
-      this.activeAction.crossFadeTo(action, duration, true)
+      this.activeAction.fadeOut(duration)
     }
-    action.play()
+
+    action
+      .reset()
+      .setEffectiveTimeScale(1)
+      .setEffectiveWeight(1)
+      .fadeIn(duration)
+      .play()
+
     this.activeAction = action
     return this
   }
