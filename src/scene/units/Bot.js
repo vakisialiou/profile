@@ -56,7 +56,8 @@ export default class Bot extends Unit {
         continue
       }
       if (item.duration) {
-        item.action.setDuration(0.6)
+        console.log('+++')
+        item.action.setDuration(item.duration)
       }
 
       if (item.loopOnce) {
