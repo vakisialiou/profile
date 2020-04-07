@@ -35,10 +35,18 @@ export class ControllerGround {
     return this
   }
 
+  /**
+   *
+   * @returns {number}
+   */
   get width() {
     return this.ground.options.width
   }
 
+  /**
+   *
+   * @returns {number}
+   */
   get height() {
     return this.ground.options.height
   }

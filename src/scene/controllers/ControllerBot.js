@@ -1,6 +1,8 @@
 import Bot from '@scene/units/Bot'
 import Loading from '@scene/loading/Loading'
 
+import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three'
+
 const MODEL_BOT = 'MODEL_BOT'
 
 export const loading = new Loading()
@@ -25,6 +27,10 @@ export class ControllerBot {
     this.bot = new Bot(this.loader.getRawModel(MODEL_BOT))
     this.bot.position.setY(2)
 
+    const geometry = new BoxGeometry(10, 10, 10)
+    const material = new MeshBasicMaterial({ color: 0xcccccc })
+    this.bot.point = new Mesh(geometry, material)
+
   }
 
   /**
@@ -33,12 +39,10 @@ export class ControllerBot {
    * @returns {ControllerBot}
    */
   preset(engine, collisionObjects = []) {
-    this.bot
-      .setScale(20)
-      .preset()
-      .idleAnimation()
+    this.bot.setScale(20).preset().idleAnimation()
 
     engine.add('bot', this.bot)
+    engine.add('bot-helper', this.bot.point)
 
     engine.addUpdate((delta) => {
       this.bot.update(delta)
@@ -58,11 +62,11 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Vector3} direction
+   * @param {Vector3} p
    * @returns {ControllerBot}
    */
-  setDirection(direction) {
-    this.bot.setDirection(direction)
+  setPoint(p) {
+    this.bot.setPoint(p)
     return this
   }
 }

@@ -102,6 +102,10 @@
             .renderStats(container)
             .registerEvents()
             .animate()
+
+          ground.onMouseDown(() => {
+            botController.setPoint(ground.clickHelperMesh.position)
+          })
         })
       })
     },
