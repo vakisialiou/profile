@@ -162,7 +162,7 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   idleAnimation() {
-    this.enableAnimation(Bot.ANIMATION_KEY_IDLE, 0.9)
+    this.enableAnimation(Bot.ANIMATION_KEY_IDLE, 0.6)
     return this
   }
 
@@ -268,18 +268,19 @@ export default class Bot extends Unit {
     this._followOptions.quaternion.setFromAxisAngle(new Vector3(0, 1, 0), angle)
 
     if (this._followOptions.orientationEnabled && !this.quaternion.equals(this._followOptions.quaternion)) {
-      const rotateSpeed = 8 // если это шаг то это путь пройденный по определенному радиусы
+      this.walkingAnimation()// TODO: move
+      const rotateSpeed = 9 //
       this.quaternion.rotateTowards(this._followOptions.quaternion, rotateSpeed * delta)
 
       // Толкать объект в его направлении.
-      // let moveSpeed = 30 * delta
-      // const distanceSq = target.distanceToSquared(this.position)
-      // const nextWayPointDistance = 0.5
-      // if (distanceSq < (nextWayPointDistance * nextWayPointDistance)) {
-      //   moveSpeed = 0
-      // }
-      // const direction = this.math.direction()
-      // this.position.addScaledVector(direction, moveSpeed)
+      let moveSpeed = 30 * delta
+      const distanceSq = target.distanceToSquared(this.position)
+      const nextWayPointDistance = 0.5
+      if (distanceSq < (nextWayPointDistance * nextWayPointDistance)) {
+        moveSpeed = 0
+      }
+      const direction = this.math.direction()
+      this.position.addScaledVector(direction, moveSpeed)
 
       // Событие круговое движение, смещение.
       return this
