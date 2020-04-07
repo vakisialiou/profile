@@ -1,6 +1,9 @@
 import Unit from '@scene/units/Unit'
 import MathObject from '@scene/helper/MathObject'
-import { LoopOnce, Matrix4, Quaternion, Vector3 } from 'three'
+import { LoopOnce, Quaternion, Vector3 } from 'three'
+import DisplacementFollow from '@scene/modifiers/DisplacementFollow'
+import DisplacementPush from '@scene/modifiers/DisplacementPush'
+import RotationTowardsTarget from '@scene/modifiers/RotationTowardsTarget'
 
 export default class Bot extends Unit {
   constructor(gltf) {
@@ -64,29 +67,11 @@ export default class Bot extends Unit {
     this.followingPath = []
 
 
-
-
-    /**
-     * The amount of deceleration.
-     * @type Number
-     * @default 3
-     */
-    this.deceleration = 3
-
-    /**
-     * A tolerance value in world units to prevent the vehicle from overshooting its target.
-     * @type {Number}
-     * @default 0
-     */
-    this.tolerance = 0
-
-
-    this.maxSpeed = 0.5
-    this.desiredVelocity = new Vector3()
-    this.displacement = new Vector3()
-
-
     this.point = null
+
+    this.displacementFollow = new DisplacementFollow()
+    this.displacementPush = new DisplacementPush()
+    this.rotationTowardsTarget = new RotationTowardsTarget()
 
   }
 
@@ -189,7 +174,7 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   runningAnimation() {
-    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING)
+    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING, 0.1)
     return this
   }
 
@@ -264,66 +249,34 @@ export default class Bot extends Unit {
       // Событие кругового движения, начало.
     }
 
-    const angle = this.math.angleToPointXZ(target)
-    this._followOptions.quaternion.setFromAxisAngle(new Vector3(0, 1, 0), angle)
+    const rotateSpeed = 5
+    const quaternion = this.rotationTowardsTarget.calculate(this, target, rotateSpeed * delta)
 
-    if (this._followOptions.orientationEnabled && !this.quaternion.equals(this._followOptions.quaternion)) {
-      this.walkingAnimation()// TODO: move
-      const rotateSpeed = 9 //
-      this.quaternion.rotateTowards(this._followOptions.quaternion, rotateSpeed * delta)
+    if (this._followOptions.orientationEnabled && !this.quaternion.equals(quaternion)) {
+      this.runningAnimation()
 
-      // Толкать объект в его направлении.
-      let moveSpeed = 30 * delta
-      const distanceSq = target.distanceToSquared(this.position)
-      const nextWayPointDistance = 0.5
-      if (distanceSq < (nextWayPointDistance * nextWayPointDistance)) {
-        moveSpeed = 0
-      }
-      const direction = this.math.direction()
-      this.position.addScaledVector(direction, moveSpeed)
-
+      this.quaternion.copy(quaternion)
+      this.position.add(this.displacementPush.calculate(this))
       // Событие круговое движение, смещение.
       return this
     }
 
     if (this._followOptions.orientationEnabled) {
-      this.walkingAnimation()// TODO: move
+      this.runningAnimation()// TODO: move
       // Событие круговое движение, завершено.
       // Событие прямолинейное движени, начало.
     }
     this._followOptions.orientationEnabled = false
 
-    // Перемещать в сторону цели.
-    // const distanceSq = target.distanceToSquared(this.position)
-    // const nextWayPointDistance = 0.5
-    // if (distanceSq < (nextWayPointDistance * nextWayPointDistance)) {
-    //   this.desiredVelocity.set(0, 0, 0)
-    // } else {
-    //   this.desiredVelocity.subVectors(target, this.position).normalize()
-    //   this.desiredVelocity.multiplyScalar(this.maxSpeed)
-    // }
-    //
-    // this.position.add(this.desiredVelocity)
-
-
-    // calculate - 2
-    this.displacement.subVectors(target, this.position)
-    const distance = this.displacement.length()
-
-    if (Number(distance.toFixed(1)) > this.tolerance) {
-      // calculate the speed required to reach the target given the desired deceleration
-      let speed = distance / this.deceleration
-
-      // make sure the speed does not exceed the max
-      speed = Math.min(speed, this.maxSpeed) / distance
-      this.desiredVelocity.copy(this.displacement).multiplyScalar(speed)
+    const displacement = this.displacementFollow.calculate(this.position, target)
+    if (displacement.length() > 0) {
       // Событие прямолинейное движени, смещение.
+      this.position.add(displacement)
     } else {
-      this.desiredVelocity.set(0, 0, 0)
-      this.idleAnimation()// TODO: move
+      this.idleAnimation()
       // Событие прямолинейное движени, завершено.
     }
-    this.position.add(this.desiredVelocity)
+
     return this
   }
 }
