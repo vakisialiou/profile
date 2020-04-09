@@ -39,6 +39,7 @@ export default class RotationTowardsTarget {
     if (!this._quaternionTo.equals(this._quaternionFrom)) {
       this._quaternionTo.rotateTowards(this._quaternionFrom, speed)
     }
+
     return this._quaternionTo
   }
 }

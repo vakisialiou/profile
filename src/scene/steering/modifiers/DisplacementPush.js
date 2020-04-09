@@ -1,4 +1,4 @@
-import DisplacementFollow from '@scene/modifiers/DisplacementFollow'
+import DisplacementFollow from '@scene/steering/modifiers/DisplacementFollow'
 import { Vector3 } from 'three'
 
 const target = new Vector3(0, 0, 0)

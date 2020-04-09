@@ -104,7 +104,7 @@
             .animate()
 
           ground.onMouseDown(() => {
-            botController.setPoint(ground.clickHelperMesh.position)
+            botController.setTarget(ground.clickHelperMesh.position)
           })
         })
       })

@@ -23,7 +23,7 @@ export default class DisplacementFollow {
      * @type {number}
      * @private
      */
-    this._deceleration = 3
+    this._deceleration = 0.8
 
     /**
      *

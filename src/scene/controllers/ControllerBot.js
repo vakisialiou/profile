@@ -26,11 +26,6 @@ export class ControllerBot {
      */
     this.bot = new Bot(this.loader.getRawModel(MODEL_BOT))
     this.bot.position.setY(2)
-
-    const geometry = new BoxGeometry(10, 10, 10)
-    const material = new MeshBasicMaterial({ color: 0xcccccc })
-    this.bot.point = new Mesh(geometry, material)
-
   }
 
   /**
@@ -42,7 +37,6 @@ export class ControllerBot {
     this.bot.setScale(20).preset().idleAnimation()
 
     engine.add('bot', this.bot)
-    engine.add('bot-helper', this.bot.point)
 
     engine.addUpdate((delta) => {
       this.bot.update(delta)
@@ -62,11 +56,11 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Vector3} p
+   * @param {Vector3} point
    * @returns {ControllerBot}
    */
-  setPoint(p) {
-    this.bot.setPoint(p)
+  setTarget(point) {
+    this.bot.setTarget(point)
     return this
   }
 }

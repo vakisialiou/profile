@@ -1,9 +1,9 @@
 import Unit from '@scene/units/Unit'
-import MathObject from '@scene/helper/MathObject'
 import { LoopOnce, Quaternion, Vector3 } from 'three'
-import DisplacementFollow from '@scene/modifiers/DisplacementFollow'
-import DisplacementPush from '@scene/modifiers/DisplacementPush'
-import RotationTowardsTarget from '@scene/modifiers/RotationTowardsTarget'
+import DisplacementFollow from '@scene/steering/modifiers/DisplacementFollow'
+import DisplacementPush from '@scene/steering/modifiers/DisplacementPush'
+import RotationTowardsTarget from '@scene/steering/modifiers/RotationTowardsTarget'
+import Path from '@scene/steering/Path'
 
 export default class Bot extends Unit {
   constructor(gltf) {
@@ -49,70 +49,26 @@ export default class Bot extends Unit {
 
     /**
      *
-     * @type {MathObject}
-     */
-    this.math = new MathObject(this)
-
-    /**
-     *
-     * @type {{quaternion: Quaternion, target: Vector3, pathLength: number, orientationEnabled: boolean}}
+     * @type {{target: Vector3, orientationEnabled: boolean}}
      * @private
      */
-    this._followOptions = { quaternion: new Quaternion(), target: new Vector3(), pathLength: 0, orientationEnabled: false }
+    this._tmp = { target: new Vector3(), orientationEnabled: false }
 
-    /**
-     *
-     * @type {Array.<Vector3>}
-     */
-    this.followingPath = []
-
-
-    this.point = null
-
-    this.displacementFollow = new DisplacementFollow()
     this.displacementPush = new DisplacementPush()
+    this.displacementFollow = new DisplacementFollow()
     this.rotationTowardsTarget = new RotationTowardsTarget()
 
+    this.path = new Path()
   }
 
   /**
    *
-   * @param {Vector3} p
+   * @param {Vector3} point
    * @returns {Bot}
    */
-  setPoint(p) {
-    this.followingPath = [p]
+  setTarget(point) {
+    this.path.clear().add(point)
     return this
-  }
-
-  /**
-   *
-   * @param {Vector3} p
-   * @returns {Bot}
-   */
-  addPoint(p) {
-    this.followingPath = [p]
-    return this
-  }
-
-  /**
-   *
-   * @param {Array.<Vector3>} arr
-   * @returns {Bot}
-   */
-  addPoints(arr) {
-    this.followingPath = this.followingPath.concat(arr)
-    return this
-  }
-
-  /**
-   * @returns {(Vector3|?)}
-   */
-  getPoint() {
-    if (this.followingPath.length > 0) {
-      return this.followingPath[0].clone().setY(this.position.y)
-    }
-    return null
   }
 
   /**
@@ -232,27 +188,31 @@ export default class Bot extends Unit {
   update(delta) {
     super.update(delta)
 
-    const target = this.getPoint()
+    let target = this.path.current()
     if (!target) {
       return this
     }
+
+    target.setY(0)
+
+    // if (this.position.equals(target)) {
+    //   target = this.path.advance().current().setY(0)
+    // }
 
     if (this.position.equals(target)) {
       return this
     }
 
-    // TODO: make as individual class behavior
-    if (!this._followOptions.target.equals(target)) {
-      this._followOptions.target.copy(target)
-      this._followOptions.pathLength = this.position.distanceTo(target)
-      this._followOptions.orientationEnabled = true
+    if (!this._tmp.target.equals(target)) {
+      this._tmp.target.copy(target)
+      this._tmp.orientationEnabled = true
       // Событие кругового движения, начало.
     }
 
-    const rotateSpeed = 5
+    const rotateSpeed = 8
     const quaternion = this.rotationTowardsTarget.calculate(this, target, rotateSpeed * delta)
 
-    if (this._followOptions.orientationEnabled && !this.quaternion.equals(quaternion)) {
+    if (this._tmp.orientationEnabled && !this.quaternion.equals(quaternion)) {
       this.runningAnimation()
 
       this.quaternion.copy(quaternion)
@@ -261,19 +221,24 @@ export default class Bot extends Unit {
       return this
     }
 
-    if (this._followOptions.orientationEnabled) {
+    if (this._tmp.orientationEnabled) {
       this.runningAnimation()// TODO: move
       // Событие круговое движение, завершено.
       // Событие прямолинейное движени, начало.
     }
-    this._followOptions.orientationEnabled = false
+
+    this._tmp.orientationEnabled = false
 
     const displacement = this.displacementFollow.calculate(this.position, target)
     if (displacement.length() > 0) {
       // Событие прямолинейное движени, смещение.
       this.position.add(displacement)
     } else {
-      this.idleAnimation()
+      this.path.advance()
+      this.position.copy(target)
+      if (this.path.finished()) {
+        this.idleAnimation()
+      }
       // Событие прямолинейное движени, завершено.
     }
 
