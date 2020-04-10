@@ -57,7 +57,17 @@ export class ControllerBot {
       .idleAnimation()
       .onStartMoving(() => {
         console.log('onStartMoving')
-        this.bot.runningAnimation()
+        // this.bot.setSpeed(1.5).runningAnimation()
+        for (const item of this._captureObjects) {
+          const length = this.bot.position.distanceTo(item.position)
+          if (length > 60) {
+            // побежали к точке
+            this.bot.setSpeed(1.5).runningAnimation()
+          } else {
+            // точка слишком близко. нужно отойти назад
+            this.bot.setSpeed(-1.5).runningBackwardsAnimation()
+          }
+        }
       })
       .onStopMoving(() => {
         console.log('onStopMoving')
@@ -77,11 +87,16 @@ export class ControllerBot {
 
         for (const item of this._captureObjects) {
           const length = this.bot.position.distanceTo(item.position)
-          if (length <= 80) {
+          if (length > 60 && length <= 140) {
             this.botTarget = item
+            // цель в зоне прицеливания, можно стрелять
             this.bot.pauseMoving().shootingAnimation()
             console.log('onMoving -> shootingAnimation')
             return
+          }
+          if (length <= 60) {
+            // точка слишком близко. нужно отойти назад
+            this.bot.setSpeed(-1.5).runningBackwardsAnimation()
           }
         }
       })

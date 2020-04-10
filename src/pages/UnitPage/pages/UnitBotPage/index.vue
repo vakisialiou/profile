@@ -32,6 +32,7 @@
           { text: Bot.ANIMATION_KEY_DYING, value: Bot.ANIMATION_KEY_DYING },
           { text: Bot.ANIMATION_KEY_WALKING, value: Bot.ANIMATION_KEY_WALKING },
           { text: Bot.ANIMATION_KEY_RUNNING, value: Bot.ANIMATION_KEY_RUNNING },
+          { text: Bot.ANIMATION_KEY_RUNNING_BACKWARDS, value: Bot.ANIMATION_KEY_RUNNING_BACKWARDS },
           { text: Bot.ANIMATION_KEY_SHOOTING, value: Bot.ANIMATION_KEY_SHOOTING }
         ],
         selectedAnimationAction: 'Active',

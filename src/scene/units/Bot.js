@@ -13,7 +13,7 @@ export default class Bot extends Unit {
      *
      * @type {number}
      */
-    this.rotateSpeed = 8
+    this.rotateSpeed = 12
 
     /**
      *
@@ -67,6 +67,12 @@ export default class Bot extends Unit {
      *
      * @type {AnimationAction}
      */
+    this.actionRunningBackwards = this.animation.findAction(Bot.ANIMATION_KEY_RUNNING_BACKWARDS)
+
+    /**
+     *
+     * @type {AnimationAction}
+     */
     this.actionDying = this.animation.findAction(Bot.ANIMATION_KEY_DYING)
 
     /**
@@ -81,6 +87,7 @@ export default class Bot extends Unit {
       { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking, disabled: false, loopOnce: false },
       { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: false, loopOnce: false },
       { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting, disabled: false, loopOnce: true },
+      { key: Bot.ANIMATION_KEY_RUNNING_BACKWARDS , action: this.actionRunningBackwards, disabled: false, loopOnce: false },
     ]
 
     /**
@@ -104,6 +111,16 @@ export default class Bot extends Unit {
   static EVENT_START_MOVING = 'EVENT_START_MOVING'
   static EVENT_STOP_MOVING = 'EVENT_STOP_MOVING'
   static EVENT_MOVING = 'EVENT_MOVING'
+
+  /**
+   *
+   * @param value
+   * @returns {Bot}
+   */
+  setSpeed(value) {
+    this.maxSpeedMoving = value
+    return this
+  }
 
   /**
    *
@@ -169,6 +186,7 @@ export default class Bot extends Unit {
   static ANIMATION_KEY_DYING = 'Dying'
   static ANIMATION_KEY_WALKING = 'Walking'
   static ANIMATION_KEY_RUNNING = 'Running'
+  static ANIMATION_KEY_RUNNING_BACKWARDS = 'RunningBackwards'
   static ANIMATION_KEY_SHOOTING = 'Shooting'
 
   /**
@@ -211,8 +229,17 @@ export default class Bot extends Unit {
    *
    * @returns {Bot}
    */
+  runningBackwardsAnimation() {
+    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARDS, 0.1)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
   shootingAnimation() {
-    this.enableAnimation(Bot.ANIMATION_KEY_SHOOTING)
+    this.enableAnimation(Bot.ANIMATION_KEY_SHOOTING, 0.2)
     return this
   }
 
@@ -333,7 +360,7 @@ export default class Bot extends Unit {
       return this
     }
 
-    target.setY(0)
+    target.setY(this.position.y)
 
     if (this.position.equals(target)) {
       return this
