@@ -67,7 +67,14 @@ export default class Bot extends Unit {
      *
      * @type {AnimationAction}
      */
-    this.actionRunningBackwards = this.animation.findAction(Bot.ANIMATION_KEY_RUNNING_BACKWARDS)
+    this.actionRunningBackwards = this.animation.findAction(Bot.ANIMATION_KEY_RUNNING_BACKWARD)
+
+    /**
+     *
+     * @type {AnimationAction}
+     */
+    this.actionRunningForward = this.animation.findAction(Bot.ANIMATION_KEY_RUNNING_FORWARD)
+    this.actionRunningForward.setDuration(9)
 
     /**
      *
@@ -87,7 +94,8 @@ export default class Bot extends Unit {
       { key: Bot.ANIMATION_KEY_WALKING, action: this.actionWalking, disabled: false, loopOnce: false },
       { key: Bot.ANIMATION_KEY_RUNNING, action: this.actionRunning, disabled: false, loopOnce: false },
       { key: Bot.ANIMATION_KEY_SHOOTING , action: this.actionShooting, disabled: false, loopOnce: true },
-      { key: Bot.ANIMATION_KEY_RUNNING_BACKWARDS , action: this.actionRunningBackwards, disabled: false, loopOnce: false },
+      { key: Bot.ANIMATION_KEY_RUNNING_FORWARD , action: this.actionRunningForward, disabled: false, loopOnce: false },
+      { key: Bot.ANIMATION_KEY_RUNNING_BACKWARD , action: this.actionRunningBackwards, disabled: false, loopOnce: false },
     ]
 
     /**
@@ -186,7 +194,8 @@ export default class Bot extends Unit {
   static ANIMATION_KEY_DYING = 'Dying'
   static ANIMATION_KEY_WALKING = 'Walking'
   static ANIMATION_KEY_RUNNING = 'Running'
-  static ANIMATION_KEY_RUNNING_BACKWARDS = 'RunningBackwards'
+  static ANIMATION_KEY_RUNNING_BACKWARD = 'RunningBackward'
+  static ANIMATION_KEY_RUNNING_FORWARD = 'RunningForward'
   static ANIMATION_KEY_SHOOTING = 'Shooting'
 
   /**
@@ -229,8 +238,17 @@ export default class Bot extends Unit {
    *
    * @returns {Bot}
    */
-  runningBackwardsAnimation() {
-    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARDS, 0.1)
+  runningBackwardAnimation() {
+    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD, 0.1)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  runningForwardAnimation() {
+    this.enableAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD, 0.1)
     return this
   }
 

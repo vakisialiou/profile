@@ -62,10 +62,10 @@ export class ControllerBot {
           const length = this.bot.position.distanceTo(item.position)
           if (length > 60) {
             // побежали к точке
-            this.bot.setSpeed(1.5).runningAnimation()
+            this.bot.setSpeed(1).runningForwardAnimation()
           } else {
             // точка слишком близко. нужно отойти назад
-            this.bot.setSpeed(-1.5).runningBackwardsAnimation()
+            this.bot.setSpeed(-1.5).runningBackwardAnimation()
           }
         }
       })
@@ -96,7 +96,7 @@ export class ControllerBot {
           }
           if (length <= 60) {
             // точка слишком близко. нужно отойти назад
-            this.bot.setSpeed(-1.5).runningBackwardsAnimation()
+            this.bot.setSpeed(-1.5).runningBackwardAnimation()
           }
         }
       })
