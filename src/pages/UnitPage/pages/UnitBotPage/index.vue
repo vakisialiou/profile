@@ -1,7 +1,7 @@
 <script>
   import './index.less'
   import {
-    BFormGroup, BFormRadioGroup
+    BFormGroup, BFormRadioGroup, BFormCheckbox
   } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import GitHubIcon from '@components/GitHubIcon'
@@ -22,7 +22,7 @@
   export default {
     name: 'UnitBotPage',
     components: {
-      WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup
+      WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox
     },
     data() {
       return {
@@ -38,7 +38,8 @@
         animationActions: [
           { text: 'Active', value: 'Active' },
           { text: 'Pause', value: 'Pause' },
-        ]
+        ],
+        botMouseControlEnabled: false
       }
     },
     methods: {
@@ -54,6 +55,14 @@
           case 'Active':
           default:
             botController.bot.unpauseAnimation()
+        }
+      },
+      toggleMouseControl: function () {
+        if (this.botMouseControlEnabled) {
+          botController.enable(true)
+        } else {
+          botController.enable(false)
+          this.toggleAnimation()
         }
       }
     },
@@ -80,14 +89,15 @@
             .preset(engine, container.offsetTop, container.offsetLeft)
 
           botController = new ControllerBot(loader)
-            .preset(engine, [ ground.clickHelperMesh ])
+            .preset(engine)
+            .captureObjects([ ground.clickHelperMesh ])
 
-          botController.bot.animation.mixer.addEventListener('loop', (event) => {
-            console.log('loop', event)
+          botController.bot.animation.mixer.addEventListener('loop', () => {
+            // console.log('loop', event)
           })
 
-          botController.bot.animation.mixer.addEventListener('finished', (event) => {
-            if (event.action === botController.bot.actionShooting && this.selectedAnimation === Bot.ANIMATION_KEY_SHOOTING) {
+          botController.bot.animation.mixer.addEventListener('finished', () => {
+            if (botController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
               botController.bot.shootingAnimation()
             }
           })
@@ -104,7 +114,9 @@
             .animate()
 
           ground.onMouseDown(() => {
-            botController.setTarget(ground.clickHelperMesh.position)
+            if (this.botMouseControlEnabled) {
+              botController.followTo(ground.clickHelperMesh.position)
+            }
           })
         })
       })
@@ -116,7 +128,7 @@
   <WrapperView :autofill="true">
     <WrapperView id="model-bot-page-canvas" :autofill="true" class="unit-bot-page">
       <div class="unit-bot-page__controls mx-4 my-2">
-        <BFormGroup label="Animations">
+        <BFormGroup label="Examples animation">
           <BFormRadioGroup
             id="bot-animations"
             v-on:input="toggleAnimation"
@@ -124,6 +136,7 @@
             :options="animations"
             buttons
             name="radios-btn-default"
+            :disabled="botMouseControlEnabled"
           />
 
           <BFormRadioGroup
@@ -134,8 +147,18 @@
             :options="animationActions"
             buttons
             name="checkbox-btn-default"
+            :disabled="botMouseControlEnabled"
           />
         </BFormGroup>
+
+        <BFormCheckbox
+          v-model="botMouseControlEnabled"
+          v-on:input="toggleMouseControl"
+          size="lg"
+          switch
+        >
+          Enable bot controls by mouse.
+        </BFormCheckbox>
       </div>
       <GitHubIcon path="/src/pages/UnitPage/pages/UnitBotPage" class="m-2" />
     </WrapperView>

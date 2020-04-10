@@ -11,6 +11,42 @@ export default class Bot extends Unit {
 
     /**
      *
+     * @type {number}
+     */
+    this.rotateSpeed = 8
+
+    /**
+     *
+     * @type {number}
+     */
+    this.maxSpeedMoving = 1.5
+
+    /**
+     *
+     * @type {Path}
+     */
+    this.path = new Path()
+
+    /**
+     *
+     * @type {DisplacementPush}
+     */
+    this.displacementPush = new DisplacementPush()
+
+    /**
+     *
+     * @type {DisplacementFollow}
+     */
+    this.displacementFollow = new DisplacementFollow()
+
+    /**
+     *
+     * @type {RotationTowardsTarget}
+     */
+    this.rotationTowardsTarget = new RotationTowardsTarget()
+
+    /**
+     *
      * @type {AnimationAction}
      */
     this.actionShooting = this.animation.findAction(Bot.ANIMATION_KEY_SHOOTING)
@@ -54,20 +90,57 @@ export default class Bot extends Unit {
      */
     this._tmp = { target: new Vector3(), orientationEnabled: false }
 
-    this.displacementPush = new DisplacementPush()
-    this.displacementFollow = new DisplacementFollow()
-    this.rotationTowardsTarget = new RotationTowardsTarget()
-
-    this.path = new Path()
+    /**
+     *
+     * @type {{pause: boolean, prevFramePause: boolean}}
+     * @private
+     */
+    this._state = { pause: false, prevFramePause: false }
   }
+
+  static EVENT_PAUSE_MOVING = 'EVENT_PAUSE_MOVING'
+  static EVENT_PLAY_MOVING = 'EVENT_PLAY_MOVING'
+
+  static EVENT_START_MOVING = 'EVENT_START_MOVING'
+  static EVENT_STOP_MOVING = 'EVENT_STOP_MOVING'
+  static EVENT_MOVING = 'EVENT_MOVING'
 
   /**
    *
    * @param {Vector3} point
    * @returns {Bot}
    */
-  setTarget(point) {
+  followTo(point) {
     this.path.clear().add(point)
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  clearPath() {
+    this.path.clear()
+    this._state.pause = false
+    this._state.prevFramePause = false
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  pauseMoving() {
+    this._state.pause = true
+    return this
+  }
+
+  /**
+   *
+   * @returns {Bot}
+   */
+  playMoving() {
+    this._state.pause = false
     return this
   }
 
@@ -163,7 +236,7 @@ export default class Bot extends Unit {
 
   /**
    *
-   * @param {string} key
+   * @param {string} key - Key of animation.
    * @param {number} duration
    * @returns {Bot}
    */
@@ -182,6 +255,73 @@ export default class Bot extends Unit {
 
   /**
    *
+   * @param {string} key - Key of animation.
+   * @returns {boolean}
+   */
+  isActiveAnimation(key) {
+    for (const item of this.animationItems) {
+      if (item.key === key && this.animation.activeAction === item.action) {
+        return true
+      }
+      if (item.key === key) {
+        break
+      }
+    }
+    return false
+  }
+
+  /**
+   *
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  onStartMoving(callback) {
+    this.addEventListener(Bot.EVENT_START_MOVING, callback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  onStopMoving(callback) {
+    this.addEventListener(Bot.EVENT_STOP_MOVING, callback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  onPauseMoving(callback) {
+    this.addEventListener(Bot.EVENT_PAUSE_MOVING, callback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  onPlayMoving(callback) {
+    this.addEventListener(Bot.EVENT_PLAY_MOVING, callback)
+    return this
+  }
+
+  /**
+   *
+   * @param {Function} callback
+   * @returns {Bot}
+   */
+  onMoving(callback) {
+    this.addEventListener(Bot.EVENT_MOVING, callback)
+    return this
+  }
+
+  /**
+   *
    * @param {number} delta
    * @returns {Bot}
    */
@@ -195,34 +335,46 @@ export default class Bot extends Unit {
 
     target.setY(0)
 
-    // if (this.position.equals(target)) {
-    //   target = this.path.advance().current().setY(0)
-    // }
-
     if (this.position.equals(target)) {
       return this
     }
 
+    if (this._state.pause) {
+      if (!this._state.prevFramePause) {
+        this.dispatchEvent({ type: Bot.EVENT_PAUSE_MOVING, target })
+      }
+      this._state.prevFramePause = true
+      return this
+    }
+
+    if (this._state.prevFramePause) {
+      this.dispatchEvent({ type: Bot.EVENT_PLAY_MOVING, target })
+    }
+    this._state.prevFramePause = false
+
     if (!this._tmp.target.equals(target)) {
       this._tmp.target.copy(target)
       this._tmp.orientationEnabled = true
-      // Событие кругового движения, начало.
+      this.dispatchEvent({ type: Bot.EVENT_START_MOVING, target })
     }
 
-    const rotateSpeed = 8
-    const quaternion = this.rotationTowardsTarget.calculate(this, target, rotateSpeed * delta)
+    this.displacementPush.setMaxSpeed(this.maxSpeedMoving)
+    this.displacementFollow.setMaxSpeed(this.maxSpeedMoving)
 
+    const quaternion = this.rotationTowardsTarget.calculate(this, target, this.rotateSpeed * delta)
     if (this._tmp.orientationEnabled && !this.quaternion.equals(quaternion)) {
-      this.runningAnimation()
-
       this.quaternion.copy(quaternion)
-      this.position.add(this.displacementPush.calculate(this))
+
+      // TODO: value 25: need calculate dynamically. Depend on distance to target and arc radius.
+      if (this.position.distanceTo(target) > 25) {
+        this.position.add(this.displacementPush.calculate(this))
+      }
       // Событие круговое движение, смещение.
+      this.dispatchEvent({ type: Bot.EVENT_MOVING, target, movingType: 'arc' })
       return this
     }
 
     if (this._tmp.orientationEnabled) {
-      this.runningAnimation()// TODO: move
       // Событие круговое движение, завершено.
       // Событие прямолинейное движени, начало.
     }
@@ -231,15 +383,15 @@ export default class Bot extends Unit {
 
     const displacement = this.displacementFollow.calculate(this.position, target)
     if (displacement.length() > 0) {
+      this.dispatchEvent({ type: Bot.EVENT_MOVING, target, movingType: 'direct' })
       // Событие прямолинейное движени, смещение.
       this.position.add(displacement)
     } else {
       this.path.advance()
       this.position.copy(target)
       if (this.path.finished()) {
-        this.idleAnimation()
+        this.dispatchEvent({ type: Bot.EVENT_STOP_MOVING, target })
       }
-      // Событие прямолинейное движени, завершено.
     }
 
     return this

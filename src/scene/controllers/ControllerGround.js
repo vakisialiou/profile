@@ -75,4 +75,12 @@ export class ControllerGround {
     })
     return this
   }
+
+  showClickHelperMesh() {
+
+  }
+
+  hideClickHelperMesh() {
+
+  }
 }

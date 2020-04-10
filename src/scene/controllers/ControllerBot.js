@@ -1,7 +1,6 @@
 import Bot from '@scene/units/Bot'
 import Loading from '@scene/loading/Loading'
-
-import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three'
+import { Vector3 } from 'three'
 
 const MODEL_BOT = 'MODEL_BOT'
 
@@ -26,15 +25,75 @@ export class ControllerBot {
      */
     this.bot = new Bot(this.loader.getRawModel(MODEL_BOT))
     this.bot.position.setY(2)
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.enabled = true
+
+    /**
+     *
+     * @type {Object3D|Group|null}
+     */
+    this.botTarget = null
+
+    /**
+     *
+     * @type {Array.<Object3D|Group>}
+     */
+    this._captureObjects = []
   }
 
   /**
    * @param {Engine} engine
-   * @param {Array.<Object3D|Mesh|Group>} collisionObjects
    * @returns {ControllerBot}
    */
-  preset(engine, collisionObjects = []) {
-    this.bot.setScale(20).preset().idleAnimation()
+  preset(engine) {
+    this.bot
+      .setScale(20)
+      .preset()
+      .pauseMoving()
+      .idleAnimation()
+      .onStartMoving(() => {
+        console.log('onStartMoving')
+        this.bot.runningAnimation()
+      })
+      .onStopMoving(() => {
+        console.log('onStopMoving')
+        this.bot.idleAnimation()
+      })
+      .onPlayMoving(() => {
+        console.log('onPlayMoving')
+      })
+      .onPauseMoving(() => {
+        console.log('onPauseMoving')
+      })
+      .onMoving((event) => {
+        if (event.movingType !== 'direct') {
+          // capture target can only if object look at in the same direction.
+          return
+        }
+
+        for (const item of this._captureObjects) {
+          const length = this.bot.position.distanceTo(item.position)
+          if (length <= 80) {
+            this.botTarget = item
+            this.bot.pauseMoving().shootingAnimation()
+            console.log('onMoving -> shootingAnimation')
+            return
+          }
+        }
+      })
+
+    this.bot.animation.mixer.addEventListener('finished', () => {
+      if (this.enabled === false) {
+        return
+      }
+      if (this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+        this.bot.shootingAnimation()
+      }
+    })
 
     engine.add('bot', this.bot)
 
@@ -46,11 +105,26 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Vector3} position
+   * @param {Boolean} value
    * @returns {ControllerBot}
    */
-  setPosition(position) {
-    this.bot.setPosition(position)
+  enable(value = true) {
+    if (value) {
+      this.enabled = value
+      this.bot.clearPath().playMoving()
+    } else {
+      this.bot.pauseMoving()
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Array.<Object3D|Group>} objects
+   * @returns {ControllerBot}
+   */
+  captureObjects(objects) {
+    this._captureObjects = objects
     return this
   }
 
@@ -59,8 +133,8 @@ export class ControllerBot {
    * @param {Vector3} point
    * @returns {ControllerBot}
    */
-  setTarget(point) {
-    this.bot.setTarget(point)
+  followTo(point) {
+    this.bot.playMoving().followTo(point)
     return this
   }
 }
