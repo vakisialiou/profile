@@ -187,7 +187,7 @@
           Enable bot controls by mouse.
         </BFormCheckbox>
       </div>
-      <GitHubIcon path="/src/pages/UnitPage/pages/UnitBotPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

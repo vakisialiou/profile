@@ -89,7 +89,7 @@
 <template>
   <WrapperView :autofill="true">
     <WrapperView id="model-tower-page-canvas" :autofill="true">
-      <GitHubIcon path="/src/pages/UnitPage/pages/UnitTowerPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitTowerPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

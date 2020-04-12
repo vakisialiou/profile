@@ -1,9 +1,9 @@
 import HomePage from './pages/HomePage'
 
-import UnitPage from './pages/UnitPage'
-import UnitGroundPage from './pages/UnitPage/pages/UnitGroundPage'
-import UnitTowerPage from './pages/UnitPage/pages/UnitTowerPage'
-import UnitBotPage from './pages/UnitPage/pages/UnitBotPage'
+import ExamplesPage from './pages/ExamplesPage'
+import UnitGroundPage from './pages/ExamplesPage/pages/UnitGroundPage'
+import UnitTowerPage from './pages/ExamplesPage/pages/UnitTowerPage'
+import UnitBotPage from './pages/ExamplesPage/pages/UnitBotPage'
 
 export const routes = [
   {
@@ -15,28 +15,28 @@ export const routes = [
     types: ['horizontal', 'home']
   },
   {
-    path: '/debug',
-    component: UnitPage,
+    path: '/examples',
+    component: ExamplesPage,
     icon: null,
-    name: 'Unit',
+    name: 'Examples',
     types: ['horizontal'],
     children: [
       {
-        path: '/unit/ground',
+        path: '/examples/ground',
         component: UnitGroundPage,
         icon: 'folder',
         keepAlive: true,
         name: 'Unit Ground'
       },
       {
-        path: '/unit/tower',
+        path: '/examples/tower',
         component: UnitTowerPage,
         icon: 'folder',
         keepAlive: true,
         name: 'Unit Tower'
       },
       {
-        path: '/unit/bot',
+        path: '/examples/bot',
         component: UnitBotPage,
         icon: 'folder',
         keepAlive: true,

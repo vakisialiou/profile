@@ -143,7 +143,7 @@
 <template>
   <WrapperView :autofill="true">
     <WrapperView id="model-ground-page-canvas" :autofill="true">
-      <GitHubIcon path="/src/pages/UnitPage/pages/UnitGroundPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitGroundPage" class="m-2" />
     </WrapperView>
     <WrapperView class="px-2 py-1">
       <BFormGroup label="Mouse helpers">

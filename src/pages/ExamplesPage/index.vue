@@ -4,7 +4,7 @@
   Vue.use(VueRouter)
 
   export default {
-    name: 'UnitPage',
+    name: 'ExamplesPage',
   }
 </script>
 
