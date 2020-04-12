@@ -182,7 +182,6 @@
         <BFormCheckbox
           v-model="botMouseControlEnabled"
           v-on:input="toggleMouseControl"
-          size="lg"
           switch
         >
           Enable bot controls by mouse.
