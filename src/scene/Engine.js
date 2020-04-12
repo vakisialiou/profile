@@ -241,6 +241,24 @@ class Engine {
   }
 
   /**
+   *
+   * @param {(Mesh|Group|Object3D|Unit)} mesh
+   * @returns {boolean}
+   */
+  has(mesh) {
+    for (const createdCategory in this.units) {
+      if (!this.units.hasOwnProperty(createdCategory)) {
+        continue
+      }
+      const itemIndex = this.units[createdCategory].indexOf(mesh)
+      if (itemIndex !== -1) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
    * Add element to scene and distribute to different category to quick search.
    *
    * @param {string} category

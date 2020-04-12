@@ -82,7 +82,7 @@ export class ControllerTower {
 
   /**
    *
-   * @param mesh
+   * @param {Object3D|Group|Unit} mesh
    * @returns {ControllerTower}
    */
   setTarget(mesh) {

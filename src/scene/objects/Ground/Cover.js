@@ -1,6 +1,6 @@
-import { Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
+import { Mesh, MeshBasicMaterial, PlaneGeometry, FaceColors } from 'three'
 
-export default class BaseModelGround extends Mesh {
+export default class Cover extends Mesh {
   constructor(options) {
     super()
 
@@ -14,6 +14,6 @@ export default class BaseModelGround extends Mesh {
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: options.color, transparent: true, opacity: 0.8 })
+    this.material = new MeshBasicMaterial({ color: options.color, transparent: true, opacity: 0.8, vertexColors: FaceColors })
   }
 }

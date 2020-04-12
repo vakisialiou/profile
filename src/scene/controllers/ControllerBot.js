@@ -56,28 +56,20 @@ export class ControllerBot {
       .pauseMoving()
       .idleAnimation()
       .onStartMoving(() => {
-        console.log('onStartMoving')
-        // this.bot.setSpeed(1.5).runningAnimation()
         for (const item of this._captureObjects) {
           const length = this.bot.position.distanceTo(item.position)
-          if (length > 60) {
-            // побежали к точке
+          if (length > 60 && length < 300) {
+            // Move to point.
             this.bot.setSpeed(1).runningForwardAnimation()
-          } else {
-            // точка слишком близко. нужно отойти назад
+            return
+          } else if (length <= 60) {
+            // Move from point.
             this.bot.setSpeed(-1.5).runningBackwardAnimation()
+            return
           }
         }
-      })
-      .onStopMoving(() => {
-        console.log('onStopMoving')
-        this.bot.idleAnimation()
-      })
-      .onPlayMoving(() => {
-        console.log('onPlayMoving')
-      })
-      .onPauseMoving(() => {
-        console.log('onPauseMoving')
+
+        this.bot.setSpeed(1.5).runningAnimation()
       })
       .onMoving((event) => {
         if (event.movingType !== 'direct') {
@@ -89,23 +81,23 @@ export class ControllerBot {
           const length = this.bot.position.distanceTo(item.position)
           if (length > 60 && length <= 140) {
             this.botTarget = item
-            // цель в зоне прицеливания, можно стрелять
+            // Stay on the place and shooting to the target.
             this.bot.pauseMoving().shootingAnimation()
-            console.log('onMoving -> shootingAnimation')
             return
           }
           if (length <= 60) {
-            // точка слишком близко. нужно отойти назад
+            // Move from point.
             this.bot.setSpeed(-1.5).runningBackwardAnimation()
           }
         }
       })
+      .onStopMoving(() => this.bot.idleAnimation())
 
     this.bot.animation.mixer.addEventListener('finished', () => {
       if (this.enabled === false) {
         return
       }
-      if (this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+      if (this.botTarget && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
       }
     })
