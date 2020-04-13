@@ -130,7 +130,8 @@
                   break
                 case 'Face':
                   const facePosition = ground.extractFacePosition(intersection)
-                  helperMouseFace.position.copy(facePosition)
+                  const faceDirection = ground.extractFaceDirection(intersection)
+                  helperMouseFace.update(facePosition, faceDirection, 30)
                   break
               }
             })
