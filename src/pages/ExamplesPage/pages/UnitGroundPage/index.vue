@@ -115,6 +115,8 @@
                 return
               }
 
+              const faceDirection = ground.extractFaceDirection(intersection)
+
               switch (this.selectedMouseHelper) {
                 case 'Segment':
                   const segmentPosition = ground.extractSegmentPosition(intersection)
@@ -126,11 +128,10 @@
                   break
                 case 'Click':
                   const mousePosition = ground.extractMouse3DPosition(intersection)
-                  helperMouseClick.position.copy(mousePosition)
+                  helperMouseClick.update(mousePosition, faceDirection)
                   break
                 case 'Face':
                   const facePosition = ground.extractFacePosition(intersection)
-                  const faceDirection = ground.extractFaceDirection(intersection)
                   helperMouseFace.update(facePosition, faceDirection, 30)
                   break
               }
