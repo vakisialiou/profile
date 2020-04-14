@@ -1,11 +1,13 @@
 import Bot from '@scene/units/Bot'
 import Loading from '@scene/loading/Loading'
-import { Vector3 } from 'three'
+import { loading as loadingBullet, ControllerBullet } from './ControllerBullet'
+import { Vector3, Math as _Math } from 'three'
 
 const MODEL_BOT = 'MODEL_BOT'
 
 export const loading = new Loading()
   .addItem(Loading.TYPE_MODEL, MODEL_BOT, '/models/bot/bot.glb')
+  .addLoading(loadingBullet)
 
 export class ControllerBot {
   /**
@@ -94,6 +96,18 @@ export class ControllerBot {
         if (length > 60 && length <= 140 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
           // Stay on the place and shooting to the target.
           this.bot.pauseMoving().shootingAnimation()
+
+          const gunPosition = new Vector3().copy(this.bot.position).setY(30)
+          const direction = this.bot
+            .getWorldDirection(new Vector3())
+            .add(new Vector3(_Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01)))
+            .multiplyScalar(-1)
+          const collisionObjects = []
+          new ControllerBullet(this.loader)
+            .setPosition(gunPosition)
+            .setDirection(direction)
+            .preset(engine, collisionObjects)
+
           return
         }
 
@@ -111,6 +125,16 @@ export class ControllerBot {
 
       if (this.target && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
+
+        const gunPosition = new Vector3().copy(this.bot.position).setY(30)
+        const direction = this.bot.getWorldDirection(new Vector3())
+          .add(new Vector3(_Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01)))
+          .multiplyScalar(-1)
+        const collisionObjects = []
+        new ControllerBullet(this.loader)
+          .setPosition(gunPosition)
+          .setDirection(direction)
+          .preset(engine, collisionObjects)
       }
     })
 

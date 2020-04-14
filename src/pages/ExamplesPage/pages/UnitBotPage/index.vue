@@ -6,7 +6,7 @@
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import Bot from '@scene/units/Bot'
-  import { Vector3, Math as _Math, Mesh, MeshStandardMaterial, CylinderGeometry } from 'three'
+  import { Vector3, Math as _Math, Mesh, MeshStandardMaterial, CylinderGeometry, MOUSE } from 'three'
   import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
@@ -64,8 +64,10 @@
       },
       toggleMouseControl: function () {
         if (this.botMouseControlEnabled) {
+          switchMouseControls(engine, 'bot-controller-rotation')
           botController.enable(true)
         } else {
+          switchMouseControls(engine, 'example-animations')
           botController.enable(false)
           this.toggleAnimation()
         }
@@ -86,6 +88,8 @@
 
       loader.preset().then(() => {
         engine.preset().then(() => {
+          switchMouseControls(engine, 'example-animations')
+
           const lightPosition = new Vector3(70, 70, 70)
           const cameraLookAt = new Vector3(0, 0, 0)
           const cameraPosition = new Vector3(-100, 0, 100)
@@ -138,10 +142,22 @@
 
           engine
             .addEventListener(Engine.EVENT_KEY_DOWN, ({event}) => {
+              if (!this.botMouseControlEnabled) {
+                return
+              }
+
               activeKeyCode = event.keyCode
+              if (event.keyCode === 17) {
+                switchMouseControls(engine, 'bot-controller-pan')
+              }
             })
             .addEventListener(Engine.EVENT_KEY_UP, ({event}) => {
+              if (!this.botMouseControlEnabled) {
+                return
+              }
+
               activeKeyCode = null
+              switchMouseControls(engine, 'bot-controller-rotation')
             })
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
               if (!this.botMouseControlEnabled) {
@@ -174,6 +190,33 @@
       })
     },
   }
+
+  /**
+   *
+   * @param {Engine} engine
+   * @param {string} type
+   * @returns {void}
+   */
+  function switchMouseControls(engine, type) {
+    switch (type) {
+      case 'example-animations':
+        engine.enableAutoRotate(true).enableMousePan(false).enableMouseRotate(false)
+      break
+      case 'bot-controller-rotation':
+        engine.enableAutoRotate(false).enableMousePan(false).enableMouseRotate(true)
+        engine.mapControls.mouseButtons = {
+          RIGHT: MOUSE.ROTATE,
+        }
+      break
+      case 'bot-controller-pan':
+        engine.enableAutoRotate(false).enableMousePan(true).enableMouseRotate(false)
+        engine.mapControls.mouseButtons = {
+          RIGHT: MOUSE.PAN
+        }
+        break
+    }
+  }
+
 </script>
 
 <template>
@@ -216,10 +259,17 @@
 
           <div class="mx-2">
             <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" />
-            <b-popover ref="popover" target="controls-helper" title="To use bot controller try:" triggers="focus">
+            <b-popover ref="popover" target="controls-helper" title="Control" triggers="focus">
+              Bot:
+              <br/>
               1. <b>Left Click</b> - moving to click position.
               <br/>
-              2. <b>Ctrl + Left Click</b> on any object - moving to object's position and attack.
+              2. <b>Ctrl + Left Click</b> (click on any object) - moving to object's direction and attack.
+              Camera:
+              <br/>
+              1. <b>Right Click</b> - rotate camera.
+              <br/>
+              2. <b>Ctrl + Right Click</b> - displace camera.
             </b-popover>
           </div>
         </div>

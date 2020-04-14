@@ -67,15 +67,17 @@ class Engine {
     this.mapControls = new MapControls(this.camera, this.renderer.domElement)
     this.mapControls.enableDamping = true
     this.mapControls.enableKeys = false
-    this.mapControls.dampingFactor = 0.15
+    this.mapControls.dampingFactor = 0.05
     this.mapControls.maxPolarAngle = _Math.degToRad(70)
     this.mapControls.minPolarAngle = _Math.degToRad(10)
     this.mapControls.minDistance = 120
     this.mapControls.maxDistance = 620
     this.mapControls.keys = {}
+    this.mapControls.enablePan = true
+    this.mapControls.enableRotate = true
     this.mapControls.mouseButtons = {
-      LEFT: MOUSE.PAN,
-      RIGHT: MOUSE.ROTATE,
+      LEFT: MOUSE.ROTATE,
+      RIGHT: MOUSE.PAN,
     }
 
     /**
@@ -672,11 +674,13 @@ class Engine {
       return this
     }
 
-    this.physicsWorld.step()
     this.mapControls.update()
+    this.physicsWorld.step()
+
     for (const updateCallback of this.updates) {
       updateCallback(delta)
     }
+
     this.renderer.update()
     return this
   }
