@@ -514,6 +514,8 @@ class Engine {
 
   static EVENT_MOUSE_DOWN = 'EVENT_MOUSE_DOWN'
   static EVENT_MOUSE_MOVE = 'EVENT_MOUSE_MOVE'
+  static EVENT_KEY_DOWN = 'EVENT_KEY_DOWN'
+  static EVENT_KEY_UP = 'EVENT_KEY_UP'
 
   /**
    *
@@ -570,6 +572,7 @@ class Engine {
    */
   _boardKeyDown(event) {
     this.register.activeKeyCode = event.keyCode
+    this.events.dispatchEvent({ type: Engine.EVENT_KEY_DOWN, event })
   }
 
   /**
@@ -577,8 +580,9 @@ class Engine {
    * @param {KeyboardEvent} event
    * @private
    */
-  _boardKeyUp() {
+  _boardKeyUp(event) {
     this.register.activeKeyCode = null
+    this.events.dispatchEvent({ type: Engine.EVENT_KEY_UP, event })
   }
 
   /**

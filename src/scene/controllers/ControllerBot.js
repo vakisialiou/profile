@@ -9,6 +9,8 @@ export const loading = new Loading()
 
 export class ControllerBot {
   /**
+   * Use method "followTo" to move object to specific position.
+   * Use method
    *
    * @param {Loading} loader
    */
@@ -34,15 +36,15 @@ export class ControllerBot {
 
     /**
      *
-     * @type {Object3D|Group|null}
+     * @type {Object3D|Group|Unit|null}
      */
-    this.botTarget = null
+    this.target = null
 
-    /**
-     *
-     * @type {Array.<Object3D|Group>}
-     */
-    this._captureObjects = []
+    this.speed = {
+      running: 1.5,
+      runningForward: 1,
+      runningBackward: - 1,
+    }
   }
 
   /**
@@ -56,20 +58,21 @@ export class ControllerBot {
       .pauseMoving()
       .idleAnimation()
       .onStartMoving(() => {
-        for (const item of this._captureObjects) {
-          const length = this.bot.position.distanceTo(item.position)
-          if (length > 60 && length < 300) {
-            // Move to point.
-            this.bot.setSpeed(1).runningForwardAnimation()
-            return
-          } else if (length <= 60) {
-            // Move from point.
-            this.bot.setSpeed(-1.5).runningBackwardAnimation()
-            return
-          }
+        if (!this.target) {
+          this.bot.setSpeed(this.speed.running).runningAnimation()
+          return
         }
 
-        this.bot.setSpeed(1.5).runningAnimation()
+        const length = this.bot.position.distanceTo(this.target.position)
+        if (length > 60 && length < 300) {
+          // Move to point.
+          this.bot.setSpeed(this.speed.runningForward).runningForwardAnimation()
+        } else if (length <= 60) {
+          // Move from point.
+          this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
+        } else {
+          this.bot.setSpeed(this.speed.running).runningAnimation()
+        }
       })
       .onMoving((event) => {
         if (event.movingType !== 'direct') {
@@ -77,18 +80,26 @@ export class ControllerBot {
           return
         }
 
-        for (const item of this._captureObjects) {
-          const length = this.bot.position.distanceTo(item.position)
-          if (length > 60 && length <= 140) {
-            this.botTarget = item
-            // Stay on the place and shooting to the target.
-            this.bot.pauseMoving().shootingAnimation()
-            return
-          }
-          if (length <= 60) {
-            // Move from point.
-            this.bot.setSpeed(-1.5).runningBackwardAnimation()
-          }
+        if (!this.target) {
+          return
+        }
+
+        const length = this.bot.position.distanceTo(this.target.position)
+
+        if (length > 140 && length <= 240 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)) {
+          this.bot.setSpeed(this.speed.runningForward).runningForwardAnimation()
+          return
+        }
+
+        if (length > 60 && length <= 140 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+          // Stay on the place and shooting to the target.
+          this.bot.pauseMoving().shootingAnimation()
+          return
+        }
+
+        if (length <= 60 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)) {
+          // Move from point.
+          this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
         }
       })
       .onStopMoving(() => this.bot.idleAnimation())
@@ -97,7 +108,8 @@ export class ControllerBot {
       if (this.enabled === false) {
         return
       }
-      if (this.botTarget && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+
+      if (this.target && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
       }
     })
@@ -127,11 +139,24 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Array.<Object3D|Group>} objects
+   * @param {Object3D|Group|Unit} value
    * @returns {ControllerBot}
    */
-  captureObjects(objects) {
-    this._captureObjects = objects
+  setTarget(value) {
+    if (this.target === value) {
+      return this
+    }
+    this.target = value
+    this.followTo(value.position)
+    return this
+  }
+
+  /**
+   *
+   * @returns {ControllerBot}
+   */
+  captureTarget() {
+    this.target = null
     return this
   }
 

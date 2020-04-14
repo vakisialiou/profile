@@ -112,6 +112,10 @@
           })
 
           botController.bot.animation.mixer.addEventListener('finished', () => {
+            if (this.botMouseControlEnabled) {
+              return
+            }
+
             if (botController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
               botController.bot.shootingAnimation()
             }
@@ -129,22 +133,42 @@
             .renderStats(container)
             .registerEvents()
             .animate()
+
+          let activeKeyCode = null
+
+          engine
+            .addEventListener(Engine.EVENT_KEY_DOWN, ({event}) => {
+              activeKeyCode = event.keyCode
+            })
+            .addEventListener(Engine.EVENT_KEY_UP, ({event}) => {
+              activeKeyCode = null
+            })
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
               if (!this.botMouseControlEnabled) {
+                return
+              }
+
+              if (event.buttons !== 1) {
                 return
               }
 
               // This page has top menu. Need set mouse offset on height it menu.
               ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
-              const intersection = ground.findIntersection(event, engine.camera)
+              const intersection = ground.findIntersection(event, engine.camera, captureObjects)
               if (!intersection) {
                 return
               }
 
               const mousePosition = ground.extractMouse3DPosition(intersection)
-              helperMouseClick.position.copy(mousePosition)
-              botController.followTo(mousePosition)
+              const faceDirection = ground.extractFaceDirection(intersection)
+              helperMouseClick.update(mousePosition, faceDirection)
+
+              if (activeKeyCode === 17 && captureObjects.includes(intersection.object)) {
+                botController.setTarget(intersection.object)
+              } else {
+                botController.captureTarget().followTo(mousePosition)
+              }
             })
         })
       })

@@ -111,6 +111,13 @@ export default class Bot extends Unit {
      * @private
      */
     this._state = { pause: false, prevFramePause: false }
+
+    /**
+     *
+     * @type {string|?}
+     * @private
+     */
+    this._activeActionKey = null
   }
 
   static EVENT_PAUSE_MOVING = 'EVENT_PAUSE_MOVING'
@@ -293,6 +300,7 @@ export default class Bot extends Unit {
       if (item.disabled) {
         break
       }
+      this._activeActionKey = key
       this.animation.enableAction(item.action, duration)
     }
     return this
@@ -304,15 +312,7 @@ export default class Bot extends Unit {
    * @returns {boolean}
    */
   isActiveAnimation(key) {
-    for (const item of this.animationItems) {
-      if (item.key === key && this.animation.activeAction === item.action) {
-        return true
-      }
-      if (item.key === key) {
-        break
-      }
-    }
-    return false
+    return this._activeActionKey === key
   }
 
   /**
