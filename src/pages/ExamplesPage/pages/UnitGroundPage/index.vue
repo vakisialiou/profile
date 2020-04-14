@@ -11,7 +11,7 @@
   import HelperGridSegments from '@scene/objects/Ground/Helpers/HelperGridSegments'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
-  import { BoxGeometry, Math as _Math, Mesh, MeshBasicMaterial, Vector3, FaceColors } from 'three'
+  import { BoxGeometry, Math as _Math, Mesh, MeshStandardMaterial, Vector3, FaceColors } from 'three'
 
   let engine = null
   const TEXTURE_GROUND = 'TEXTURE_GROUND'
@@ -83,7 +83,7 @@
           const intersectionObjects = []
           for (let i = 0; i < 5; i++) {
             const geometry = new BoxGeometry(20, 30, 20)
-            const material = new MeshBasicMaterial({color: 0x0000FF, vertexColors: FaceColors})
+            const material = new MeshStandardMaterial({ color: 0x666666, vertexColors: FaceColors })
             const item = new Mesh(geometry, material)
             item.position.setX(_Math.randInt(-500, 500))
             item.position.setZ(_Math.randInt(-500, 500))

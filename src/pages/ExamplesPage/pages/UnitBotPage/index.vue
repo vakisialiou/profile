@@ -1,18 +1,18 @@
 <script>
   import './index.less'
-  import { BFormGroup, BFormRadioGroup, BFormCheckbox } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import Bot from '@scene/units/Bot'
-  import { Vector3, Math as _Math, Mesh, MeshBasicMaterial, CylinderGeometry } from 'three'
+  import { Vector3, Math as _Math, Mesh, MeshStandardMaterial, CylinderGeometry } from 'three'
   import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
 
   const geometry = new CylinderGeometry(10, 10, 30, 16, 16)
-  const material = new MeshBasicMaterial({ color: 0xFF00FF })
+  const material = new MeshStandardMaterial({ color: 0x666666 })
   const cube = new Mesh(geometry, material)
 
   let engine = null
@@ -26,7 +26,7 @@
 
   export default {
     name: 'UnitBotPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox },
+    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
         selectedAnimation: Bot.ANIMATION_KEY_IDLE,
@@ -201,16 +201,31 @@
             name="checkbox-btn-default"
             :disabled="botMouseControlEnabled"
           />
+
         </BFormGroup>
 
-        <BFormCheckbox
-          v-model="botMouseControlEnabled"
-          v-on:input="toggleMouseControl"
-          switch
-        >
-          Enable bot controls by mouse.
-        </BFormCheckbox>
+        <div class="d-flex">
+
+          <BFormCheckbox
+            v-model="botMouseControlEnabled"
+            v-on:input="toggleMouseControl"
+            switch
+          >
+            <span>Enable bot controller.</span>
+          </BFormCheckbox>
+
+          <div class="mx-2">
+            <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" />
+            <b-popover ref="popover" target="controls-helper" title="To use bot controller try:" triggers="focus">
+              1. <b>Left Click</b> - moving to click position.
+              <br/>
+              2. <b>Ctrl + Left Click</b> on any object - moving to object's position and attack.
+            </b-popover>
+          </div>
+        </div>
+
       </div>
+
       <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotPage" class="m-2" />
     </WrapperView>
   </WrapperView>
