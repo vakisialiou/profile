@@ -1,20 +1,20 @@
 import { SPE } from '@scene/libs/SPE'
-import { AdditiveBlending, Color, NormalBlending, Vector3 } from 'three'
+import { AdditiveBlending, MultiplyBlending, Color, NormalBlending, Vector3 } from 'three'
 
-export default class TowerEffect {
+export default class BotEffect {
   constructor() {
 
     this.shotEffectSettings = {
       type: SPE.distributions.SPHERE,
       position: {
-        spread: new Vector3(10),
+        spread: new Vector3(0.4),
         radius: 1,
       },
       velocity: {
         value: new Vector3( 10 )
       },
       size: {
-        value: [ 30, 0 ]
+        value: [ 6, 0 ]
       },
       opacity: {
         value: [1, 0]
@@ -32,21 +32,21 @@ export default class TowerEffect {
 
     this.shockMistSettings = {
       particleCount: 1,
-      position: {
-        distribution: SPE.distributions.SPHERE
-      },
+      // position: {
+      //   distribution: SPE.distributions.SPHERE
+      // },
       alive: true,
-      maxAge: { value: 2 },
+      maxAge: { value: 1 },
       duration: 1,
       velocity: {
         value: new Vector3( 14, 3, 10 ),
         distribution: SPE.distributions.SPHERE
       },
       acceleration: {
-        value: new Vector3( 0, 4, 0 ),
-        distribution: SPE.distributions.BOX
+        value: new Vector3( 0, 10, 0 ),
+        distribution: SPE.distributions.SPHERE
       },
-      size: { value: 100 },
+      size: { value: 40 },
       color: {
         value: [
           new Color( 0.2, 0.2, 0.2 ),
@@ -66,42 +66,47 @@ export default class TowerEffect {
   /**
    *
    * @param {Texture} texture
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   createShotEffect(texture) {
-    if (this.groups.hasOwnProperty(TowerEffect.EFFECT_SHOT)) {
-      throw new Error(`Effect '${TowerEffect.EFFECT_SHOT}' has already created in TowerEffect`)
+    if (this.groups.hasOwnProperty(BotEffect.EFFECT_SHOT)) {
+      throw new Error(`Effect '${BotEffect.EFFECT_SHOT}' has already created in BotEffect`)
     }
     const particleGroup = new SPE.Group({
       texture: { value: texture },
       blending: AdditiveBlending,
       maxParticleCount: 2000,
+      // depthTest: false,
+      // // alphaTest: false,
+      // depthWrite: true,
     })
 
     particleGroup.addPool(10, this.shotEffectSettings, false)
-    this.groups[TowerEffect.EFFECT_SHOT] = particleGroup
+    this.groups[BotEffect.EFFECT_SHOT] = particleGroup
     return this
   }
 
   /**
    *
    * @param {Texture} texture
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   createMistEffect(texture) {
-    if (this.groups.hasOwnProperty(TowerEffect.EFFECT_MIST)) {
-      throw new Error(`Effect '${TowerEffect.EFFECT_MIST}' has already created in TowerEffect`)
+    if (this.groups.hasOwnProperty(BotEffect.EFFECT_MIST)) {
+      throw new Error(`Effect '${BotEffect.EFFECT_MIST}' has already created in BotEffect`)
     }
     const particleGroup = new SPE.Group({
       texture: { value: texture },
-      depthTest: false,
-      depthWrite: true,
+      // depthTest: false,
+      // depthWrite: true,
+      // depthTest: false,
+      // depthWrite: true,
       blending: NormalBlending,
       maxParticleCount: 2000
     })
 
     particleGroup.addPool(10, this.shockMistSettings, false)
-    this.groups[TowerEffect.EFFECT_MIST] = particleGroup
+    this.groups[BotEffect.EFFECT_MIST] = particleGroup
 
     return this
   }
@@ -109,20 +114,20 @@ export default class TowerEffect {
   /**
    *
    * @param {Vector3} position
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   emmitShotEffect(position) {
-    this._emmitEffect(TowerEffect.EFFECT_SHOT, position)
+    this._emmitEffect(BotEffect.EFFECT_SHOT, position)
     return this
   }
 
   /**
    *
    * @param {Vector3} position
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   emmitMistEffect(position) {
-    this._emmitEffect(TowerEffect.EFFECT_MIST, position)
+    this._emmitEffect(BotEffect.EFFECT_MIST, position)
     return this
   }
 
@@ -131,7 +136,7 @@ export default class TowerEffect {
    * @returns {Mesh}
    */
   getShotMesh() {
-    const particleGroup = this._getGroup(TowerEffect.EFFECT_SHOT)
+    const particleGroup = this._getGroup(BotEffect.EFFECT_SHOT)
     particleGroup.mesh.frustumCulled = false
     return particleGroup['mesh']
   }
@@ -141,7 +146,7 @@ export default class TowerEffect {
    * @returns {Mesh}
    */
   getMistMesh() {
-    const particleGroup = this._getGroup(TowerEffect.EFFECT_MIST)
+    const particleGroup = this._getGroup(BotEffect.EFFECT_MIST)
     particleGroup.mesh.frustumCulled = false
     return particleGroup['mesh']
   }
@@ -149,7 +154,7 @@ export default class TowerEffect {
   /**
    *
    * @param {number} delta
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   update(delta) {
     for (const groupName in this.groups) {
@@ -166,7 +171,7 @@ export default class TowerEffect {
    *
    * @param {string} type
    * @param {Vector3} position
-   * @returns {TowerEffect}
+   * @returns {BotEffect}
    */
   _emmitEffect(type, position) {
     this._getGroup(type).triggerPoolEmitter(1, position)
@@ -181,7 +186,7 @@ export default class TowerEffect {
    */
   _getGroup(type) {
     if (!this.groups.hasOwnProperty(type)) {
-      throw Error(`Unknown group ${type}. Before emmit effect you must create it. Look at TowerEffect._emmitEffect`)
+      throw Error(`Unknown group ${type}. Before emmit effect you must create it. Look at BotEffect._emmitEffect`)
     }
     return this.groups[type]
   }

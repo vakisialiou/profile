@@ -1,12 +1,15 @@
 import Bot from '@scene/units/Bot'
 import Loading from '@scene/loading/Loading'
+import BotEffect from '@scene/effects/BotEffect'
 import { loading as loadingBullet, ControllerBullet } from './ControllerBullet'
-import { Vector3, Math as _Math } from 'three'
+import { Vector3 } from 'three'
 
 const MODEL_BOT = 'MODEL_BOT'
+const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
 
 export const loading = new Loading()
   .addItem(Loading.TYPE_MODEL, MODEL_BOT, '/models/bot/bot.glb')
+  .addItem(Loading.TYPE_TEXTURE, TEXTURE_SMOKE_PARTICLE, '/images/spe/smokeparticle.png')
   .addLoading(loadingBullet)
 
 export class ControllerBot {
@@ -32,6 +35,14 @@ export class ControllerBot {
 
     /**
      *
+     * @type {BotEffect}
+     */
+    this.botEffect = new BotEffect()
+      .createShotEffect(this.loader.getTexture(TEXTURE_SMOKE_PARTICLE))
+      .createMistEffect(this.loader.getTexture(TEXTURE_SMOKE_PARTICLE))
+
+    /**
+     *
      * @type {boolean}
      */
     this.enabled = true
@@ -46,7 +57,14 @@ export class ControllerBot {
       running: 1.5,
       runningForward: 1,
       runningBackward: - 1,
+      walking: 0.5,
     }
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.patrol = false
 
     this.enemies = []
   }
@@ -57,13 +75,13 @@ export class ControllerBot {
    */
   preset(engine) {
     this.bot
-      .setScale(20)
-      .preset()
-      .pauseMoving()
-      .idleAnimation()
       .onStartMoving(() => {
         if (!this.target) {
-          this.bot.setSpeed(this.speed.running).runningAnimation()
+          if (this.patrol) {
+            this.bot.setSpeed(this.speed.walking).walkingAnimation()
+          } else {
+            this.bot.setSpeed(this.speed.running).runningAnimation()
+          }
           return
         }
 
@@ -75,7 +93,11 @@ export class ControllerBot {
           // Move from point.
           this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
         } else {
-          this.bot.setSpeed(this.speed.running).runningAnimation()
+          if (this.patrol) {
+            this.bot.setSpeed(this.speed.walking).walkingAnimation()
+          } else {
+            this.bot.setSpeed(this.speed.running).runningAnimation()
+          }
         }
       })
       .onMoving((event) => {
@@ -99,10 +121,15 @@ export class ControllerBot {
           // Stay on the place and shooting to the target.
           this.bot.pauseMoving().shootingAnimation()
 
+          const weaponPosition = this.bot.getWeaponPosition()
           new ControllerBullet(this.loader)
-            .setPosition(this.bot.getWeaponPosition())
+            .setPosition(weaponPosition)
             .setDirection(this.bot.getWeaponDirection())
             .preset(engine, this.enemies)
+
+          // Провацировать эффек выстрела.
+          this.botEffect.emmitShotEffect(weaponPosition)
+          this.botEffect.emmitMistEffect(weaponPosition)
 
           return
         }
@@ -113,6 +140,9 @@ export class ControllerBot {
         }
       })
       .onStopMoving(() => this.bot.idleAnimation())
+      .idleAnimation()
+      .setScale(20)
+      .preset()
 
     this.bot.animation.mixer.addEventListener('finished', () => {
       if (this.enabled === false) {
@@ -122,17 +152,25 @@ export class ControllerBot {
       if (this.target && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
 
+        const weaponPosition = this.bot.getWeaponPosition()
         new ControllerBullet(this.loader)
-          .setPosition(this.bot.getWeaponPosition())
+          .setPosition(weaponPosition)
           .setDirection(this.bot.getWeaponDirection())
           .preset(engine, this.enemies)
+
+        // Провацировать эффек выстрела.
+        this.botEffect.emmitShotEffect(weaponPosition)
+        this.botEffect.emmitMistEffect(weaponPosition)
       }
     })
 
     engine.add('bot', this.bot)
+      .add('bot-effect', this.botEffect.getShotMesh()) // Добавить на сцену эффекты
+      .add('bot-effect', this.botEffect.getMistMesh()) // Добавить на сцену эффекты
 
     engine.addUpdate((delta) => {
       this.bot.update(delta)
+      this.botEffect.update(delta)
     })
     return this
   }
@@ -149,6 +187,37 @@ export class ControllerBot {
     } else {
       this.bot.pauseMoving()
     }
+    return this
+  }
+
+  /**
+   *
+   * @param {boolean} value
+   * @returns {ControllerBot}
+   */
+  patrolling(value) {
+    this.patrol = value
+    return this
+  }
+
+  /**
+   *
+   * @param {Vector3} position
+   * @returns {ControllerBot}
+   */
+  setPosition(position) {
+    this.bot.position.copy(position)
+    this.bot.position.setY(2)
+    return this
+  }
+
+  /**
+   *
+   * @param {Object3D|Mesh|Group|Unit} enemies
+   * @returns {ControllerBot}
+   */
+  setEnemies(enemies) {
+    this.enemies = enemies
     return this
   }
 
@@ -181,7 +250,18 @@ export class ControllerBot {
    * @returns {ControllerBot}
    */
   followTo(point) {
-    this.bot.playMoving().followTo(point)
+    this.bot.followTo(point).playMoving()
+    return this
+  }
+
+  /**
+   *
+   * @param {Array.<Vector3>} points
+   * @param {boolean} [loop]
+   * @returns {ControllerBot}
+   */
+  setPath(points, loop = false) {
+    this.bot.setPath(points, loop).playMoving()
     return this
   }
 }

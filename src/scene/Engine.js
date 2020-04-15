@@ -52,7 +52,7 @@ class Engine {
      *
      * @type {PerspectiveCamera}
      */
-    this.camera = new PerspectiveCamera(60, this.width / this.height, 1, 5000)
+    this.camera = new PerspectiveCamera(50, this.width / this.height, 1, 5000)
 
     /**
      *

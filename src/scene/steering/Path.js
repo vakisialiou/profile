@@ -40,13 +40,12 @@ export default class Path {
     }
 
     this.index++
-
-    if (this.loop === false && this.points.length < (this.index - 1)) {
+    if (this.loop === false && this.points.length < (this.index + 1)) {
       this.index--
       return this
     }
 
-    if (this.loop === true && this.points.length < (this.index - 1)) {
+    if (this.loop === true && this.points.length < (this.index + 1)) {
       this.index = 0
     }
     return this
@@ -76,6 +75,9 @@ export default class Path {
    * @returns {boolean}
    */
   finished() {
-    return this.loop === false && this.points.length === this.index
+    if (this.points.length === 0) {
+      return true
+    }
+    return this.loop === false && this.points.length === (this.index + 1)
   }
 }

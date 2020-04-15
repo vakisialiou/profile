@@ -167,12 +167,28 @@ export default class Bot extends Unit {
   }
 
   /**
+   * Follow to specific point. Stop when you reach a point.
    *
    * @param {Vector3} point
    * @returns {Bot}
    */
   followTo(point) {
     this.path.clear().add(point)
+    return this
+  }
+
+  /**
+   * Follow from one to another point.
+   *
+   * @param {Array.<Vector3>} points
+   * @param {boolean} [loop]
+   * @returns {Bot}
+   */
+  setPath(points, loop = false) {
+    this.path.loop = loop
+    for (const point of points) {
+      this.path.add(point)
+    }
     return this
   }
 
@@ -403,8 +419,10 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   update(delta) {
+    delta = delta === 0 ? 0.0000000001 : delta
     super.update(delta)
 
+    // Select last point.
     let target = this.path.current()
     if (!target) {
       return this
@@ -413,9 +431,16 @@ export default class Bot extends Unit {
     target.setY(this.position.y)
 
     if (this.position.equals(target)) {
-      return this
+      if (this.path.loop) {
+        // Looping path. Select first point.
+        target = this.path.advance().current()
+        target.setY(this.position.y)
+      } else {
+        return this
+      }
     }
 
+    // Pause control.
     if (this._state.pause) {
       if (!this._state.prevFramePause) {
         this.dispatchEvent({ type: Bot.EVENT_PAUSE_MOVING, target })
@@ -429,6 +454,7 @@ export default class Bot extends Unit {
     }
     this._state.prevFramePause = false
 
+    // Remember active target.
     if (!this._tmp.target.equals(target)) {
       this._tmp.target.copy(target)
       this._tmp.orientationEnabled = true
@@ -438,6 +464,7 @@ export default class Bot extends Unit {
     this.displacementPush.setMaxSpeed(this.maxSpeedMoving)
     this.displacementFollow.setMaxSpeed(this.maxSpeedMoving)
 
+    // Arc moving.
     const quaternion = this.rotationTowardsTarget.calculate(this, target, this.rotateSpeed * delta)
     if (this._tmp.orientationEnabled && !this.quaternion.equals(quaternion)) {
       this.quaternion.copy(quaternion)
@@ -458,6 +485,7 @@ export default class Bot extends Unit {
 
     this._tmp.orientationEnabled = false
 
+    // Direct moving.
     const displacement = this.displacementFollow.calculate(this.position, target)
     if (displacement.length() > 0) {
       this.dispatchEvent({ type: Bot.EVENT_MOVING, target, movingType: 'direct' })

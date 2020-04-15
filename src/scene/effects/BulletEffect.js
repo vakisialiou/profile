@@ -208,6 +208,7 @@ export default class BulletEffect {
    */
   getShockWaveMesh() {
     const particleGroup = this._getGroup(BulletEffect.EFFECT_SHOCK_WAVE)
+    particleGroup.mesh.frustumCulled = false
     return particleGroup['mesh']
   }
 
@@ -217,6 +218,7 @@ export default class BulletEffect {
    */
   getMistMesh() {
     const particleGroup = this._getGroup(BulletEffect.EFFECT_MIST)
+    particleGroup.mesh.frustumCulled = false
     return particleGroup['mesh']
   }
 

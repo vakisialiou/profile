@@ -11,12 +11,8 @@
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
 
-  const geometry = new CylinderGeometry(10, 10, 30, 16, 16)
-  const material = new MeshStandardMaterial({ color: 0x666666 })
-  const cube = new Mesh(geometry, material)
-
   let engine = null
-  let botController = null
+  let userBotController = null
 
   const TEXTURE_GROUND = 'TEXTURE_GROUND'
 
@@ -44,31 +40,31 @@
           { text: 'Active', value: 'Active' },
           { text: 'Pause', value: 'Pause' },
         ],
-        botMouseControlEnabled: false
+        botMouseControlEnabled: true
       }
     },
     methods: {
       toggleAnimation: function () {
         this.selectedAnimationAction = 'Active'
-        botController.bot.enableAnimation(this.selectedAnimation)
+        userBotController.bot.enableAnimation(this.selectedAnimation)
       },
       toggleAnimationAction: function () {
         switch (this.selectedAnimationAction) {
           case 'Pause':
-            botController.bot.pauseAnimation()
+            userBotController.bot.pauseAnimation()
             break
           case 'Active':
           default:
-            botController.bot.unpauseAnimation()
+            userBotController.bot.unpauseAnimation()
         }
       },
       toggleMouseControl: function () {
         if (this.botMouseControlEnabled) {
           switchMouseControls(engine, 'bot-controller-rotation')
-          botController.enable(true)
+          userBotController.enable(true)
         } else {
           switchMouseControls(engine, 'example-animations')
-          botController.enable(false)
+          userBotController.enable(false)
           this.toggleAnimation()
         }
       }
@@ -88,46 +84,65 @@
 
       loader.preset().then(() => {
         engine.preset().then(() => {
-          switchMouseControls(engine, 'example-animations')
-
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-100, 0, 100)
-
-          const captureObjects = []
-          for (let i = 0; i < 10; i++) {
-            const item = cube.clone()
-            item.position.setX(_Math.randInt(-500, 500))
-            item.position.setZ(_Math.randInt(-500, 500))
-            item.position.setY(15)
-            engine.add('cube', item)
-            captureObjects.push(item)
+          if (this.botMouseControlEnabled) {
+            switchMouseControls(engine, 'bot-controller-rotation')
+          } else {
+            switchMouseControls(engine, 'example-animations')
           }
 
           const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
           const helperMouseClick = new HelperMouseClick(ground)
           helperMouseClick.position.set(100000, 0, 100000)
 
-          botController = new ControllerBot(loader).preset(engine)
-            // .captureObjects(captureObjects)
+          engine
+            .add('ground', ground)
+            .add('ground-helper', helperMouseClick)
 
-          botController.bot.animation.mixer.addEventListener('loop', () => {
+          const enemies = []
+          for (let i = 0; i < 10; i++) {
+            const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
+            const material = new MeshStandardMaterial({ color: 0x666666 })
+            const cube = new Mesh(geometry, material)
+            cube.renderOrder = - 1000
+
+            cube.position.setX(_Math.randInt(-500, 500))
+            cube.position.setZ(_Math.randInt(-500, 500))
+            cube.position.setY(15)
+            engine.add('cube', cube)
+            enemies.push(cube)
+          }
+
+          const botController = new ControllerBot(loader)
+          botController
+            .patrolling(true)
+            .setPosition(new Vector3(100, 0, 100))
+            // Гулять по периметру карты.
+            .setPath([new Vector3(400, 0, 400), new Vector3(400, 0, - 400), new Vector3(-400, 0, -400), new Vector3(-400, 0, 400)], true)
+            .preset(engine)
+
+          enemies.push(botController.bot.model)
+
+          userBotController = new ControllerBot(loader).preset(engine).setEnemies(enemies)
+
+          userBotController.bot.animation.mixer.addEventListener('loop', () => {
             // console.log('loop', event)
           })
 
-          botController.bot.animation.mixer.addEventListener('finished', () => {
+          userBotController.bot.animation.mixer.addEventListener('finished', () => {
             if (this.botMouseControlEnabled) {
               return
             }
 
-            if (botController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
-              botController.bot.shootingAnimation()
+            if (userBotController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+              userBotController.bot.shootingAnimation()
             }
           })
 
+          const lightPosition = new Vector3(70, 70, 70)
+          const cameraLookAt = new Vector3(0, 0, 0)
+          const cameraPosition = new Vector3(-100, 0, 100)
+
           engine
-            .add('ground', ground)
-            .add('ground-helper', helperMouseClick)
             .setDirLight(lightPosition)
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
@@ -171,7 +186,7 @@
               // This page has top menu. Need set mouse offset on height it menu.
               ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
-              const intersection = ground.findIntersection(event, engine.camera, captureObjects)
+              const intersection = ground.findIntersection(event, engine.camera, enemies, true)
               if (!intersection) {
                 return
               }
@@ -180,10 +195,10 @@
               const faceDirection = ground.extractFaceDirection(intersection)
               helperMouseClick.update(mousePosition, faceDirection)
 
-              if (activeKeyCode === 17 && captureObjects.includes(intersection.object)) {
-                botController.setTarget(intersection.object)
+              if (activeKeyCode === 17 && enemies.includes(intersection.object)) {
+                userBotController.setTarget(intersection.object)
               } else {
-                botController.captureTarget().followTo(mousePosition)
+                userBotController.captureTarget().followTo(mousePosition)
               }
             })
         })
@@ -209,7 +224,7 @@
         }
       break
       case 'bot-controller-pan':
-        engine.enableAutoRotate(false).enableMousePan(true).enableMouseRotate(false)
+        engine.enableAutoRotate(false).enableMousePan(true, 2.4).enableMouseRotate(false)
         engine.mapControls.mouseButtons = {
           RIGHT: MOUSE.PAN
         }

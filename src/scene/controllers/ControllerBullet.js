@@ -43,6 +43,8 @@ export class ControllerBullet {
    * @returns {ControllerBullet}
    */
   preset(engine, collisionObjects = []) {
+    const bulletCollisionAudio = engine.createPositionalAudio(this.loader.getAudioBuffer(AUDIO_BULLET_COLLISION))
+
     const update = (delta) => {
       this.bullet.update(delta)
       this.bulletEffect.update(delta)
@@ -61,14 +63,12 @@ export class ControllerBullet {
         engine.remove(this.bulletEffect.getShockWaveMesh())
         engine.remove(this.bulletEffect.getMistMesh())
         engine.remove(this.bulletEffect.getTraceMesh())
+        engine.remove(bulletCollisionAudio)
       }, 6000)
     }
 
     this.bullet.setCollisionObjects(collisionObjects)
     this.bullet.addEventListener(Bullet.EVENT_DESTROY, () => destroy())
-
-    const bulletCollisionAudio = engine.createPositionalAudio(this.loader.getAudioBuffer(AUDIO_BULLET_COLLISION))
-    this.bullet.add(bulletCollisionAudio)
 
     this.bullet.addEventListener(Bullet.EVENT_COLLISION, () => {
       // Провацировать эффек взрывной волны.
@@ -79,10 +79,10 @@ export class ControllerBullet {
       this.bulletEffect.stopTraceEffect()
 
       // Добавить звук попадания.
-      if (!bulletCollisionAudio.isPlaying) {
-        bulletCollisionAudio.setVolume(60)
-        bulletCollisionAudio.play()
-      }
+      engine.add('bullet-audio', bulletCollisionAudio)
+      bulletCollisionAudio.position.copy(this.bullet.position)
+      bulletCollisionAudio.setVolume(60)
+      bulletCollisionAudio.play()
 
       destroy()
     })

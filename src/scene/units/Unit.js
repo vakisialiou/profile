@@ -1,4 +1,4 @@
-import { Object3D, Box3, Box3Helper, Vector3 } from 'three'
+import { Object3D, Vector3 } from 'three'
 import UnitAnimation from './../animations/UnitAnimation'
 
 export default class Unit extends Object3D {
@@ -28,18 +28,6 @@ export default class Unit extends Object3D {
      * @type {(RigidBody|null)}
      */
     this.rigidBody = null
-
-    /**
-     *
-     * @type {Box3}
-     */
-    this.box = new Box3()
-
-    /**
-     *
-     * @type {Box3Helper}
-     */
-    this.rigitBodyHelper = new Box3Helper(this.box)
   }
 
   /**
@@ -54,16 +42,15 @@ export default class Unit extends Object3D {
   /**
    *
    * @param {World} physicsWorld
-   * @param {Vector3} [size]
+   * @param {Vector3} size
    * @returns {Unit}
    */
-  setRigidBody(physicsWorld, size = null) {
+  setRigidBody(physicsWorld, size) {
     if (this.rigidBody) {
       throw Error('Rigid body has already exists.')
     }
-    this.box.setFromObject(this.model)
+
     const pos = this.position.toArray()
-    size = size || this.box.getSize(new Vector3()).toArray()
     const physicsOptions = { type: 'box', size, pos, move: true }
     this.rigidBody = physicsWorld.add(physicsOptions)
     return this
@@ -87,15 +74,6 @@ export default class Unit extends Object3D {
   setPosition(position) {
     this.position.copy(position)
     this.rigidBody ? this.rigidBody.position.copy(position) : null
-    return this
-  }
-
-  /**
-   *
-   * @returns {Unit}
-   */
-  showRigidBodyHelper() {
-    this.add(this.rigitBodyHelper)
     return this
   }
 
