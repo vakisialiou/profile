@@ -47,6 +47,8 @@ export class ControllerBot {
       runningForward: 1,
       runningBackward: - 1,
     }
+
+    this.enemies = []
   }
 
   /**
@@ -97,16 +99,10 @@ export class ControllerBot {
           // Stay on the place and shooting to the target.
           this.bot.pauseMoving().shootingAnimation()
 
-          const gunPosition = new Vector3().copy(this.bot.position).setY(30)
-          const direction = this.bot
-            .getWorldDirection(new Vector3())
-            .add(new Vector3(_Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01)))
-            .multiplyScalar(-1)
-          const collisionObjects = []
           new ControllerBullet(this.loader)
-            .setPosition(gunPosition)
-            .setDirection(direction)
-            .preset(engine, collisionObjects)
+            .setPosition(this.bot.getWeaponPosition())
+            .setDirection(this.bot.getWeaponDirection())
+            .preset(engine, this.enemies)
 
           return
         }
@@ -126,15 +122,10 @@ export class ControllerBot {
       if (this.target && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
 
-        const gunPosition = new Vector3().copy(this.bot.position).setY(30)
-        const direction = this.bot.getWorldDirection(new Vector3())
-          .add(new Vector3(_Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01), _Math.randFloat(-0.01, 0.01)))
-          .multiplyScalar(-1)
-        const collisionObjects = []
         new ControllerBullet(this.loader)
-          .setPosition(gunPosition)
-          .setDirection(direction)
-          .preset(engine, collisionObjects)
+          .setPosition(this.bot.getWeaponPosition())
+          .setDirection(this.bot.getWeaponDirection())
+          .preset(engine, this.enemies)
       }
     })
 

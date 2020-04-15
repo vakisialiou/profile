@@ -1,5 +1,5 @@
 import Unit from '@scene/units/Unit'
-import { LoopOnce, Quaternion, Vector3 } from 'three'
+import { LoopOnce, Math as _Math, Vector3 } from 'three'
 import DisplacementFollow from '@scene/steering/modifiers/DisplacementFollow'
 import DisplacementPush from '@scene/steering/modifiers/DisplacementPush'
 import RotationTowardsTarget from '@scene/steering/modifiers/RotationTowardsTarget'
@@ -44,6 +44,15 @@ export default class Bot extends Unit {
      * @type {RotationTowardsTarget}
      */
     this.rotationTowardsTarget = new RotationTowardsTarget()
+
+    /**
+     *
+     * @type {Object3D}
+     */
+    this.weaponPlug = this.getObjectByName('Plug')
+    this._weaponPlugPosition = new Vector3()
+    this._weaponPlugDirection = new Vector3()
+    this._weaponPlugAccuracy = new Vector3()
 
     /**
      *
@@ -122,10 +131,30 @@ export default class Bot extends Unit {
 
   static EVENT_PAUSE_MOVING = 'EVENT_PAUSE_MOVING'
   static EVENT_PLAY_MOVING = 'EVENT_PLAY_MOVING'
-
   static EVENT_START_MOVING = 'EVENT_START_MOVING'
   static EVENT_STOP_MOVING = 'EVENT_STOP_MOVING'
   static EVENT_MOVING = 'EVENT_MOVING'
+
+  /**
+   *
+   * @returns {Vector3}
+   */
+  getWeaponPosition() {
+    return this.weaponPlug.getWorldPosition(this._weaponPlugPosition)
+  }
+
+  /**
+   *
+   * @param {number} [minAccuracy]
+   * @param {number} [maxAccuracy]
+   * @returns {Vector3}
+   */
+  getWeaponDirection(minAccuracy = - 0.01, maxAccuracy = 0.01) {
+    this._weaponPlugAccuracy.setX(_Math.randFloat(minAccuracy, maxAccuracy))
+    this._weaponPlugAccuracy.setY(_Math.randFloat(minAccuracy, maxAccuracy))
+    this._weaponPlugAccuracy.setZ(_Math.randFloat(minAccuracy, maxAccuracy))
+    return this.getWorldDirection(this._weaponPlugDirection).add(this._weaponPlugAccuracy).multiplyScalar(-1)
+  }
 
   /**
    *
@@ -181,6 +210,9 @@ export default class Bot extends Unit {
    * @returns {Bot}
    */
   preset() {
+    if (!this.weaponPlug) {
+      throw new Error(`Could not find object by name Plug.`)
+    }
     for (const item of this.animationItems) {
       if (!item.action) {
         throw new Error(`Could not find action "${item.key}"`)

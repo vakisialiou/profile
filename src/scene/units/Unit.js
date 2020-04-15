@@ -44,6 +44,15 @@ export default class Unit extends Object3D {
 
   /**
    *
+   * @param {string} name
+   * @returns {Object3D|undefined}
+   */
+  getObjectByName(name) {
+    return this.model.getObjectByName(name) || super.getObjectByName(name)
+  }
+
+  /**
+   *
    * @param {World} physicsWorld
    * @param {Vector3} [size]
    * @returns {Unit}

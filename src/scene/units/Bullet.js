@@ -1,8 +1,8 @@
 import { Mesh, MeshBasicMaterial, SphereGeometry, Raycaster, Vector3 } from 'three'
 import Unit from './Unit'
 
-const geometry = new SphereGeometry(0.6)
-const material = new MeshBasicMaterial({ color: 0xFF0000 })
+const geometry = new SphereGeometry(0.2)
+const material = new MeshBasicMaterial({ color: 0x666666, opacity: 0.4, transparent: true })
 
 export default class Bullet extends Unit {
   /**
