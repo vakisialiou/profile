@@ -178,14 +178,22 @@ export default class Bot extends Unit {
   }
 
   /**
-   * Follow from one to another point.
    *
-   * @param {Array.<Vector3>} points
-   * @param {boolean} [loop]
+   * @param {string} type - Use constants of class (Path.TYPE_RELAX|Path.TYPE_BACKWARD|Path.TYPE_LOOP)
    * @returns {Bot}
    */
-  setPath(points, loop = false) {
-    this.path.loop = loop
+  setPathType(type) {
+    this.path.type(type)
+    return this
+  }
+
+  /**
+   *
+   * @param {Array.<Vector3>} points
+   * @returns {Bot}
+   */
+  setPath(points) {
+    this.path.clear()
     for (const point of points) {
       this.path.add(point)
     }
@@ -252,6 +260,9 @@ export default class Bot extends Unit {
   static ANIMATION_KEY_RUNNING_BACKWARD = 'RunningBackward'
   static ANIMATION_KEY_RUNNING_FORWARD = 'RunningForward'
   static ANIMATION_KEY_SHOOTING = 'Shooting'
+  static ANIMATION_KEY_JUMPING_UP = 'JumpingUp'
+  static ANIMATION_KEY_JUMPING_FORWARD = 'JumpingForward'
+  static ANIMATION_KEY_JUMPING_BACKWARD = 'JumpingBackward'
 
   /**
    *
@@ -431,12 +442,11 @@ export default class Bot extends Unit {
     target.setY(this.position.y)
 
     if (this.position.equals(target)) {
-      if (this.path.loop) {
-        // Looping path. Select first point.
+      if (this.path.finished()) {
+        return this
+      } else {
         target = this.path.advance().current()
         target.setY(this.position.y)
-      } else {
-        return this
       }
     }
 

@@ -26,7 +26,7 @@
   const helperGridSegments = new HelperGridSegments(ground)
 
   export default {
-    name: 'UnitGroundPage',
+    name: 'GroundPage',
     data: () => {
       return {
         selectedMouseHelper: 'Click',

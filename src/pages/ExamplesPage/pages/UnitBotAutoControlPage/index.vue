@@ -1,0 +1,151 @@
+<script>
+  import './index.less'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
+  import WrapperView from '@components/WrapperView'
+  import GitHubIcon from '@components/GitHubIcon'
+  import Loading from '@scene/loading/Loading'
+  import Engine from '@scene/Engine'
+  import { Vector3, Line, BufferGeometry, LineBasicMaterial } from 'three'
+  import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
+  import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
+  import Ground from '@scene/objects/Ground'
+  import Bot from '@scene/units/Bot'
+  import Path from '@scene/steering/Path'
+
+  const botPath = [new Vector3(0, 0, 30), new Vector3(0, 0, 300), new Vector3(- 350, 0, 100), new Vector3(- 50, 0, - 300), new Vector3(300, 0, - 150)]
+
+  const lineGeometry = new BufferGeometry().setFromPoints(botPath)
+  const lineMaterial = new LineBasicMaterial({ color: 0xffffff })
+  const linePath = new Line(lineGeometry, lineMaterial)
+
+  let engine = null
+  let botController = null
+  const TEXTURE_GROUND = 'TEXTURE_GROUND'
+
+  const loader = new Loading()
+    .addLoading(loadingBot)
+    .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
+
+
+
+  export default {
+    name: 'UnitBotAutoControlPage',
+    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    data() {
+      return {
+        selectedAnimation: Bot.ANIMATION_KEY_RUNNING,
+        animations: [
+          { text: Bot.ANIMATION_KEY_WALKING, value: Bot.ANIMATION_KEY_WALKING },
+          { text: Bot.ANIMATION_KEY_RUNNING, value: Bot.ANIMATION_KEY_RUNNING },
+          { text: Bot.ANIMATION_KEY_RUNNING_FORWARD, value: Bot.ANIMATION_KEY_RUNNING_FORWARD },
+          { text: Bot.ANIMATION_KEY_RUNNING_BACKWARD, value: Bot.ANIMATION_KEY_RUNNING_BACKWARD },
+        ],
+        selectedPathType: Path.TYPE_RELAX,
+        pathTypes: [
+          { text: 'Loop', value: Path.TYPE_LOOP },
+          { text: 'Reach last point and stop', value: Path.TYPE_RELAX },
+          { text: 'Reach last point and go back', value: Path.TYPE_BACKWARD },
+        ]
+      }
+    },
+    methods: {
+      toggleAnimation: function () {
+        botController.useMovingAnimation(this.selectedAnimation)
+      },
+      togglePathType: function () {
+        switch (this.selectedPathType) {
+          case Path.TYPE_RELAX:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_RELAX).clearPath().setPath(botPath)
+            break
+          case Path.TYPE_LOOP:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_LOOP).clearPath().setPath(botPath)
+            break
+          case Path.TYPE_BACKWARD:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_BACKWARD).clearPath().setPath(botPath)
+            break
+        }
+
+      }
+    },
+    activated() {
+      engine.pause(false)
+    },
+    deactivated() {
+      engine.pause(true)
+    },
+    destroyed() {
+      engine.destroy()
+    },
+    mounted() {
+      engine = Engine.create('bot-auto-control-canvas')
+      const container = document.getElementById('bot-auto-control-canvas')
+
+      loader.preset().then(() => {
+        engine.preset().then(() => {
+          const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          const helperMouseClick = new HelperMouseClick(ground)
+          helperMouseClick.position.set(100000, 0, 100000)
+
+          botController = new ControllerBot(loader)
+          botController
+            .setPathType(this.selectedPathType)
+            .setPosition(botPath[0])
+            // Гулять по периметру карты.
+            .setPath(botPath)
+            .preset(engine)
+
+          const lightPosition = new Vector3(70, 70, 70)
+          const cameraLookAt = new Vector3(410, 0, 410)
+          const cameraPosition = new Vector3(450, 0, 450)
+
+          engine
+            .add('ground', ground)
+            .add('ground-helper', helperMouseClick)
+            .add('line-path-helper', linePath)
+            .setDirLight(lightPosition)
+            .setHemiLight(lightPosition)
+            .setPointLight(lightPosition)
+            .setCamera(cameraPosition, cameraLookAt)
+            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
+            .render(container)
+            .renderStats(container)
+            .registerEvents()
+            .animate()
+        })
+      })
+    },
+  }
+
+</script>
+
+<template>
+  <WrapperView :autofill="true">
+    <WrapperView id="bot-auto-control-canvas" :autofill="true" class="unit-bot-auto-control-page">
+      <div class="unit-bot-auto-control-page__controls mx-2 my-2">
+
+        <BFormGroup label="Toggle animation moving">
+          <BFormRadioGroup
+            id="bot-animations-running"
+            v-on:input="toggleAnimation"
+            v-model="selectedAnimation"
+            :options="animations"
+            buttons
+          />
+        </BFormGroup>
+
+        <BFormGroup label="Path type">
+          <BFormRadioGroup
+            id="bot-path-type"
+            v-on:input="togglePathType"
+            v-model="selectedPathType"
+            :options="pathTypes"
+            buttons
+          />
+        </BFormGroup>
+
+      </div>
+
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotAutoControlPage" class="m-2" />
+    </WrapperView>
+  </WrapperView>
+</template>

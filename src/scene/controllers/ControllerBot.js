@@ -60,13 +60,94 @@ export class ControllerBot {
       walking: 0.5,
     }
 
+    this.aimingArea = { min: 140, max: 240 }
+    this.shootingArea = { min: 60, max: 140 }
+    this.retreatArea = { min: 0, max: 60 }
+
     /**
      *
-     * @type {boolean}
+     * @type {string}
+     * @private
      */
-    this.patrol = false
+    this._movingAnimation = Bot.ANIMATION_KEY_RUNNING
+    this._movingAnimationNeedUpdate = false
 
     this.enemies = []
+  }
+
+  /**
+   * Used when model is moving to target.
+   *
+   * @param {string} movingAnimationKey - Use constants. Look at method "ControllerBot._activateMoveAnimation" that using it.
+   * @returns {ControllerBot}
+   */
+  useMovingAnimation(movingAnimationKey) {
+    this._movingAnimation = movingAnimationKey
+    this._movingAnimationNeedUpdate = true
+    return this
+  }
+
+  /**
+   *
+   * @param {string} movingAnimationKey
+   * @returns {ControllerBot}
+   * @private
+   */
+  _activateMoveAnimation(movingAnimationKey) {
+    switch (movingAnimationKey) {
+      case Bot.ANIMATION_KEY_WALKING:
+        this.bot.setSpeed(this.speed.walking).walkingAnimation()
+        break
+      case Bot.ANIMATION_KEY_RUNNING_FORWARD:
+        this.bot.setSpeed(this.speed.runningForward).runningForwardAnimation()
+        break
+      case Bot.ANIMATION_KEY_RUNNING_BACKWARD:
+        this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
+        break
+      case Bot.ANIMATION_KEY_RUNNING:
+      default:
+        this.bot.setSpeed(this.speed.running).runningAnimation()
+        break
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Engine} engine
+   * @returns {ControllerBot}
+   * @private
+   */
+  _emmitBullet(engine) {
+    const weaponPosition = this.bot.getWeaponPosition()
+    const weaponDirection = this.bot.getWeaponDirection()
+    new ControllerBullet(this.loader)
+      .setPosition(weaponPosition)
+      .setDirection(weaponDirection)
+      .preset(engine, this.enemies)
+
+    // Провацировать эффек выстрела.
+    this.botEffect.emmitShotEffect(weaponPosition)
+    this.botEffect.emmitMistEffect(weaponPosition)
+    return this
+  }
+
+  /**
+   *
+   * @param {number} distance - Distance between bot position and target.
+   * @returns {string|null}
+   */
+  area(distance) {
+    if (distance > this.aimingArea.min && distance <= this.aimingArea.max) {
+      return 'aiming-area'
+    }
+    if (distance > this.retreatArea.min && distance <= this.retreatArea.max) {
+      return 'retreat-area'
+    }
+    if (distance > this.shootingArea.min && distance <= this.shootingArea.max) {
+      return 'shooting-area'
+    }
+    return null
   }
 
   /**
@@ -77,30 +158,30 @@ export class ControllerBot {
     this.bot
       .onStartMoving(() => {
         if (!this.target) {
-          if (this.patrol) {
-            this.bot.setSpeed(this.speed.walking).walkingAnimation()
-          } else {
-            this.bot.setSpeed(this.speed.running).runningAnimation()
-          }
+          this._activateMoveAnimation(this._movingAnimation)
           return
         }
 
         const length = this.bot.position.distanceTo(this.target.position)
-        if (length > 60 && length < 300) {
+        if (this.area(length) === 'aiming-area' && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)) {
           // Move to point.
-          this.bot.setSpeed(this.speed.runningForward).runningForwardAnimation()
-        } else if (length <= 60) {
-          // Move from point.
-          this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
-        } else {
-          if (this.patrol) {
-            this.bot.setSpeed(this.speed.walking).walkingAnimation()
-          } else {
-            this.bot.setSpeed(this.speed.running).runningAnimation()
-          }
+          this._activateMoveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)
+          return
         }
+
+        if (this.area(length) === 'retreat-area' && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)) {
+          // Move from point.
+          this._activateMoveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)
+          return this
+        }
+
+        this._activateMoveAnimation(this._movingAnimation)
       })
       .onMoving((event) => {
+        if (this._movingAnimationNeedUpdate) {
+          this._movingAnimationNeedUpdate = false
+          this._activateMoveAnimation(this._movingAnimation)
+        }
         if (event.movingType !== 'direct') {
           // capture target can only if object look at in the same direction.
           return
@@ -112,31 +193,24 @@ export class ControllerBot {
 
         const length = this.bot.position.distanceTo(this.target.position)
 
-        if (length > 140 && length <= 240 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)) {
-          this.bot.setSpeed(this.speed.runningForward).runningForwardAnimation()
+        // Прицеливаться.
+        if (this.area(length) === 'aiming-area' && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)) {
+          this._activateMoveAnimation(Bot.ANIMATION_KEY_RUNNING_FORWARD)
           return
         }
 
-        if (length > 60 && length <= 140 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+        // Стрелять.
+        if (this.area(length) === 'shooting-area' && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
           // Stay on the place and shooting to the target.
           this.bot.pauseMoving().shootingAnimation()
-
-          const weaponPosition = this.bot.getWeaponPosition()
-          new ControllerBullet(this.loader)
-            .setPosition(weaponPosition)
-            .setDirection(this.bot.getWeaponDirection())
-            .preset(engine, this.enemies)
-
-          // Провацировать эффек выстрела.
-          this.botEffect.emmitShotEffect(weaponPosition)
-          this.botEffect.emmitMistEffect(weaponPosition)
-
+          this._emmitBullet(engine)
           return
         }
 
-        if (length <= 60 && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)) {
+        // Отходить.
+        if (this.area(length) === 'retreat-area' && !this.bot.isActiveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)) {
           // Move from point.
-          this.bot.setSpeed(this.speed.runningBackward).runningBackwardAnimation()
+          this._activateMoveAnimation(Bot.ANIMATION_KEY_RUNNING_BACKWARD)
         }
       })
       .onStopMoving(() => this.bot.idleAnimation())
@@ -151,16 +225,7 @@ export class ControllerBot {
 
       if (this.target && this.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
         this.bot.shootingAnimation()
-
-        const weaponPosition = this.bot.getWeaponPosition()
-        new ControllerBullet(this.loader)
-          .setPosition(weaponPosition)
-          .setDirection(this.bot.getWeaponDirection())
-          .preset(engine, this.enemies)
-
-        // Провацировать эффек выстрела.
-        this.botEffect.emmitShotEffect(weaponPosition)
-        this.botEffect.emmitMistEffect(weaponPosition)
+        this._emmitBullet(engine)
       }
     })
 
@@ -187,16 +252,6 @@ export class ControllerBot {
     } else {
       this.bot.pauseMoving()
     }
-    return this
-  }
-
-  /**
-   *
-   * @param {boolean} value
-   * @returns {ControllerBot}
-   */
-  patrolling(value) {
-    this.patrol = value
     return this
   }
 
@@ -239,12 +294,13 @@ export class ControllerBot {
    *
    * @returns {ControllerBot}
    */
-  captureTarget() {
+  clearTarget() {
     this.target = null
     return this
   }
 
   /**
+   * Use to set only one point.
    *
    * @param {Vector3} point
    * @returns {ControllerBot}
@@ -256,12 +312,30 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Array.<Vector3>} points
-   * @param {boolean} [loop]
    * @returns {ControllerBot}
    */
-  setPath(points, loop = false) {
-    this.bot.setPath(points, loop).playMoving()
+  clearPath() {
+    this.bot.clearPath()
+    return this
+  }
+
+  /**
+   *
+   * @param {Array.<Vector3>} points
+   * @returns {ControllerBot}
+   */
+  setPath(points) {
+    this.bot.setPath(points).playMoving()
+    return this
+  }
+
+  /**
+   *
+   * @param {string} type
+   * @returns {ControllerBot}
+   */
+  setPathType(type) {
+    this.bot.setPathType(type)
     return this
   }
 }

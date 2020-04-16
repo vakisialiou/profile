@@ -76,8 +76,8 @@ class Engine {
     this.mapControls.enablePan = true
     this.mapControls.enableRotate = true
     this.mapControls.mouseButtons = {
-      LEFT: MOUSE.ROTATE,
-      RIGHT: MOUSE.PAN,
+      RIGHT: MOUSE.ROTATE,
+      LEFT: MOUSE.PAN,
     }
 
     /**
@@ -510,6 +510,7 @@ class Engine {
    */
   setCamera(position = new Vector3(100, 50, 100), lookAt = new Vector3()) {
     this.camera.position.copy(position)
+    this.mapControls.target.copy(lookAt)
     this.camera.lookAt(lookAt)
     return this
   }
