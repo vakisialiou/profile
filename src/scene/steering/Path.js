@@ -4,21 +4,30 @@ export default class Path {
     /**
      *
      * @type {Array.<Vector3>}
+     * @private
      */
-    this.points = []
+    this._points = []
 
     /**
      *
      * @type {number}
+     * @private
      */
-    this.index = 0
+    this._index = 0
 
     /**
      *
      * @type {boolean}
+     * @private
      */
-    this.loop = false
-    this._type = Path.TYPE_RELAX
+    this._increase = true
+
+    /**
+     *
+     * @type {string}
+     * @private
+     */
+    this._type = Path.TYPE_LAZY
   }
 
   /**
@@ -26,14 +35,14 @@ export default class Path {
    *
    * @type {string}
    */
-  static TYPE_RELAX = 'RELAX'
+  static TYPE_LAZY = 'LAZY'
 
   /**
    * Reach the last then take first point.
    *
    * @type {string}
    */
-  static TYPE_LOOP = 'LOOP'
+  static TYPE_LOOP_FORWARD = 'TYPE_LOOP_FORWARD'
 
   /**
    * Reach the last then take previous point.
@@ -41,11 +50,11 @@ export default class Path {
    *
    * @type {string}
    */
-  static TYPE_BACKWARD = 'BACKWARD'
+  static TYPE_LOOP_BACKWARD = 'TYPE_LOOP_BACKWARD'
 
   /**
    *
-   * @param {string} value - Use constants of class (Path.TYPE_RELAX|Path.TYPE_BACKWARD|Path.TYPE_LOOP)
+   * @param {string} value - Use constants of class (Path.TYPE_LAZY|Path.TYPE_LOOP_BACKWARD|Path.TYPE_LOOP_FORWARD)
    * @returns {Path}
    */
   type(value) {
@@ -59,7 +68,7 @@ export default class Path {
    * @returns {Path}
    */
   add(point) {
-    this.points.push(point.clone())
+    this._points.push(point.clone())
     return this
   }
 
@@ -68,18 +77,42 @@ export default class Path {
    * @returns {Path}
    */
   advance() {
-    if (this.points.length === 0) {
+    if (this._points.length === 0) {
       return this
     }
 
-    this.index++
-    if (this._type === Path.TYPE_RELAX && this.points.length < (this.index + 1)) {
-      this.index--
+    if (this._points.length === 1) {
+      this._index = 0
       return this
     }
 
-    if (this._type === Path.TYPE_LOOP && this.points.length < (this.index + 1)) {
-      this.index = 0
+    if (this._type !== Path.TYPE_LOOP_BACKWARD) {
+      this._increase = true
+    }
+
+    // increase or reduce index
+    this._index = this._increase ? this._index + 1 : this._index - 1
+
+    if (this._type === Path.TYPE_LOOP_BACKWARD) {
+      if (this._index === this._points.length) {
+        this._increase = false
+        this._index = this._points.length - 2 // set index of previous point.
+      }
+
+      if (this._index === -1) {
+        this._increase = true
+        this._index = 1 // set index of second point.
+      }
+      return this
+    }
+
+    if (this._type === Path.TYPE_LAZY && this._index === this._points.length) {
+      this._index-- // set index of last point.
+      return this
+    }
+
+    if (this._type === Path.TYPE_LOOP_FORWARD && this._index === this._points.length) {
+      this._index = 0 // set index of first point.
     }
     return this
   }
@@ -89,8 +122,8 @@ export default class Path {
    * @returns {Path}
    */
   clear() {
-    this.points = []
-    this.index = 0
+    this._points = []
+    this._index = 0
     return this
   }
 
@@ -99,18 +132,23 @@ export default class Path {
    * @returns {Vector3|?}
    */
   current() {
-    return this.points[this.index] || null
+    return this._points[this._index] || null
   }
 
   /**
-   * Returns true if this path is not looped and the last point is active.
+   * Return TRUE always if does not have points or if point is only one.
+   * Returns TRUE if this path is not looped and the last point is active.
+   * Return FALSE always if allowed come back.
    *
    * @returns {boolean}
    */
   finished() {
-    if (this.points.length === 0) {
+    if ([0, 1].includes(this._points.length)) {
       return true
     }
-    return this._type === Path.TYPE_RELAX && this.points.length === (this.index + 1)
+    if (this._type === Path.TYPE_LOOP_BACKWARD) {
+      return false
+    }
+    return this._type === Path.TYPE_LAZY && this._points.length === (this._index + 1)
   }
 }

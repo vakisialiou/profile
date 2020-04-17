@@ -12,7 +12,7 @@
   import Bot from '@scene/units/Bot'
   import Path from '@scene/steering/Path'
 
-  const botPath = [new Vector3(0, 0, 30), new Vector3(0, 0, 300), new Vector3(- 350, 0, 100), new Vector3(- 50, 0, - 300), new Vector3(300, 0, - 150)]
+  const botPath = [new Vector3(0, 0, 30), new Vector3(0, 0, 300), new Vector3(- 350, 0, 100)/*, new Vector3(- 50, 0, - 300), new Vector3(300, 0, - 150)*/]
 
   const lineGeometry = new BufferGeometry().setFromPoints(botPath)
   const lineMaterial = new LineBasicMaterial({ color: 0xffffff })
@@ -40,11 +40,11 @@
           { text: Bot.ANIMATION_KEY_RUNNING_FORWARD, value: Bot.ANIMATION_KEY_RUNNING_FORWARD },
           { text: Bot.ANIMATION_KEY_RUNNING_BACKWARD, value: Bot.ANIMATION_KEY_RUNNING_BACKWARD },
         ],
-        selectedPathType: Path.TYPE_RELAX,
+        selectedPathType: Path.TYPE_LAZY,
         pathTypes: [
-          { text: 'Loop', value: Path.TYPE_LOOP },
-          { text: 'Reach last point and stop', value: Path.TYPE_RELAX },
-          { text: 'Reach last point and go back', value: Path.TYPE_BACKWARD },
+          { text: 'Lazy', value: Path.TYPE_LAZY },
+          { text: 'Loop forward', value: Path.TYPE_LOOP_FORWARD },
+          { text: 'Loop backward', value: Path.TYPE_LOOP_BACKWARD },
         ]
       }
     },
@@ -54,14 +54,14 @@
       },
       togglePathType: function () {
         switch (this.selectedPathType) {
-          case Path.TYPE_RELAX:
-            botController.setPosition(botPath[0]).setPathType(Path.TYPE_RELAX).clearPath().setPath(botPath)
+          case Path.TYPE_LAZY:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_LAZY).clearPath().setPath(botPath)
             break
-          case Path.TYPE_LOOP:
-            botController.setPosition(botPath[0]).setPathType(Path.TYPE_LOOP).clearPath().setPath(botPath)
+          case Path.TYPE_LOOP_FORWARD:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_LOOP_FORWARD).clearPath().setPath(botPath)
             break
-          case Path.TYPE_BACKWARD:
-            botController.setPosition(botPath[0]).setPathType(Path.TYPE_BACKWARD).clearPath().setPath(botPath)
+          case Path.TYPE_LOOP_BACKWARD:
+            botController.setPosition(botPath[0]).setPathType(Path.TYPE_LOOP_BACKWARD).clearPath().setPath(botPath)
             break
         }
 
