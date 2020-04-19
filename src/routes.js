@@ -2,10 +2,11 @@ import HomePage from './pages/HomePage'
 
 import ExamplesPage from './pages/ExamplesPage'
 import GroundPage from './pages/ExamplesPage/pages/GroundPage'
-import UnitTowerPage from './pages/ExamplesPage/pages/UnitTowerPage'
-import UnitBotUserControlPage from './pages/ExamplesPage/pages/UnitBotUserControlPage'
-import UnitBotAutoControlPage from './pages/ExamplesPage/pages/UnitBotAutoControlPage'
-import UnitBotAnimationPage from './pages/ExamplesPage/pages/UnitBotAnimationPage'
+import TowerPage from './pages/ExamplesPage/pages/TowerPage'
+import OutlinePage from './pages/ExamplesPage/pages/OutlinePage'
+import BotUserControlPage from './pages/ExamplesPage/pages/BotUserControlPage'
+import BotAutoControlPage from './pages/ExamplesPage/pages/BotAutoControlPage'
+import BotAnimationPage from './pages/ExamplesPage/pages/BotAnimationPage'
 
 export const routes = [
   {
@@ -32,31 +33,38 @@ export const routes = [
       },
       {
         path: '/examples/tower',
-        component: UnitTowerPage,
+        component: TowerPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Unit tower'
+        name: 'Towers'
       },
       {
         path: '/examples/bot-animation',
-        component: UnitBotAnimationPage,
+        component: BotAnimationPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Unit bot animation'
+        name: 'Bot animations'
       },
       {
         path: '/examples/bot-user-control',
-        component: UnitBotUserControlPage,
+        component: BotUserControlPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Unit bot user control'
+        name: 'User bot controls'
       },
       {
         path: '/examples/bot-auto-control',
-        component: UnitBotAutoControlPage,
+        component: BotAutoControlPage,
         icon: 'folder',
         keepAlive: true,
-        name: 'Unit bot auto control'
+        name: 'Auto bot controls'
+      },
+      {
+        path: '/examples/outline',
+        component: OutlinePage,
+        icon: 'folder',
+        keepAlive: true,
+        name: 'Outline'
       },
     ]
   },

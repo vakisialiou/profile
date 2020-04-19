@@ -64,6 +64,14 @@ export default class Path {
 
   /**
    *
+   * @returns {Array<Vector3>}
+   */
+  getPoints() {
+    return this._points
+  }
+
+  /**
+   *
    * @param {Vector3} point
    * @returns {Path}
    */

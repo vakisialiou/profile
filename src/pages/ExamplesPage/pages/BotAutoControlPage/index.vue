@@ -29,7 +29,7 @@
 
 
   export default {
-    name: 'UnitBotAutoControlPage',
+    name: 'BotAutoControlPage',
     components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
@@ -106,10 +106,10 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
             .render(container)
             .renderStats(container)
             .registerEvents()
+            .enableOutline(true)
             .animate()
         })
       })
@@ -120,8 +120,8 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="bot-auto-control-canvas" :autofill="true" class="unit-bot-auto-control-page">
-      <div class="unit-bot-auto-control-page__controls mx-2 my-2">
+    <WrapperView id="bot-auto-control-canvas" :autofill="true" class="bot-auto-control-page">
+      <div class="bot-auto-control-page__controls mx-2 my-2">
 
         <BFormGroup label="Toggle animation moving">
           <BFormRadioGroup
@@ -145,7 +145,7 @@
 
       </div>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotAutoControlPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAutoControlPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

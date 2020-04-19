@@ -105,6 +105,8 @@
             .setCamera(cameraPosition, cameraLookAt)
             .render(document.getElementById('model-ground-page-canvas'))
             .registerEvents()
+            .setFog(0xFFFFFF)
+            .enableOutline(true)
             .animate()
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
               // This page has top menu. Need set mouse offset on height it menu.

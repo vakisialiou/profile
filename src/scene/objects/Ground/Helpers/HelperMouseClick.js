@@ -1,4 +1,4 @@
-import { CylinderGeometry, MeshBasicMaterial, Mesh, Group, Vector3 } from 'three'
+import { CylinderGeometry, MeshStandardMaterial, Mesh, Group, Vector3 } from 'three'
 
 export default class HelperMouseClick extends Group {
   /**
@@ -16,9 +16,9 @@ export default class HelperMouseClick extends Group {
 
     /**
      *
-     * @type {MeshBasicMaterial}
+     * @type {MeshStandardMaterial}
      */
-    const material = new MeshBasicMaterial({ color: 0x00FFFF })
+    const material = new MeshStandardMaterial({ color: 0x00FFFF })
 
     const mesh = new Mesh(geometry, material)
     mesh.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)

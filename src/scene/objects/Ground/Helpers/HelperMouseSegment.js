@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, Mesh, MeshBasicMaterial } from 'three'
+import { BoxBufferGeometry, Mesh, MeshStandardMaterial } from 'three'
 
 export default class HelperMouseSegment extends Mesh {
   /**
@@ -18,8 +18,9 @@ export default class HelperMouseSegment extends Mesh {
 
     /**
      *
-     * @type {MeshBasicMaterial}
+     * @type {MeshStandardMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: 0xFF0000, opacity: 0.5, transparent: true })
+    this.material = new MeshStandardMaterial({ color: 0x666666 })
+    this.renderOrder = 1000
   }
 }

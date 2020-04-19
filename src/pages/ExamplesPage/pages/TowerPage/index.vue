@@ -16,7 +16,7 @@
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
 
   export default {
-    name: 'UnitTowerPage',
+    name: 'TowerPage',
     components: {
       WrapperView, GitHubIcon
     },
@@ -30,8 +30,8 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('model-tower-page-canvas')
-      const container = document.getElementById('model-tower-page-canvas')
+      engine = Engine.create('tower-page-canvas')
+      const container = document.getElementById('tower-page-canvas')
 
       loader.preset().then(() => {
         engine.preset().then(() => {
@@ -59,10 +59,11 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
             .render(container)
             .renderStats(container)
             .registerEvents()
+            // .setFog(0xFFFFFF)
+            .enableOutline(true)
             .animate()
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
               // This page has top menu. Need set mouse offset on height it menu.
@@ -88,8 +89,8 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="model-tower-page-canvas" :autofill="true">
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitTowerPage" class="m-2" />
+    <WrapperView id="tower-page-canvas" :autofill="true">
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/TowerPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

@@ -31,7 +31,7 @@ export class ControllerBot {
      * @type {(Bot|Unit)}
      */
     this.bot = new Bot(this.loader.getRawModel(MODEL_BOT))
-    this.bot.position.setY(2)
+    // this.bot.position.setY(2)
 
     /**
      *
@@ -152,9 +152,13 @@ export class ControllerBot {
 
   /**
    * @param {Engine} engine
+   * @param {boolean} [usePhysicsWorld]
    * @returns {ControllerBot}
    */
-  preset(engine) {
+  preset(engine, usePhysicsWorld = false) {
+    if (usePhysicsWorld) {
+      this.bot.setRigidBody(engine.physicsWorld)
+    }
     this.bot
       .onStartMoving(() => {
         if (!this.target) {
@@ -215,7 +219,7 @@ export class ControllerBot {
       })
       .onStopMoving(() => this.bot.idleAnimation())
       .idleAnimation()
-      .setScale(20)
+      .setScale(0.2)
       .preset()
 
     this.bot.animation.mixer.addEventListener('finished', () => {
@@ -229,7 +233,8 @@ export class ControllerBot {
       }
     })
 
-    engine.add('bot', this.bot)
+    engine
+      .add('bot', this.bot)
       .add('bot-effect', this.botEffect.getShotMesh()) // Добавить на сцену эффекты
       .add('bot-effect', this.botEffect.getMistMesh()) // Добавить на сцену эффекты
 
@@ -261,8 +266,8 @@ export class ControllerBot {
    * @returns {ControllerBot}
    */
   setPosition(position) {
-    this.bot.position.copy(position)
-    this.bot.position.setY(2)
+    // this.bot.position.copy(position)
+    // this.bot.position.setY(2)
     return this
   }
 

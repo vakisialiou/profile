@@ -96,7 +96,7 @@ export class ControllerTower {
    * @returns {ControllerTower}
    */
   setPosition(position) {
-    this.tower.setPosition(position)
+    this.tower.position.copy(position)
     return this
   }
 }

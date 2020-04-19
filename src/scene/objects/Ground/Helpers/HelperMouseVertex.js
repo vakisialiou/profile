@@ -1,4 +1,4 @@
-import { SphereGeometry, MeshBasicMaterial, Mesh } from 'three'
+import { SphereGeometry, MeshStandardMaterial, Mesh } from 'three'
 
 export default class HelperMouseVertex extends Mesh {
   /**
@@ -18,8 +18,8 @@ export default class HelperMouseVertex extends Mesh {
 
     /**
      *
-     * @type {MeshBasicMaterial}
+     * @type {MeshStandardMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: 0x000000 })
+    this.material = new MeshStandardMaterial({ color: 0x000000 })
   }
 }

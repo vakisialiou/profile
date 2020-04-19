@@ -1,7 +1,10 @@
-import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, sRGBEncoding } from 'three'
+import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color, sRGBEncoding } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
+import { SSAARenderPass } from 'three/examples/jsm/postprocessing/SSAARenderPass'
+import { CopyShader } from 'three/examples/jsm/shaders/CopyShader'
 
 class EngineRenderer extends WebGLRenderer {
   /**
@@ -10,17 +13,10 @@ class EngineRenderer extends WebGLRenderer {
    * @param {Camera} camera
    * @param {WebGLRendererParameters} [parameters]
    */
-  constructor(scene, camera, parameters) {
-    super({
-      alpha: true,
-      antialias: true,
-      gammaInput: true,
-      gammaOutput: true,
-      gammaFactor: 0.2,
-      physicallyCorrectLights: true,
-      outputEncoding: sRGBEncoding,
-      ...parameters
-    })
+  constructor(scene, camera, parameters = {}) {
+    super({ alpha: false, antialias: true, ...parameters })
+    this.outputEncoding = sRGBEncoding
+    this.physicallyCorrectLights = true
 
     /**
      *
@@ -54,6 +50,18 @@ class EngineRenderer extends WebGLRenderer {
 
     /**
      *
+     * @type {SSAARenderPass}
+     */
+    this.ssaaRenderPass = new SSAARenderPass(this.scene, this.camera)
+
+    /**
+     *
+     * @type {ShaderPass}
+     */
+    this.copyPass = new ShaderPass(CopyShader)
+
+    /**
+     *
      * @type {{resize: Function|null}}
      */
     this.register = { resize: null }
@@ -77,6 +85,17 @@ class EngineRenderer extends WebGLRenderer {
 
   /**
    *
+   * @returns {Vector2}
+   */
+  get resolution() {
+    const pixelRatio = this.getPixelRatio()
+    return new Vector2()
+      .setX(1 / (this.width * pixelRatio))
+      .setY(1 / (this.height * pixelRatio))
+  }
+
+  /**
+   *
    * @param {Boolean} [value] - Default is TRUE
    * @returns {EngineRenderer}
    */
@@ -88,19 +107,37 @@ class EngineRenderer extends WebGLRenderer {
   /**
    *
    * @param {Array.<(Object3D|Mesh)>} objectsArray
-   * @param {Color} visibleColor
+   * @param {{visibleEdgeColor: [(number|string|Color)], hiddenEdgeColor: [(number|string|Color)], edgeStrength: number, edgeGlow: number, edgeThickness: number, pulsePeriod: number}} [options]
    * @returns {OutlinePass}
    */
-  createOutline(objectsArray, visibleColor) {
+  createOutline(objectsArray, options = {}) {
     const outlinePass = new OutlinePass(new Vector2(this.width, this.width), this.scene, this.camera, objectsArray)
-    outlinePass.edgeStrength = 2.5
-    outlinePass.edgeGlow = 0.7
-    outlinePass.edgeThickness = 2.8
-    outlinePass.visibleEdgeColor = visibleColor
-    outlinePass.hiddenEdgeColor.set(0)
+    outlinePass.edgeStrength = options.edgeStrength || 2.5
+    outlinePass.edgeGlow = options.edgeGlow || 0.7
+    outlinePass.edgeThickness = options.edgeThickness || 2.8
+    outlinePass.pulsePeriod = options.pulsePeriod || 0
+    if (options.visibleEdgeColor) {
+      outlinePass.visibleEdgeColor.set(options.visibleEdgeColor)
+    }
+    if (options.hiddenEdgeColor) {
+      outlinePass.hiddenEdgeColor.set(options.hiddenEdgeColor)
+    }
     this.composer.addPass(outlinePass)
-    this.enableOutline(true)
     return outlinePass
+  }
+
+  /**
+   *
+   * @param {OutlinePass} outlinePass
+   * @returns {EngineRenderer}
+   */
+  removeOutline(outlinePass) {
+    const index = this.composer.passes.indexOf(outlinePass)
+    if (index > -1) {
+      console.log(index, this.composer.passes)
+      this.composer.passes.splice(index, 1)
+    }
+    return this
   }
 
   /**
@@ -132,10 +169,15 @@ class EngineRenderer extends WebGLRenderer {
    * @returns {EngineRenderer}
    */
   preset() {
-    this.setPixelRatio(window.devicePixelRatio)
+    this.setPixelRatio(window.devicePixelRatio || 1)
     this.setSize(this.width, this.height)
     this.composer.setSize(this.width, this.height)
     this.composer.addPass(this.renderPass)
+    this.composer.addPass(this.copyPass)
+
+    this.ssaaRenderPass.unbiased = true
+    this.ssaaRenderPass.sampleLevel = 1
+    this.composer.addPass(this.ssaaRenderPass)
     return this
   }
 

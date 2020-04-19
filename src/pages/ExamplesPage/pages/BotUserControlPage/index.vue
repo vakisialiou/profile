@@ -21,7 +21,7 @@
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
 
   export default {
-    name: 'UnitBotUserControlPage',
+    name: 'BotUserControlPage',
     components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
@@ -93,10 +93,10 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
             .render(container)
             .renderStats(container)
             .registerEvents()
+            .enableOutline(true)
             .animate()
 
           let activeKeyCode = null
@@ -167,8 +167,8 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="bot-user-control-canvas" :autofill="true" class="unit-bot-user-control-page">
-      <div class="unit-bot-user-control-page__controls mx-2 my-2">
+    <WrapperView id="bot-user-control-canvas" :autofill="true" class="bot-user-control-page">
+      <div class="bot-user-control-page__controls mx-2 my-2">
         <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" font-scale="2" />
         <b-popover ref="popover" target="controls-helper" title="Control" triggers="focus">
           Bot:
@@ -184,7 +184,7 @@
         </b-popover>
       </div>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotUserControlPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotUserControlPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>

@@ -17,7 +17,6 @@ import { EventDispatcher } from 'three'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import EngineRenderer from './EngineRenderer'
-import { World } from 'oimo'
 import Unit from './units/Unit'
 
 class Engine {
@@ -47,12 +46,13 @@ class Engine {
      * @type {Scene}
      */
     this.scene = new Scene()
+    this.scene.background = new Color(0xFFFFFF)
 
     /**
      *
      * @type {PerspectiveCamera}
      */
-    this.camera = new PerspectiveCamera(50, this.width / this.height, 1, 5000)
+    this.camera = new PerspectiveCamera(45, this.width / this.height, 0.1, 5000)
 
     /**
      *
@@ -117,15 +117,9 @@ class Engine {
     this.pointLightHelper = new PointLightHelper(this.pointLight, 6, 0xFF0000)
 
     /**
-     *
-     * @type {World}
-     */
-    this.physicsWorld = new World()
-
-    /**
      * List of units that must work with physics engine.
      *
-     * @type {{[Engine.CATEGORY_PHYSICS]: Array.<Unit>, [string]: Array}}
+     * @type {{[string]: Array.<Unit>, [string]: Array}}
      */
     this.units = {}
 
@@ -171,12 +165,6 @@ class Engine {
      */
     this.audioListener = new AudioListener()
   }
-
-  /**
-   *
-   * @type {string}
-   */
-  static CATEGORY_PHYSICS = 'physics'
 
   /**
    *
@@ -234,63 +222,53 @@ class Engine {
 
   /**
    *
-   * @param {Object} [options]
+   * @param {(Mesh|Group|Object3D|Unit)} mesh
+   * @returns {boolean}
+   */
+  has(mesh) {
+    return Boolean(this.scene.getObjectById(mesh.id))
+  }
+
+  /**
+   * Add element to scene and distribute to different categories.
+   *
+   * @param {string|Array.<string>} categories
+   * @param {(Mesh|Group|Object3D|Unit)} mesh
    * @returns {Engine}
    */
-  setPhysicsGround(options = {}) {
-    this.physicsWorld.add({ size: [1000, 1, 1000], pos: [0, 0, 0], density: 1000, ...options })
+  add(categories, mesh) {
+    categories = Array.isArray(categories) ? categories : [categories]
+    for (const category of categories) {
+      if (!this.units.hasOwnProperty(category)) {
+        this.units[category] = []
+      }
+
+      if (!this.units[category].includes(mesh)) {
+        this.units[category].push(mesh)
+      }
+    }
+
+    this.scene.add(mesh)
     return this
   }
 
   /**
    *
-   * @param {(Mesh|Group|Object3D|Unit)} mesh
-   * @returns {boolean}
-   */
-  has(mesh) {
-    for (const createdCategory in this.units) {
-      if (!this.units.hasOwnProperty(createdCategory)) {
-        continue
-      }
-      const itemIndex = this.units[createdCategory].indexOf(mesh)
-      if (itemIndex !== -1) {
-        return true
-      }
-    }
-    return false
-  }
-
-  /**
-   * Add element to scene and distribute to different category to quick search.
-   *
-   * @param {string} category
-   * @param {(Mesh|Group|Object3D|Unit)} mesh
+   * @param {(Object3D|Mesh|Group|Unit)} mesh
    * @returns {Engine}
    */
-  add(category, mesh) {
-    if (!this.units.hasOwnProperty(category)) {
-      this.units[category] = []
-    }
-
-    for (const createdCategory in this.units) {
-      if (!this.units.hasOwnProperty(createdCategory)) {
+  remove(mesh) {
+    for (const category in this.units) {
+      if (!this.units.hasOwnProperty(category)) {
         continue
       }
-      const itemIndex = this.units[createdCategory].indexOf(mesh)
+      const itemIndex = this.units[category].indexOf(mesh)
       if (itemIndex !== -1) {
-        throw Error(`Model has already added to scene and relate to ${createdCategory} category`)
+        this.units[category].splice(itemIndex, 1)
       }
     }
 
-    if (mesh instanceof Unit) {
-      if (!this.units.hasOwnProperty(Engine.CATEGORY_PHYSICS)) {
-        this.units[Engine.CATEGORY_PHYSICS] = []
-      }
-      this.units[Engine.CATEGORY_PHYSICS].push(mesh)
-    }
-
-    this.scene.add(mesh)
-    this.units[category].push(mesh)
+    this.scene.remove(mesh)
     return this
   }
 
@@ -319,11 +297,12 @@ class Engine {
 
   /**
    *
-   * @param {Array.<string>} categories
+   * @param {string|Array.<string>} categories
    * @returns {Array.<(Mesh|Group|Object3D|Unit)>}
    */
   getUnits(categories) {
     let units = []
+    categories = Array.isArray(categories) ? categories : [categories]
     for (const category of categories) {
       if (this.units.hasOwnProperty(category)) {
         units = units.concat(this.units[category])
@@ -334,35 +313,11 @@ class Engine {
 
   /**
    *
-   * @param {(Object3D|Mesh|Group|Unit)} mesh
+   * @param {number} hex
    * @returns {Engine}
    */
-  remove(mesh) {
-    for (const category in this.units) {
-      if (!this.units.hasOwnProperty(category)) {
-        continue
-      }
-      const itemIndex = this.units[category].indexOf(mesh)
-      if (itemIndex !== -1) {
-        this.units[category].splice(itemIndex, 1)
-      }
-      if (category !== Engine.CATEGORY_PHYSICS && this.units[category].length === 0) {
-        delete this.units[category]
-      }
-    }
-
-    this.scene.remove(mesh)
-    return this
-  }
-
-  /**
-   *
-   * @param {Color} [color]
-   * @returns {Engine}
-   */
-  setFog(color) {
-    this.scene.background = color || new Color().setHSL(0.6, 0, 1)
-    this.scene.fog = new Fog(this.scene.background, 1, 3000)
+  setFog(hex) {
+    this.scene.fog = new Fog(hex, 1, 1600)
     return this
   }
 
@@ -416,10 +371,21 @@ class Engine {
 
   /**
    *
+   * @param {boolean} [value] - Default is true
    * @returns {Engine}
    */
-  enableOutline() {
-    this.renderer.enableOutline()
+  enableOutline(value = true) {
+    this.renderer.enableOutline(value)
+    return this
+  }
+
+  /**
+   *
+   * @param {OutlinePass} outlinePass
+   * @returns {Engine}
+   */
+  removeOutline(outlinePass) {
+    this.renderer.removeOutline(outlinePass)
     return this
   }
 
@@ -465,6 +431,7 @@ class Engine {
    */
   setAxesHelper(size = 100) {
     const grid = new AxesHelper(size)
+    grid.position.setY(0.2)
     this.scene.add(grid)
     return this
   }
@@ -676,10 +643,9 @@ class Engine {
     }
 
     this.mapControls.update()
-    this.physicsWorld.step()
 
     for (const updateCallback of this.updates) {
-      updateCallback(delta)
+      updateCallback(delta || 0.0000001)
     }
 
     this.renderer.update()
@@ -698,13 +664,6 @@ class Engine {
 
     while(this.scene.children.length > 0) {
       this.scene.remove(this.scene.children[0])
-    }
-
-    const units = this.units[Engine.CATEGORY_PHYSICS] || []
-    for (const unit of units) {
-      if (unit.rigidBody) {
-        this.physicsWorld.remove(unit.rigidBody)
-      }
     }
 
     this.mapControls.dispose()

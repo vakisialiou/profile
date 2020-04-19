@@ -103,7 +103,7 @@ export class ControllerBullet {
    * @returns {ControllerBullet}
    */
   setPosition(position) {
-    this.bullet.setPosition(position)
+    this.bullet.position.copy(position)
     this.bulletEffect.emmitTraceEffect(position)
     return this
   }

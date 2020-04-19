@@ -45,7 +45,7 @@ export default {
       const storm = new Storm(new Color(0x6A9EE6))
       const sky = new SkyBox(textures.getTexture('sky-box-galaxy'))
 
-      const planet = new Planet(textures.getTexture('planet-1')).setPosition(new Vector3(- 200, - 300, 300))
+      const planet = new Planet(textures.getTexture('planet-1')).setPosition(new Vector3(300, - 160, 20))
       sky.addParticle(planet)
       sky.addParticle(new Star(textures.getTexture('star-1')).setScale(45).setPosition(new Vector3(600, 100, 200)))
       sky.addParticle(new Star(textures.getTexture('star-2')).setScale(45).setPosition(new Vector3(600, 100, -600)))
@@ -67,6 +67,7 @@ export default {
           .enableMouseRotate(false)
           .enableMouseZoom(false)
           .render(document.getElementById('home-page-canvas'))
+          .enableOutline(true)
           .registerEvents()
           .animate()
 
@@ -83,7 +84,8 @@ export default {
           engine.pointLight.position.copy(engine.camera.position)
         })
 
-        engine.createOutline(storm.lightningsMeshes, new Color(0x6A9EE6))
+        engine.createOutline(storm.lightningsMeshes, { visibleEdgeColor: new Color(0x6A9EE6) })
+        engine.createOutline([planet], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 1.4, pulsePeriod: 40, edgeThickness: 4.4, edgeStrength: 1.5 })
       })
     })
   },

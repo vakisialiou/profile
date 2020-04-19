@@ -21,7 +21,7 @@
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
 
   export default {
-    name: 'UnitBotAnimationPage',
+    name: 'BotAnimationPage',
     components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
@@ -68,8 +68,8 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('unit-bot-animation-canvas')
-      const container = document.getElementById('unit-bot-animation-canvas')
+      engine = Engine.create('bot-animation-canvas')
+      const container = document.getElementById('bot-animation-canvas')
 
       loader.preset().then(() => {
         engine.preset().then(() => {
@@ -102,10 +102,10 @@
             .setHemiLight(lightPosition)
             .setPointLight(lightPosition)
             .setCamera(cameraPosition, cameraLookAt)
-            .setPhysicsGround({ size: [ground.width, 1, ground.height] })
             .render(container)
             .renderStats(container)
             .registerEvents()
+            .enableOutline(true)
             .animate()
         })
       })
@@ -115,8 +115,8 @@
 
 <template>
   <WrapperView :autofill="true">
-    <WrapperView id="unit-bot-animation-canvas" :autofill="true" class="unit-bot-animation-page">
-      <div class="unit-bot-animation-page__controls px-4 py-2">
+    <WrapperView id="bot-animation-canvas" :autofill="true" class="bot-animation-page">
+      <div class="bot-animation-page__controls px-4 py-2">
         <BFormGroup label="Toggle animation">
           <BFormRadioGroup
             id="bot-animations"
@@ -157,7 +157,7 @@
         >Pause animation</BFormCheckbox>
       </div>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitBotAnimationPage" class="m-2" />
+      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAnimationPage" class="m-2" />
     </WrapperView>
   </WrapperView>
 </template>
