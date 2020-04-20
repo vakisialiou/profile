@@ -8,8 +8,4 @@
   }
 </script>
 
-<template>
-  <keep-alive :include="['ModelGroundPage', 'ModelTowerPage']">
-    <RouterView />
-  </keep-alive>
-</template>
+<template>ExamplesPage</template>

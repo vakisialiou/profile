@@ -12,10 +12,10 @@
   import Bot from '@scene/units/Bot'
   import Path from '@scene/steering/Path'
 
-  const botPath = [new Vector3(0, 0, 30), new Vector3(0, 0, 300), new Vector3(- 350, 0, 100)/*, new Vector3(- 50, 0, - 300), new Vector3(300, 0, - 150)*/]
+  const botPath = [new Vector3(0, 1, 30), new Vector3(0, 1, 300), new Vector3(- 350, 1, 100)]
 
   const lineGeometry = new BufferGeometry().setFromPoints(botPath)
-  const lineMaterial = new LineBasicMaterial({ color: 0xffffff })
+  const lineMaterial = new LineBasicMaterial({ color: 0x222222, linewidth: 1 })
   const linePath = new Line(lineGeometry, lineMaterial)
 
   let engine = null
@@ -25,8 +25,6 @@
   const loader = new Loading()
     .addLoading(loadingBot)
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
-
-
 
   export default {
     name: 'BotAutoControlPage',
@@ -67,12 +65,6 @@
 
       }
     },
-    activated() {
-      engine.pause(false)
-    },
-    deactivated() {
-      engine.pause(true)
-    },
     destroyed() {
       engine.destroy()
     },
@@ -90,13 +82,12 @@
           botController
             .setPathType(this.selectedPathType)
             .setPosition(botPath[0])
-            // Гулять по периметру карты.
             .setPath(botPath)
             .preset(engine)
 
           const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(410, 0, 410)
-          const cameraPosition = new Vector3(450, 0, 450)
+          const cameraLookAt = new Vector3().copy(botPath[0])
+          const cameraPosition = new Vector3(0, 0, 0)
 
           engine
             .add('ground', ground)

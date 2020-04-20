@@ -1,3 +1,6 @@
+body {
+  background: #000000 !important;
+}
 #container {
   top: 0;
   left: 0;

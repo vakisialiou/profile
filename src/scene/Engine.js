@@ -20,7 +20,11 @@ import EngineRenderer from './EngineRenderer'
 import Unit from './units/Unit'
 
 class Engine {
-  constructor() {
+  /**
+   *
+   * @param {string} sceneName
+   */
+  constructor(sceneName) {
 
     /**
      *
@@ -164,23 +168,30 @@ class Engine {
      * @type {AudioListener}
      */
     this.audioListener = new AudioListener()
+
+    /**
+     *
+     * @type {string}
+     */
+    this.sceneName = sceneName
   }
 
   /**
    *
-   * @param {string} [name]
+   * @param {string} [sceneName]
    * @returns {Engine}
    */
-  static create(name) {
-    name = name || 'default'
+  static create(sceneName) {
+    sceneName = sceneName || 'default'
     if (!window.__engine__) {
       window.__engine__ = {}
     }
-    if (window.__engine__.hasOwnProperty(name)) {
-      window.__engine__[name].destroy()
+    if (window.__engine__.hasOwnProperty(sceneName)) {
+      window.__engine__[sceneName].destroy()
     }
-    const engine = new Engine()
-    window.__engine__[name] = engine
+
+    const engine = new Engine(sceneName)
+    window.__engine__[sceneName] = engine
     return engine
   }
 
@@ -667,6 +678,9 @@ class Engine {
     }
 
     this.mapControls.dispose()
+    if (window.__engine__ && window.__engine__.hasOwnProperty(this.sceneName)) {
+       delete window.__engine__[this.sceneName]
+    }
     return this
   }
 }

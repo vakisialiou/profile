@@ -3,28 +3,25 @@
   import Vue from 'vue'
   import VueRouter from 'vue-router'
   import HorizontalMenu from './components/HorizontalMenu'
-  import { routes } from './routes'
-  import {
-    BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav,
-    BNavForm, BFormInput, BButton, BImg, BIcon
-  } from 'bootstrap-vue'
+  import AppRoutes from './routes/AppRoutes'
+  import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BImg } from 'bootstrap-vue'
 
   Vue.use(VueRouter)
 
+  const appRoutes = new AppRoutes()
+
   export default {
     name: 'App',
-    router: new VueRouter({ routes }),
+    router: new VueRouter({ routes: appRoutes.fullRoutes }),
     computed: {
       horizontalMenuRoutes: () => {
-        return routes.filter((route) => route.types.includes('horizontal'))
+        return appRoutes.horizontalMenuRoutes()
       },
       homePageRouter: () => {
-        return routes.find((route) => route.types.includes('home'))
+        return appRoutes.homePageRouter()
       },
       keepAliveRoutes: () => {
-        return routes
-          .filter((item) => item.keepAlive)
-          .map((route) => route.component.name)
+        return appRoutes.keepAliveRoutes()
       }
     },
     methods: {

@@ -65,12 +65,6 @@
       },
     },
     components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckboxGroup },
-    activated() {
-      engine.pause(false)
-    },
-    deactivated() {
-      engine.pause(true)
-    },
     destroyed() {
       engine.destroy()
     },
