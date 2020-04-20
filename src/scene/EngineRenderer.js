@@ -15,8 +15,6 @@ class EngineRenderer extends WebGLRenderer {
    */
   constructor(scene, camera, parameters = {}) {
     super({ alpha: false, antialias: true, ...parameters })
-    this.outputEncoding = sRGBEncoding
-    this.physicallyCorrectLights = true
 
     /**
      *
