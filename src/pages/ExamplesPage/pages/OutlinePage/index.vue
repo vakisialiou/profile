@@ -13,7 +13,7 @@
     CylinderGeometry,
     BoxGeometry,
     SphereGeometry,
-    BufferGeometry, LineBasicMaterial, Line, Raycaster, RingGeometry, Color, Group
+    BufferGeometry, LineBasicMaterial, Line, Raycaster, RingGeometry, Color, Group, Math as _Math
   } from 'three'
   import { loading as loadingBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
@@ -102,7 +102,7 @@
             item.shape.position.copy(item.path.current())
 
             const ring = createRing(item.color)
-            ring.position.setY(1)
+            ring.position.setY(_Math.randFloat(0.1, 0.9))
             ring.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), - Math.PI / 2)
             item.shape.add(ring)
 
@@ -155,7 +155,7 @@
             .setFog(0xFFFFFF)
             .animate()
 
-          let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 1.4, edgeThickness: 2, edgeStrength: 1.2 })
+          let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 0, edgeThickness: 1, edgeStrength: 2 })
 
           engine
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
@@ -233,7 +233,7 @@
    * @returns {Mesh}
    */
   function createRing(color) {
-    const geometry = new RingGeometry(49.8 * 2, 50 * 2, 64)
+    const geometry = new RingGeometry(40 * 2, 50 * 2, 64)
     const material = new MeshStandardMaterial({ color })
     return new Mesh(geometry, material)
   }
