@@ -90,7 +90,6 @@
             .render(container)
             .renderStats(container)
             .registerEvents()
-            .enableOutline(true)
             .animate()
 
           let activeKeyCode = null

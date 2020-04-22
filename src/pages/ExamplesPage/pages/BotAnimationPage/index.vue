@@ -99,7 +99,6 @@
             .render(container)
             .renderStats(container)
             .registerEvents()
-            .enableOutline(true)
             .animate()
         })
       })

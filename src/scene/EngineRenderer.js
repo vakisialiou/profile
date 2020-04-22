@@ -1,10 +1,7 @@
-import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color, sRGBEncoding } from 'three'
+import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 import { SSAARenderPass } from 'three/examples/jsm/postprocessing/SSAARenderPass'
-import { CopyShader } from 'three/examples/jsm/shaders/CopyShader'
 
 class EngineRenderer extends WebGLRenderer {
   /**
@@ -42,21 +39,9 @@ class EngineRenderer extends WebGLRenderer {
 
     /**
      *
-     * @type {RenderPass}
-     */
-    this.renderPass = new RenderPass(this.scene, this.camera)
-
-    /**
-     *
      * @type {SSAARenderPass}
      */
     this.ssaaRenderPass = new SSAARenderPass(this.scene, this.camera)
-
-    /**
-     *
-     * @type {ShaderPass}
-     */
-    this.copyPass = new ShaderPass(CopyShader)
 
     /**
      *
@@ -132,7 +117,6 @@ class EngineRenderer extends WebGLRenderer {
   removeOutline(outlinePass) {
     const index = this.composer.passes.indexOf(outlinePass)
     if (index > -1) {
-      console.log(index, this.composer.passes)
       this.composer.passes.splice(index, 1)
     }
     return this
@@ -170,8 +154,6 @@ class EngineRenderer extends WebGLRenderer {
     this.setPixelRatio(window.devicePixelRatio || 1)
     this.setSize(this.width, this.height)
     this.composer.setSize(this.width, this.height)
-    this.composer.addPass(this.renderPass)
-    this.composer.addPass(this.copyPass)
 
     this.ssaaRenderPass.unbiased = true
     this.ssaaRenderPass.sampleLevel = 1

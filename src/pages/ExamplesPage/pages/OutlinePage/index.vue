@@ -10,7 +10,9 @@
     Vector3,
     Mesh,
     MeshStandardMaterial,
+    MeshPhongMaterial,
     CylinderGeometry,
+    ConeGeometry,
     BoxGeometry,
     SphereGeometry,
     BufferGeometry, LineBasicMaterial, Line, Raycaster, RingGeometry, Color, Group, Math as _Math
@@ -58,7 +60,7 @@
               path: new Path().type(Path.TYPE_LOOP_BACKWARD).add(new Vector3(100, 0, 100)).add(new Vector3(- 50, 0, - 200)),
               shape: new Group(),
               type: 'box',
-              color: 0xFFD300,
+              color: 0x307102,
               speed: 0.5,
               enableUserControls: false
             },
@@ -66,7 +68,7 @@
               path: new Path().type(Path.TYPE_LOOP_BACKWARD).add(new Vector3(-180, 0, 200)).add(new Vector3(150, 0, - 300)),
               shape: new Group(),
               type: 'sphere',
-              color: 0xA600FF,
+              color: 0x8E3E00,
               speed: 1,
               enableUserControls: false
             },
@@ -75,6 +77,14 @@
               shape: new Group(),
               type: 'cylinder',
               color: 0x222222,
+              speed: 1.5,
+              enableUserControls: false
+            },
+            {
+              path: new Path().type(Path.TYPE_LOOP_BACKWARD).add(new Vector3(180, 0, -160)).add(new Vector3(-250, 0, 120)),
+              shape: new Group(),
+              type: 'cone',
+              color: 0x0004C4,
               speed: 1.5,
               enableUserControls: false
             }
@@ -91,12 +101,15 @@
               case 'sphere':
                 item.shape.add(createSphere(item.color))
                 break
+              case 'cone':
+                item.shape.add(createCone(item.color))
+                break
             }
 
             item.shape.position.copy(item.path.current())
 
             const ring = createRing(item.color)
-            ring.position.setY(_Math.randFloat(0.1, 0.9))
+            ring.position.setY(_Math.randFloat(1, 1.99))
             ring.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), - Math.PI / 2)
             item.shape.add(ring)
 
@@ -145,11 +158,10 @@
             .render(container)
             .renderStats(container)
             .registerEvents()
-            .enableOutline()
-            .setFog(0xFFFFFF)
+            .enableOutline(true)
             .animate()
 
-          let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 0, edgeThickness: 1, edgeStrength: 2 })
+          let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xC4A900), edgeGlow: 0, edgeThickness: 2, edgeStrength: 2 })
 
           engine
             .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
@@ -195,7 +207,7 @@
    */
   function createCylinder(color) {
     const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
-    const material = new MeshStandardMaterial({ color })
+    const material = new MeshPhongMaterial({ color })
     return new Mesh(geometry, material)
   }
 
@@ -206,7 +218,7 @@
    */
   function createSphere(color) {
     const geometry = new SphereGeometry(10, 32, 32)
-    const material = new MeshStandardMaterial({ color })
+    const material = new MeshPhongMaterial({ color })
     return new Mesh(geometry, material)
   }
 
@@ -217,7 +229,19 @@
    */
   function createBox(color) {
     const geometry = new BoxGeometry(10, 40, 10)
-    const material = new MeshStandardMaterial({ color })
+    const material = new MeshPhongMaterial({ color })
+    return new Mesh(geometry, material)
+  }
+
+
+  /**
+   *
+   * @param {number} color
+   * @returns {Mesh}
+   */
+  function createCone(color) {
+    const geometry = new ConeGeometry(10, 40)
+    const material = new MeshPhongMaterial({ color })
     return new Mesh(geometry, material)
   }
 
@@ -228,7 +252,7 @@
    */
   function createRing(color) {
     const geometry = new RingGeometry(40 * 2, 50 * 2, 64)
-    const material = new MeshStandardMaterial({ color })
+    const material = new MeshPhongMaterial({ color })
     return new Mesh(geometry, material)
   }
 
@@ -239,7 +263,7 @@
    */
   function linePath(color, points) {
     const lineGeometry = new BufferGeometry().setFromPoints(points)
-    const lineMaterial = new LineBasicMaterial({ color })
+    const lineMaterial = new LineBasicMaterial({ color, linewidth: 2 })
     return new Line(lineGeometry, lineMaterial)
   }
 

@@ -75,7 +75,7 @@ class Engine {
     this.mapControls.maxPolarAngle = _Math.degToRad(70)
     this.mapControls.minPolarAngle = _Math.degToRad(10)
     this.mapControls.minDistance = 120
-    this.mapControls.maxDistance = 620
+    this.mapControls.maxDistance = 1220
     this.mapControls.keys = {}
     this.mapControls.enablePan = true
     this.mapControls.enableRotate = true
@@ -328,7 +328,7 @@ class Engine {
    * @returns {Engine}
    */
   setFog(hex) {
-    this.scene.fog = new Fog(hex, 1, 1600)
+    this.scene.fog = new Fog(hex, 1, 1000)
     return this
   }
 
