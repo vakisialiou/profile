@@ -97,12 +97,11 @@ class EngineRenderer extends WebGLRenderer {
 
   /**
    *
-   * @param {Array.<(Object3D|Mesh)>} objectsArray
    * @param {{visibleEdgeColor: [(number|string|Color)], hiddenEdgeColor: [(number|string|Color)], edgeStrength: number, edgeGlow: number, edgeThickness: number, pulsePeriod: number}} [options]
    * @returns {OutlinePass}
    */
-  createOutline(objectsArray, options = {}) {
-    const outlinePass = new OutlinePass(new Vector2(this.width, this.width), this.scene, this.camera, objectsArray)
+  createOutline(options = {}) {
+    const outlinePass = new OutlinePass(new Vector2(this.width, this.height), this.scene, this.camera)
     outlinePass.edgeStrength = options.edgeStrength || 2.5
     outlinePass.edgeGlow = options.edgeGlow || 0.7
     outlinePass.edgeThickness = options.edgeThickness || 2.8
@@ -113,6 +112,22 @@ class EngineRenderer extends WebGLRenderer {
     if (options.hiddenEdgeColor) {
       outlinePass.hiddenEdgeColor.set(options.hiddenEdgeColor)
     }
+
+    /**
+     *
+     * @param {(Array.<Mesh>|Array.<SkinnedMesh>)} meshes
+     * @param {boolean} isSkinnedMeshes
+     */
+    outlinePass.setMeshes = (meshes, isSkinnedMeshes) => {
+      outlinePass.depthMaterial.skinning = isSkinnedMeshes
+      outlinePass.prepareMaskMaterial.skinning = isSkinnedMeshes
+      outlinePass.depthMaterial.morphTargets = !isSkinnedMeshes
+      outlinePass.prepareMaskMaterial.morphTargets = !isSkinnedMeshes
+      outlinePass.depthMaterial.needsUpdate = true
+      outlinePass.prepareMaskMaterial.needsUpdate = true
+      outlinePass.selectedObjects = meshes
+    }
+
     this.composer.addPass(outlinePass)
     return outlinePass
   }

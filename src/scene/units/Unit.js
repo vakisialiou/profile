@@ -1,4 +1,4 @@
-import { Group, Mesh, CylinderGeometry, MeshBasicMaterial } from 'three'
+import { Group, Mesh, CylinderGeometry, MeshBasicMaterial, SkinnedMesh } from 'three'
 import UnitAnimation from './../animations/UnitAnimation'
 
 export default class Unit extends Group {
@@ -26,7 +26,22 @@ export default class Unit extends Group {
     const material = new MeshBasicMaterial({ color: 0x666666, transparent: true, opacity: 0 })
     this.unitBody = new Mesh(geometry, material)
     this.unitBody.renderOrder = 10000
+    this.unitBody.visible = false
     this.add(this.unitBody)
+  }
+
+  /**
+   *
+   * @returns {Array.<SkinnedMesh>}
+   */
+  getSkinnedMeshes() {
+    const meshes = []
+    this.model.traverse((item) => {
+      if (item instanceof SkinnedMesh) {
+        meshes.push(item)
+      }
+    })
+    return meshes
   }
 
   /**

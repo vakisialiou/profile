@@ -5,14 +5,12 @@
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
-  import {
-    Vector3, Mesh, MeshPhongMaterial, CylinderGeometry, ConeGeometry, BoxGeometry, SphereGeometry, BufferGeometry,
-    LineBasicMaterial, Line, RingGeometry, Color
-  } from 'three'
+  import { Vector3, Color } from 'three'
   import { loading as loadingBot, MODEL_BOT } from '@scene/controllers/ControllerBot'
   import { loading as loadingTower, MODEL_TOWER } from '@scene/controllers/ControllerTower'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
+  import Shape from '@scene/objects/Shape'
   import Unit from '@scene/units/Unit'
   import Bot from '@scene/units/Bot'
   import Tower from '@scene/units/Tower'
@@ -54,16 +52,17 @@
 
         const rawBotModel = loader.getRawModel(MODEL_BOT)
         const bot = new Bot(rawBotModel)
+        bot.idleAnimation()
+        engine.addUpdate((delta) => bot.update(delta))
 
         const rawTowerModel = loader.getRawModel(MODEL_TOWER)
         const tower = new Tower(rawTowerModel)
 
-        engine.add('shapes', createBox(0xC46900, new Vector3(- 100, 0, 0)))
-        engine.add('shapes', createCylinder(0xC46900, new Vector3(- 50, 0, 0)))
-        engine.add('shapes', createSphere(0xC46900, new Vector3(0, 0, 0)))
-        engine.add('shapes', createCone(0xC46900, new Vector3(50, 0, 0)))
-        engine.add('shapes', createRing(0xC46900, new Vector3(100, 0, 0)))
-        engine.add('shapes', createLine(0xC46900, [ new Vector3(- 100, 24, 0), new Vector3(100, 24, 0) ]))
+        engine.add('shapes', new Shape(0x222222).createBox().setPosition(new Vector3(- 100, 0, 0)))
+        engine.add('shapes', new Shape(0xB17200).createCylinder().setPosition(new Vector3(- 50, 0, 0)))
+        engine.add('shapes', new Shape(0x0E2C20).createSphere().setPosition(new Vector3(0, 0, 0)))
+        engine.add('shapes', new Shape(0xB17200).createCone().setPosition(new Vector3(50, 0, 0)))
+        engine.add('shapes', new Shape(0x222222).createRing().setPosition(new Vector3(100, 0, 0)))
         engine.add('shapes', bot.setScale(0.2).setPosition(new Vector3(0, 0, -100)))
         engine.add('shapes', tower.setScale(20).setPosition(new Vector3(0, 0, 100)))
 
@@ -84,7 +83,7 @@
           .enableOutline(true)
           .animate()
 
-        let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xC4A900), edgeGlow: 0, edgeThickness: 1.3, edgeStrength: 2.1 })
+        let outlinePass = engine.createOutline({ visibleEdgeColor: new Color(0xC4A900), edgeGlow: 0, edgeThickness: 1.3, edgeStrength: 2.1 })
 
         engine
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
@@ -110,104 +109,24 @@
             }
 
             let unit = enemies.find((item) => item.getObjectById(intersection.object.id))
-            console.log(unit, intersection.object)
-            // if (intersection.object.parent instanceof Unit) {
-            //   unit = intersection.object.parent.model.children[0]['children']
-            //   outlinePass.selectedObjects = unit
-            //   console.log(unit)
-            //   return
-            // }
+
+            if (intersection.object.parent instanceof Unit) {
+              const skinnedMeshes = intersection.object.parent.getSkinnedMeshes()
+              if (skinnedMeshes.length > 0) {
+                outlinePass.setMeshes(skinnedMeshes, true)
+              } else {
+                outlinePass.setMeshes([intersection.object.parent], false)
+              }
+              return
+            }
 
             if (unit) {
               userTarget.set(0, 0, 0)
-              // outlinePass.selectedObjects = [intersection.object]
-              outlinePass.selectedObjects = [unit]
+              outlinePass.setMeshes([unit], false)
             }
         })
       })
     },
-  }
-
-  /**
-   *
-   * @param {number} color
-   * @param {Vector3} position
-   * @returns {Mesh}
-   */
-  function createCylinder(color, position) {
-    const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
-    const material = new MeshPhongMaterial({ color })
-    const mesh = new Mesh(geometry, material)
-    mesh.position.copy(position)
-    return mesh
-  }
-
-  /**
-   *
-   * @param {number} color
-   * @param {Vector3} position
-   * @returns {Mesh}
-   */
-  function createSphere(color, position) {
-    const geometry = new SphereGeometry(10, 32, 32)
-    const material = new MeshPhongMaterial({ color })
-    const mesh = new Mesh(geometry, material)
-    mesh.position.copy(position)
-    return mesh
-  }
-
-  /**
-   *
-   * @param {number} color
-   * @param {Vector3} position
-   * @returns {Mesh}
-   */
-  function createBox(color, position) {
-    const geometry = new BoxGeometry(10, 40, 10)
-    const material = new MeshPhongMaterial({ color })
-    const mesh = new Mesh(geometry, material)
-    mesh.position.copy(position)
-    return mesh
-  }
-
-
-  /**
-   *
-   * @param {number} color
-   * @param {Vector3} position
-   * @returns {Mesh}
-   */
-  function createCone(color, position) {
-    const geometry = new ConeGeometry(10, 40)
-    const material = new MeshPhongMaterial({ color })
-    const mesh = new Mesh(geometry, material)
-    mesh.position.copy(position)
-    return mesh
-  }
-
-  /**
-   *
-   * @param {number} color
-   * @param {Vector3} position
-   * @returns {Mesh}
-   */
-  function createRing(color, position) {
-    const geometry = new RingGeometry(10, 15, 64)
-    const material = new MeshPhongMaterial({ color })
-    const mesh = new Mesh(geometry, material)
-    mesh.position.copy(position)
-    return mesh
-  }
-
-  /**
-   * @param {number} color
-   * @param {Array.<Vector3>} points
-   * @returns {Line}
-   */
-  function createLine(color, points) {
-    const lineGeometry = new BufferGeometry().setFromPoints(points)
-    const lineMaterial = new LineBasicMaterial({ color, linewidth: 2 })
-    return new Line(lineGeometry, lineMaterial)
   }
 
 </script>
