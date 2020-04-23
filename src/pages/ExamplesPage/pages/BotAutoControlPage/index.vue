@@ -111,7 +111,7 @@
     <WrapperView id="bot-auto-control-canvas" :autofill="true" class="bot-auto-control-page">
       <div class="bot-auto-control-page__controls mx-2 my-2">
 
-        <BFormGroup label="Toggle animation moving">
+        <BFormGroup label="Переключить анимацию движения">
           <BFormRadioGroup
             id="bot-animations-running"
             v-on:input="toggleAnimation"
@@ -121,7 +121,7 @@
           />
         </BFormGroup>
 
-        <BFormGroup label="Path type">
+        <BFormGroup label="Выбрать действие после достижения последней точки">
           <BFormRadioGroup
             id="bot-path-type"
             v-on:input="togglePathType"

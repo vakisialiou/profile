@@ -1,12 +1,13 @@
+import { v4 as uuid } from 'uuid'
 
 export default class RouteItem {
   /**
    *
    * @param {VueComponent|Object} component
-   * @param {string} name
+   * @param {string} title
    * @param {string} path
    */
-  constructor(component, name, path) {
+  constructor(component, title, path) {
     /**
      *
      * @type {string}
@@ -35,7 +36,13 @@ export default class RouteItem {
      *
      * @type {string}
      */
-    this.name = name
+    this.name = uuid()
+
+    /**
+     *
+     * @type {string}
+     */
+    this.title = title
 
     /**
      *
@@ -60,6 +67,16 @@ export default class RouteItem {
      * @type {Array.<RouteItem>}
      */
     this.children = []
+  }
+
+  /**
+   *
+   * @param {string} value
+   * @returns {RouteItem}
+   */
+  setName(value) {
+    this.name = value
+    return this
   }
 
   /**

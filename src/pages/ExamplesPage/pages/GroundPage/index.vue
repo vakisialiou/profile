@@ -141,7 +141,7 @@
       <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitGroundPage" class="m-2" />
     </WrapperView>
     <WrapperView class="px-2 py-1">
-      <BFormGroup label="Mouse helpers">
+      <BFormGroup label="Выбрать для получения позиции">
         <BFormRadioGroup
           id="mouse-helpers"
           v-on:input="toggleMouseHelper"
@@ -152,7 +152,7 @@
         />
       </BFormGroup>
 
-      <BFormGroup label="Grid helpers">
+      <BFormGroup label="Включить помощник на плоскости">
         <BFormCheckboxGroup
           id="grid-helpers"
           v-on:input="toggleGridHelper"

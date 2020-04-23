@@ -29,13 +29,13 @@
 <template>
   <BNavbarNav>
     <template v-for="(route, index) in routes">
-      <BNavItemDropdown :key="index" :text="route.name" v-if="route.children && route.children.length > 0">
+      <BNavItemDropdown :key="index" :text="route.title" v-if="route.children && route.children.length > 0">
         <template v-for="(subRoute, subIndex) in route.children">
 
           <RouterLink :to="{ name: subRoute.name }" :key="subIndex" v-slot="{ href, navigate, isActive }">
             <BDropdownItemButton :active="isActive" :href="href" @click="navigate">
               <BIcon :icon="subRoute.icon" aria-hidden="true" v-if="subRoute.icon" />
-              {{ subRoute.name }}
+              {{ subRoute.title }}
               <span class="sr-only">(Not selected)</span>
             </BDropdownItemButton>
           </RouterLink>
@@ -46,7 +46,7 @@
       <RouterLink :to="{ name: route.name }" :key="index" v-slot="{ href, navigate, isActive }" v-if="route.children.length === 0">
         <BNavItem :active="isActive" :href="href" @click="navigate">
           <BIcon :icon="route.icon" aria-hidden="true" v-if="route.icon" />
-          {{ route.name }}
+          {{ route.title }}
           <span class="sr-only">(Not selected)</span>
         </BNavItem>
       </RouterLink>

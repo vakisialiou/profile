@@ -108,7 +108,7 @@
   <WrapperView :autofill="true">
     <WrapperView id="bot-animation-canvas" :autofill="true" class="bot-animation-page">
       <div class="bot-animation-page__controls px-4 py-2">
-        <BFormGroup label="Toggle animation">
+        <BFormGroup label="Переключить анимацию">
           <BFormRadioGroup
             id="bot-animations"
             v-on:input="toggleAnimation"
@@ -118,7 +118,7 @@
           />
         </BFormGroup>
 
-        <BFormGroup label="Toggle animation moving">
+        <BFormGroup label="Переключить анимацию движения">
           <BFormRadioGroup
             id="bot-animations-moving"
             v-on:input="toggleAnimation"
@@ -128,7 +128,7 @@
           />
         </BFormGroup>
 
-        <BFormGroup label="Toggle animation jumping">
+        <BFormGroup label="Переключить анимацию прыжков">
           <BFormRadioGroup
             id="bot-animations-jumping"
             v-on:input="toggleAnimation"
@@ -145,7 +145,7 @@
           v-on:input="toggleAnimationAction"
           v-model="pauseAnimationAction"
           switch
-        >Pause animation</BFormCheckbox>
+        >Пауза анимации</BFormCheckbox>
       </div>
 
       <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAnimationPage" class="m-2" />

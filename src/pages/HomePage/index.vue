@@ -101,18 +101,16 @@ export default {
     <WrapperView id="home-page" class="home-page__canvas" :autofill="true" />
       <div class="container-fluid home-page__container">
 
-        <div class="row px-3 pt-4">
-          <h4 class="text-light">Examples:</h4>
-        </div>
+        <div class="row p-2">
+          <div class="col-md-6 col-lg-4 px-0" v-for="(item, index) in menuItems" :key="index">
 
-        <div class="row py-3">
-          <div class="col-md-6 col-lg-4" v-for="(item, index) in menuItems" :key="index">
-
-            <div class="card flex-md-row mb-4 box-shadow bg-dark">
+            <div class="card flex-md-row box-shadow bg-dark m-2">
               <div class="card-body d-flex flex-column align-items-start p-2">
 
                 <h3 class="mb-2">
-                  <a class="text-light" :href="item.path">{{ item.name }}</a>
+                  <RouterLink :to="{ name: item.name }" :key="index" v-slot="{ href, navigate }">
+                    <a :href="href" @click="navigate" class="text-light">{{ item.title }}</a>
+                  </RouterLink>
                 </h3>
                 <p class="card-text mb-auto text-light">{{ item.description }}</p>
 

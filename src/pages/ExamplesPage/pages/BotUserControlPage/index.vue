@@ -167,17 +167,18 @@
         </BButton>
         <div>
         <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" font-scale="2" />
-        <b-popover ref="popover" target="controls-helper" title="Control" triggers="focus">
-          Bot:
+        <b-popover ref="popover" target="controls-helper" title="Управление ботом" triggers="focus">
+          <b>Персонаж:</b>
           <br/>
-          1. <b>Left Click</b> - moving to click position.
+          1. <b>Left Click</b> - двигаться в направлении клика.
           <br/>
-          2. <b>Ctrl + Left Click</b> (click on any object) - moving to object's direction and attack.
-          Camera:
+          2. <b>Ctrl + Left Click</b> (клик по объекту) - двигаться в направлении объекта и атаковать.
+          <hr/>
+          <b>Камера:</b>
           <br/>
-          1. <b>Right Click</b> - rotate camera.
+          1. <b>Right Click</b> - повернуть камеру.
           <br/>
-          2. <b>Ctrl + Right Click</b> - displace camera.
+          2. <b>Ctrl + Right Click</b> - сместить камеру.
         </b-popover>
         </div>
       </div>

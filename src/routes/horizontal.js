@@ -6,10 +6,10 @@ export const TYPE_MENU_HOME = 'home'
 export const TYPE_MENU_HORIZONTAL = 'horizontal'
 
 export const routes = [
-  new RouteItem(HomePage, 'Home', '/')
+  new RouteItem(HomePage, 'Примеры', '/')
     .addType(TYPE_MENU_HORIZONTAL)
     .addType(TYPE_MENU_HOME),
 
-  new RouteItem(ProfilePage, 'Profile', '/profile')
+  new RouteItem(ProfilePage, 'Профиль', '/profile')
     .addType(TYPE_MENU_HORIZONTAL),
 ]
