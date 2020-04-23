@@ -1,7 +1,9 @@
 import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
-import { SSAARenderPass } from 'three/examples/jsm/postprocessing/SSAARenderPass'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader'
 
 class EngineRenderer extends WebGLRenderer {
   /**
@@ -11,7 +13,7 @@ class EngineRenderer extends WebGLRenderer {
    * @param {WebGLRendererParameters} [parameters]
    */
   constructor(scene, camera, parameters = {}) {
-    super({ alpha: false, antialias: true, ...parameters })
+    super({ alpha: false, antialias: true, logarithmicDepthBuffer: true, ...parameters })
 
     /**
      *
@@ -39,9 +41,15 @@ class EngineRenderer extends WebGLRenderer {
 
     /**
      *
-     * @type {SSAARenderPass}
+     * @type {RenderPass}
      */
-    this.ssaaRenderPass = new SSAARenderPass(this.scene, this.camera)
+    this.renderPass = new RenderPass(this.scene, this.camera)
+
+    /**
+     *
+     * @type {ShaderPass}
+     */
+    this.fxaaPass = new ShaderPass(FXAAShader)
 
     /**
      *
@@ -151,13 +159,14 @@ class EngineRenderer extends WebGLRenderer {
    * @returns {EngineRenderer}
    */
   preset() {
+    this.composer.addPass(this.renderPass)
     this.setPixelRatio(window.devicePixelRatio || 1)
     this.setSize(this.width, this.height)
     this.composer.setSize(this.width, this.height)
 
-    this.ssaaRenderPass.unbiased = true
-    this.ssaaRenderPass.sampleLevel = 1
-    this.composer.addPass(this.ssaaRenderPass)
+    this.fxaaPass.uniforms['resolution'].value.copy(this.resolution)
+    this.fxaaPass.renderToScreen = true
+    this.composer.addPass(this.fxaaPass)
     return this
   }
 

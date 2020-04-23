@@ -66,41 +66,39 @@
       const container = document.getElementById('bot-animation-canvas')
 
       loader.preset().then(() => {
-        engine.preset().then(() => {
-          const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
-          const helperMouseClick = new HelperMouseClick(ground)
-          helperMouseClick.position.set(100000, 0, 100000)
+        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const helperMouseClick = new HelperMouseClick(ground)
+        helperMouseClick.position.set(100000, 0, 100000)
 
-          botController = new ControllerBot(loader).preset(engine)
+        botController = new ControllerBot(loader).preset(engine)
 
-          botController.bot.animation.mixer.addEventListener('loop', () => {
-            // console.log('loop', event)
-          })
-
-          botController.bot.animation.mixer.addEventListener('finished', () => {
-            if (botController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
-              botController.bot.shootingAnimation()
-            }
-          })
-
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-100, 0, 100)
-
-          engine
-            .enableMousePan(false)
-            .enableMouseRotate(true)
-            .add('ground', ground)
-            .add('ground-helper', helperMouseClick)
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setPointLight(lightPosition)
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(container)
-            .renderStats(container)
-            .registerEvents()
-            .animate()
+        botController.bot.animation.mixer.addEventListener('loop', () => {
+          // console.log('loop', event)
         })
+
+        botController.bot.animation.mixer.addEventListener('finished', () => {
+          if (botController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+            botController.bot.shootingAnimation()
+          }
+        })
+
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3(0, 0, 0)
+        const cameraPosition = new Vector3(-100, 0, 100)
+
+        engine
+          .enableMousePan(false)
+          .enableMouseRotate(true)
+          .add('ground', ground)
+          .add('ground-helper', helperMouseClick)
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setPointLight(lightPosition)
+          .setCamera(cameraPosition, cameraLookAt)
+          .preset(container)
+          .renderStats(container)
+          .registerEvents()
+          .animate()
       })
     },
   }

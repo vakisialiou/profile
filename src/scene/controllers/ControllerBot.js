@@ -4,8 +4,8 @@ import BotEffect from '@scene/effects/BotEffect'
 import { loading as loadingBullet, ControllerBullet } from './ControllerBullet'
 import { Vector3 } from 'three'
 
-const MODEL_BOT = 'MODEL_BOT'
-const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
+export const MODEL_BOT = 'MODEL_BOT'
+export const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
 
 export const loading = new Loading()
   .addItem(Loading.TYPE_MODEL, MODEL_BOT, '/models/bot/bot.glb')

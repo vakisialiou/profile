@@ -1,5 +1,5 @@
 import Unit from './Unit'
-import { Vector3, Matrix4, Quaternion } from 'three'
+import { Vector3, Matrix4, Quaternion, Mesh } from 'three'
 import MathObject from '@scene/helper/MathObject'
 
 export default class Tower extends Unit {
@@ -20,7 +20,7 @@ export default class Tower extends Unit {
 
     /**
      * @typedef {Object} GunOptions
-     * @property {(Object3D|Mesg|Group)} model
+     * @property {(Object3D|Mesh|Group)} model
      * @property {number} reloadTime
      * @property {number} lastShotTime
      */

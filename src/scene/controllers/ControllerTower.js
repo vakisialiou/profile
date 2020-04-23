@@ -5,9 +5,9 @@ import { Vector3 } from 'three'
 
 import { loading as loadingBullet, ControllerBullet } from './ControllerBullet'
 
-const MODEL_TOWER = 'TOWER_MODEL_TOWER'
-const AUDIO_TOWER_SHOT = 'TOWER_AUDIO_TOWER_SHOT'
-const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
+export const MODEL_TOWER = 'TOWER_MODEL_TOWER'
+export const AUDIO_TOWER_SHOT = 'TOWER_AUDIO_TOWER_SHOT'
+export const TEXTURE_SMOKE_PARTICLE = 'TOWER_TEXTURE_SMOKE_PARTICLE'
 
 export const loading = new Loading()
   .addItem(Loading.TYPE_MODEL, MODEL_TOWER, '/models/tower/tower.glb')

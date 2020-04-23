@@ -22,11 +22,21 @@ export default class Unit extends Group {
      */
     this.animation = new UnitAnimation(rawModel)
 
-    const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
+    const geometry = new CylinderGeometry(20, 20, 60, 16, 16)
     const material = new MeshBasicMaterial({ color: 0x666666, transparent: true, opacity: 0 })
     this.unitBody = new Mesh(geometry, material)
     this.unitBody.renderOrder = 10000
     this.add(this.unitBody)
+  }
+
+  /**
+   *
+   * @param position
+   * @returns {Unit}
+   */
+  setPosition(position) {
+    this.position.copy(position)
+    return this
   }
 
   /**

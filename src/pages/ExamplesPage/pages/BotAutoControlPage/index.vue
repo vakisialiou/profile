@@ -73,35 +73,33 @@
       const container = document.getElementById('bot-auto-control-canvas')
 
       loader.preset().then(() => {
-        engine.preset().then(() => {
-          const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
-          const helperMouseClick = new HelperMouseClick(ground)
-          helperMouseClick.position.set(100000, 0, 100000)
+        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const helperMouseClick = new HelperMouseClick(ground)
+        helperMouseClick.position.set(100000, 0, 100000)
 
-          botController = new ControllerBot(loader)
-          botController
-            .setPathType(this.selectedPathType)
-            .setPosition(botPath[0])
-            .setPath(botPath)
-            .preset(engine)
+        botController = new ControllerBot(loader)
+        botController
+          .setPathType(this.selectedPathType)
+          .setPosition(botPath[0])
+          .setPath(botPath)
+          .preset(engine)
 
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3().copy(botPath[0])
-          const cameraPosition = new Vector3(0, 0, 0)
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3().copy(botPath[0])
+        const cameraPosition = new Vector3(0, 0, 0)
 
-          engine
-            .add('ground', ground)
-            .add('ground-helper', helperMouseClick)
-            .add('line-path-helper', linePath)
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setPointLight(lightPosition)
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(container)
-            .renderStats(container)
-            .registerEvents()
-            .animate()
-        })
+        engine
+          .add('ground', ground)
+          .add('ground-helper', helperMouseClick)
+          .add('line-path-helper', linePath)
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setPointLight(lightPosition)
+          .setCamera(cameraPosition, cameraLookAt)
+          .preset(container)
+          .renderStats(container)
+          .registerEvents()
+          .animate()
       })
     },
   }

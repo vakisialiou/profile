@@ -28,52 +28,50 @@
       const container = document.getElementById('tower-page-canvas')
 
       loader.preset().then(() => {
-        engine.preset().then(() => {
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-600, 0, 600)
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3(0, 0, 0)
+        const cameraPosition = new Vector3(-600, 0, 600)
 
-          const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
-          const helperMouseSegment = new HelperMouseSegment(ground)
-          helperMouseSegment.position.set(1000000, 0, 1000000)
+        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const helperMouseSegment = new HelperMouseSegment(ground)
+        helperMouseSegment.position.set(1000000, 0, 1000000)
 
-          const towers = []
-          const towersMap = [ new Vector3(-420, 0, 420), new Vector3(420, 0, 420), new Vector3(420, 0, -420), new Vector3(-420, 0, -420) ]
-          for (let i = 0; i < towersMap.length; i++) {
-            const tower = new ControllerTower(loader)
-            tower.setPosition(towersMap[i])
-            tower.preset(engine, [ helperMouseSegment ])
-            towers.push(tower)
-          }
+        const towers = []
+        const towersMap = [ new Vector3(-420, 0, 420), new Vector3(420, 0, 420), new Vector3(420, 0, -420), new Vector3(-420, 0, -420) ]
+        for (let i = 0; i < towersMap.length; i++) {
+          const tower = new ControllerTower(loader)
+          tower.setPosition(towersMap[i])
+          tower.preset(engine, [ helperMouseSegment ])
+          towers.push(tower)
+        }
 
-          engine
-            .add('ground', ground)
-            .add('ground-helper', helperMouseSegment)
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setPointLight(lightPosition)
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(container)
-            .renderStats(container)
-            .registerEvents()
-            .animate()
-            .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
-              // This page has top menu. Need set mouse offset on height it menu.
-              ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
+        engine
+          .add('ground', ground)
+          .add('ground-helper', helperMouseSegment)
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setPointLight(lightPosition)
+          .setCamera(cameraPosition, cameraLookAt)
+          .preset(container)
+          .renderStats(container)
+          .registerEvents()
+          .animate()
+          .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
+            // This page has top menu. Need set mouse offset on height it menu.
+            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
-              // Ground intersection only
-              const intersection = ground.findIntersection(event, engine.camera)
-              if (!intersection) {
-                return
-              }
+            // Ground intersection only
+            const intersection = ground.findIntersection(event, engine.camera)
+            if (!intersection) {
+              return
+            }
 
-              const segmentPosition = ground.extractSegmentPosition(intersection)
-              helperMouseSegment.position.copy(segmentPosition)
-              for (const tower of towers) {
-                tower.setTarget(helperMouseSegment)
-              }
-            })
-        })
+            const segmentPosition = ground.extractSegmentPosition(intersection)
+            helperMouseSegment.position.copy(segmentPosition)
+            for (const tower of towers) {
+              tower.setTarget(helperMouseSegment)
+            }
+          })
       })
     },
   }

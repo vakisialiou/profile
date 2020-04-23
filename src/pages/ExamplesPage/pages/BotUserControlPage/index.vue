@@ -1,12 +1,12 @@
 <script>
   import './index.less'
-  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import Bot from '@scene/units/Bot'
-  import { Vector3, Math as _Math, Mesh, MeshStandardMaterial, CylinderGeometry, MOUSE } from 'three'
+  import { Vector3, Mesh, MeshStandardMaterial, CylinderGeometry, MOUSE } from 'three'
   import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
@@ -22,14 +22,16 @@
 
   export default {
     name: 'BotUserControlPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
     data() {
       return {
 
       }
     },
     methods: {
-
+      screenshot: function () {
+        engine.screenshot()
+      }
     },
     destroyed() {
       engine.destroy()
@@ -39,96 +41,94 @@
       const container = document.getElementById('bot-user-control-canvas')
 
       loader.preset().then(() => {
-        engine.preset().then(() => {
-          switchMouseControls(engine, 'bot-controller-rotation')
+        switchMouseControls(engine, 'bot-controller-rotation')
 
-          const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
-          const helperMouseClick = new HelperMouseClick(ground)
-          helperMouseClick.position.set(100000, 0, 100000)
+        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const helperMouseClick = new HelperMouseClick(ground)
+        helperMouseClick.position.set(100000, 0, 100000)
 
-          engine
-            .add('ground', ground)
-            .add('ground-helper', helperMouseClick)
+        engine
+          .add('ground', ground)
+          .add('ground-helper', helperMouseClick)
 
-          const enemies = []
-          for (let i = -4; i < 5; i++) {
-            if (i === 0) {
-              continue
-            }
-            const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
-            const material = new MeshStandardMaterial({ color: 0x666666 })
-            const cube = new Mesh(geometry, material)
-            cube.renderOrder = - 1000
-
-            let t = i * 100
-            cube.position.setX(t)
-            cube.position.setZ(t)
-            cube.position.setY(15)
-            engine.add('cube', cube)
-            enemies.push(cube)
+        const enemies = []
+        for (let i = -4; i < 5; i++) {
+          if (i === 0) {
+            continue
           }
+          const geometry = new CylinderGeometry(10, 10, 40, 16, 16)
+          const material = new MeshStandardMaterial({ color: 0x666666 })
+          const cube = new Mesh(geometry, material)
+          cube.renderOrder = - 1000
 
-          userBotController = new ControllerBot(loader)
-            .setEnemies(enemies)
-            .preset(engine)
+          let t = i * 100
+          cube.position.setX(t)
+          cube.position.setZ(t)
+          cube.position.setY(15)
+          engine.add('cube', cube)
+          enemies.push(cube)
+        }
 
-          userBotController.bot.animation.mixer.addEventListener('finished', () => {
-            if (userBotController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
-              userBotController.bot.shootingAnimation()
+        userBotController = new ControllerBot(loader)
+          .setEnemies(enemies)
+          .preset(engine)
+
+        userBotController.bot.animation.mixer.addEventListener('finished', () => {
+          if (userBotController.bot.isActiveAnimation(Bot.ANIMATION_KEY_SHOOTING)) {
+            userBotController.bot.shootingAnimation()
+          }
+        })
+
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3(0, 0, 0)
+        const cameraPosition = new Vector3(-100, 0, 100)
+
+        engine
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setPointLight(lightPosition)
+          .setCamera(cameraPosition, cameraLookAt)
+          .preset(container)
+          .renderStats(container)
+          .registerEvents()
+          .animate()
+
+        let activeKeyCode = null
+
+        engine
+          .addEventListener(Engine.EVENT_KEY_DOWN, ({event}) => {
+            activeKeyCode = event.keyCode
+            if (event.keyCode === 17) {
+              switchMouseControls(engine, 'bot-controller-pan')
             }
           })
+          .addEventListener(Engine.EVENT_KEY_UP, ({event}) => {
+            activeKeyCode = null
+            switchMouseControls(engine, 'bot-controller-rotation')
+          })
+          .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
+            if (event.buttons !== 1) {
+              return
+            }
 
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-100, 0, 100)
+            // This page has top menu. Need set mouse offset on height it menu.
+            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
-          engine
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setPointLight(lightPosition)
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(container)
-            .renderStats(container)
-            .registerEvents()
-            .animate()
+            const intersection = ground.findIntersection(event, engine.camera, enemies, true)
+            if (!intersection) {
+              return
+            }
 
-          let activeKeyCode = null
+            const mousePosition = ground.extractMouse3DPosition(intersection)
+            const faceDirection = ground.extractFaceDirection(intersection)
+            helperMouseClick.update(mousePosition, faceDirection)
 
-          engine
-            .addEventListener(Engine.EVENT_KEY_DOWN, ({event}) => {
-              activeKeyCode = event.keyCode
-              if (event.keyCode === 17) {
-                switchMouseControls(engine, 'bot-controller-pan')
-              }
-            })
-            .addEventListener(Engine.EVENT_KEY_UP, ({event}) => {
-              activeKeyCode = null
-              switchMouseControls(engine, 'bot-controller-rotation')
-            })
-            .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
-              if (event.buttons !== 1) {
-                return
-              }
-
-              // This page has top menu. Need set mouse offset on height it menu.
-              ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-
-              const intersection = ground.findIntersection(event, engine.camera, enemies, true)
-              if (!intersection) {
-                return
-              }
-
-              const mousePosition = ground.extractMouse3DPosition(intersection)
-              const faceDirection = ground.extractFaceDirection(intersection)
-              helperMouseClick.update(mousePosition, faceDirection)
-
-              if (activeKeyCode === 17 && enemies.includes(intersection.object)) {
-                userBotController.setTarget(intersection.object)
-              } else {
-                userBotController.clearTarget().followTo(mousePosition)
-              }
-            })
-        })
+            if (activeKeyCode === 17 && enemies.includes(intersection.object)) {
+              userBotController.setTarget(intersection.object)
+            } else {
+              userBotController.clearTarget().followTo(mousePosition)
+            }
+          })
       })
     },
   }
@@ -162,6 +162,10 @@
   <WrapperView :autofill="true">
     <WrapperView id="bot-user-control-canvas" :autofill="true" class="bot-user-control-page">
       <div class="bot-user-control-page__controls mx-2 my-2">
+        <BButton size="sm" @click="screenshot" class="my-2">
+          <BIcon icon="image" />
+        </BButton>
+        <div>
         <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" font-scale="2" />
         <b-popover ref="popover" target="controls-helper" title="Control" triggers="focus">
           Bot:
@@ -175,6 +179,7 @@
           <br/>
           2. <b>Ctrl + Right Click</b> - displace camera.
         </b-popover>
+        </div>
       </div>
 
       <GitHubIcon path="/src/pages/ExamplesPage/pages/BotUserControlPage" class="m-2" />

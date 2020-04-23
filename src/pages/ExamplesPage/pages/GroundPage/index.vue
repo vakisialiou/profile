@@ -71,66 +71,65 @@
     mounted() {
       loader.preset().then(() => {
         engine = Engine.create('model-ground-page-canvas')
-        engine.preset().then(() => {
-          ground.setTexture(loader.getTexture(TEXTURE_GROUND))
 
-          const intersectionObjects = []
-          for (let i = 0; i < 5; i++) {
-            const geometry = new BoxGeometry(20, 30, 20)
-            const material = new MeshStandardMaterial({ color: 0x666666, vertexColors: FaceColors })
-            const item = new Mesh(geometry, material)
-            item.position.setX(_Math.randInt(-500, 500))
-            item.position.setZ(_Math.randInt(-500, 500))
-            item.position.setY(15)
-            engine.add('shapes', item)
-            intersectionObjects.push(item)
-          }
+        ground.setTexture(loader.getTexture(TEXTURE_GROUND))
 
-          const lightPosition = new Vector3(70, 70, 70)
-          const cameraLookAt = new Vector3(0, 0, 0)
-          const cameraPosition = new Vector3(-600, 0, 600)
+        const intersectionObjects = []
+        for (let i = 0; i < 5; i++) {
+          const geometry = new BoxGeometry(20, 30, 20)
+          const material = new MeshStandardMaterial({ color: 0x666666, vertexColors: FaceColors })
+          const item = new Mesh(geometry, material)
+          item.position.setX(_Math.randInt(-500, 500))
+          item.position.setZ(_Math.randInt(-500, 500))
+          item.position.setY(15)
+          engine.add('shapes', item)
+          intersectionObjects.push(item)
+        }
 
-          engine
-            .add('ground', ground)
-            .add('helpers', helperMouseClick)
-            .setDirLight(lightPosition)
-            .setHemiLight(lightPosition)
-            .setAxesHelper()
-            .setCamera(cameraPosition, cameraLookAt)
-            .render(document.getElementById('model-ground-page-canvas'))
-            .registerEvents()
-            .animate()
-            .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
-              // This page has top menu. Need set mouse offset on height it menu.
-              ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
+        const lightPosition = new Vector3(70, 70, 70)
+        const cameraLookAt = new Vector3(0, 0, 0)
+        const cameraPosition = new Vector3(-600, 0, 600)
 
-              const intersection = ground.findIntersection(event, engine.camera, intersectionObjects)
-              if (!intersection) {
-                return
-              }
+        engine
+          .add('ground', ground)
+          .add('helpers', helperMouseClick)
+          .setDirLight(lightPosition)
+          .setHemiLight(lightPosition)
+          .setAxesHelper()
+          .setCamera(cameraPosition, cameraLookAt)
+          .preset(document.getElementById('model-ground-page-canvas'))
+          .registerEvents()
+          .animate()
+          .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
+            // This page has top menu. Need set mouse offset on height it menu.
+            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
-              const faceDirection = ground.extractFaceDirection(intersection)
+            const intersection = ground.findIntersection(event, engine.camera, intersectionObjects)
+            if (!intersection) {
+              return
+            }
 
-              switch (this.selectedMouseHelper) {
-                case 'Segment':
-                  const segmentPosition = ground.extractSegmentPosition(intersection)
-                  helperMouseSegment.position.copy(segmentPosition)
-                  break
-                case 'Vertex':
-                  const vertexPosition = ground.extractVertexPosition(intersection)
-                  helperMouseVertex.position.copy(vertexPosition)
-                  break
-                case 'Click':
-                  const mousePosition = ground.extractMouse3DPosition(intersection)
-                  helperMouseClick.update(mousePosition, faceDirection)
-                  break
-                case 'Face':
-                  const facePosition = ground.extractFacePosition(intersection)
-                  helperMouseFace.update(facePosition, faceDirection, 30)
-                  break
-              }
-            })
-        })
+            const faceDirection = ground.extractFaceDirection(intersection)
+
+            switch (this.selectedMouseHelper) {
+              case 'Segment':
+                const segmentPosition = ground.extractSegmentPosition(intersection)
+                helperMouseSegment.position.copy(segmentPosition)
+                break
+              case 'Vertex':
+                const vertexPosition = ground.extractVertexPosition(intersection)
+                helperMouseVertex.position.copy(vertexPosition)
+                break
+              case 'Click':
+                const mousePosition = ground.extractMouse3DPosition(intersection)
+                helperMouseClick.update(mousePosition, faceDirection)
+                break
+              case 'Face':
+                const facePosition = ground.extractFacePosition(intersection)
+                helperMouseFace.update(facePosition, faceDirection, 30)
+                break
+            }
+          })
       })
     }
   }

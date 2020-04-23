@@ -59,36 +59,35 @@ export default {
 
       const stormPosition = new Vector3(0, 0, 0)
       const cameraPosition = new Vector3(0, 0, -600)
-      engine.preset().then(() => {
-        engine
-          .setDirLight(cameraPosition)
-          .setPointLight(cameraPosition)
-          .setCamera(cameraPosition, stormPosition)
-          .enableAutoRotate(true)
-          .enableMousePan(false)
-          .enableMouseRotate(false)
-          .enableMouseZoom(false)
-          .render(document.getElementById('home-page'))
-          .enableOutline(true)
-          .registerEvents()
-          .animate()
 
-        engine.scene.add(sky)
-        engine.scene.add(storm)
-        storm.position.copy(stormPosition)
+      engine
+        .setDirLight(cameraPosition)
+        .setPointLight(cameraPosition)
+        .setCamera(cameraPosition, stormPosition)
+        .enableAutoRotate(true)
+        .enableMousePan(false)
+        .enableMouseRotate(false)
+        .enableMouseZoom(false)
+        .preset(document.getElementById('home-page'))
+        .enableOutline(true)
+        .registerEvents()
+        .animate()
 
-        let i = 0
-        engine.updates.push((delta) => {
-          storm.update(delta)
-          sky.setPosition(engine.mapControls.target).update(delta)
+      engine.scene.add(sky)
+      engine.scene.add(storm)
+      storm.position.copy(stormPosition)
 
-          engine.dirLight.position.copy(engine.camera.position)
-          engine.pointLight.position.copy(engine.camera.position)
-        })
+      let i = 0
+      engine.updates.push((delta) => {
+        storm.update(delta)
+        sky.setPosition(engine.mapControls.target).update(delta)
 
-        engine.createOutline(storm.lightningsMeshes, { visibleEdgeColor: new Color(0x6A9EE6) })
-        engine.createOutline([planet], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 2.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 })
+        engine.dirLight.position.copy(engine.camera.position)
+        engine.pointLight.position.copy(engine.camera.position)
       })
+
+      engine.createOutline(storm.lightningsMeshes, { visibleEdgeColor: new Color(0x6A9EE6) })
+      engine.createOutline([planet], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 2.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 })
     })
   },
   components: {

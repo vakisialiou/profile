@@ -71,7 +71,7 @@ class Engine {
     this.mapControls = new MapControls(this.camera, this.renderer.domElement)
     this.mapControls.enableDamping = true
     this.mapControls.enableKeys = false
-    this.mapControls.dampingFactor = 0.05
+    this.mapControls.dampingFactor = 0.2
     this.mapControls.maxPolarAngle = _Math.degToRad(70)
     this.mapControls.minPolarAngle = _Math.degToRad(10)
     this.mapControls.minDistance = 120
@@ -219,16 +219,6 @@ class Engine {
     const audio = new PositionalAudio(this.audioListener)
     audio.setBuffer(audioBuffer)
     return audio
-  }
-
-  /**
-   *
-   * @returns {Promise}
-   */
-  preset() {
-    return new Promise((resolve) => {
-      resolve()
-    })
   }
 
   /**
@@ -613,7 +603,7 @@ class Engine {
    * @param {Element} container
    * @returns {Engine}
    */
-  render(container) {
+  preset(container) {
     this.renderer.preset()
     this.container = container
     this.container.appendChild(this.renderer.domElement)
@@ -645,9 +635,8 @@ class Engine {
    *
    * @returns {Engine}
    */
-  animate() {
+  render() {
     this.stats.update()
-    this.register.requestAnimationId = requestAnimationFrame(() => this.animate())
     const delta = this.clock.getDelta()
     if (this.stopped) {
       return this
@@ -661,6 +650,15 @@ class Engine {
 
     this.renderer.update()
     return this
+  }
+
+  /**
+   *
+   * @returns {Engine}
+   */
+  animate() {
+    this.register.requestAnimationId = requestAnimationFrame(() => this.animate())
+    return this.render()
   }
 
   /**
@@ -681,6 +679,24 @@ class Engine {
     if (window.__engine__ && window.__engine__.hasOwnProperty(this.sceneName)) {
        delete window.__engine__[this.sceneName]
     }
+    return this
+  }
+
+  /**
+   *
+   * @returns {Engine}
+   */
+  screenshot() {
+    const linkElement = document.createElement('a')
+    linkElement.style.display = 'none'
+    this.render()
+    this.renderer.domElement.toBlob((blob) => {
+      document.body.appendChild(linkElement)
+      linkElement.href = window.URL.createObjectURL(blob)
+      linkElement.download = `screen-capture-${this.renderer.domElement.width}x${this.renderer.domElement.height}.png`
+      linkElement.click()
+      linkElement.remove()
+    })
     return this
   }
 }
