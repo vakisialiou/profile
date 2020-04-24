@@ -1,5 +1,5 @@
 <script>
-  import { BFormGroup, BFormRadioGroup, BFormCheckboxGroup } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckboxGroup, BButton, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
@@ -48,6 +48,9 @@
       }
     },
     methods: {
+      screenshot: function () {
+        engine.screenshot()
+      },
       toggleMouseHelper: function () {
         for (const item of this.mouseHelpers) {
           if (this.selectedMouseHelper === item.value) {
@@ -68,7 +71,7 @@
         }
       },
     },
-    components: { WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckboxGroup },
+    components: { WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckboxGroup, BButton, BIcon },
     destroyed() {
       engine.destroy()
     },
@@ -147,6 +150,11 @@
     <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left" class="m-4">
         <div class="m-2">
+
+          <BButton variant="dark" size="sm" @click="screenshot"  class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+
           <BFormGroup label="Выбрать для получения позиции">
             <BFormRadioGroup
               id="mouse-helpers"

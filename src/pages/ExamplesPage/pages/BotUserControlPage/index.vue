@@ -6,7 +6,7 @@
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
   import Bot from '@scene/units/Bot'
-  import { Vector3, Mesh, MeshStandardMaterial, CylinderGeometry, MOUSE } from 'three'
+  import { Vector3, Mesh, MeshStandardMaterial, CylinderGeometry } from 'three'
   import { loading as loadingBot, ControllerBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
   import Ground from '@scene/objects/Ground'
@@ -46,8 +46,6 @@
       const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
-        switchMouseControls(engine, 'bot-controller-rotation')
-
         const ground = new Ground()
           .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
           // This page has top menu. Need set mouse offset on height it menu.
@@ -107,13 +105,9 @@
         engine
           .addEventListener(Engine.EVENT_KEY_DOWN, ({event}) => {
             activeKeyCode = event.keyCode
-            if (event.keyCode === 17) {
-              switchMouseControls(engine, 'bot-controller-pan')
-            }
           })
           .addEventListener(Engine.EVENT_KEY_UP, ({event}) => {
             activeKeyCode = null
-            switchMouseControls(engine, 'bot-controller-rotation')
           })
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
             if (event.buttons !== 1) {
@@ -139,29 +133,6 @@
     },
   }
 
-  /**
-   *
-   * @param {Engine} engine
-   * @param {string} type
-   * @returns {void}
-   */
-  function switchMouseControls(engine, type) {
-    switch (type) {
-      case 'bot-controller-rotation':
-        engine.enableMousePan(false).enableMouseRotate(true)
-        engine.mapControls.mouseButtons = {
-          RIGHT: MOUSE.ROTATE,
-        }
-      break
-      case 'bot-controller-pan':
-        engine.enableMousePan(true, 2.4).enableMouseRotate(false)
-        engine.mapControls.mouseButtons = {
-          RIGHT: MOUSE.PAN
-        }
-        break
-    }
-  }
-
 </script>
 
 <template>
@@ -169,7 +140,7 @@
     <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left">
         <div class="m-2">
-          <BButton size="sm" @click="screenshot" class="mb-2">
+          <BButton variant="dark"  size="sm" @click="screenshot" class="mb-2">
             <BIcon icon="image" />
           </BButton>
           <div>
@@ -185,7 +156,7 @@
             <br/>
             1. <b>Right Click</b> - повернуть камеру.
             <br/>
-            2. <b>Ctrl + Right Click</b> - сместить камеру.
+            2. <b>Ctrl + Right Click</b> - двигать камеру.
           </b-popover>
           </div>
         </div>

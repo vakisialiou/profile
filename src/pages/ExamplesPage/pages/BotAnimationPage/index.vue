@@ -1,5 +1,5 @@
 <script>
-  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BButton, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
@@ -22,7 +22,7 @@
 
   export default {
     name: 'BotAnimationPage',
-    components: { WrapperView, WrapperCorner, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: { WrapperView, WrapperCorner, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BButton, BIcon },
     data() {
       return {
         offsetTop: 0,
@@ -49,6 +49,9 @@
       }
     },
     methods: {
+      screenshot: function () {
+        engine.screenshot()
+      },
       toggleAnimation: function () {
         this.pauseAnimationAction = false
         botController.bot.enableAnimation(this.selectedAnimation)
@@ -119,6 +122,10 @@
     <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left">
         <div class="m-2">
+          <BButton variant="dark" size="sm" @click="screenshot"  class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+
           <BFormGroup label="Переключить анимацию">
             <BFormRadioGroup
               id="bot-animations"

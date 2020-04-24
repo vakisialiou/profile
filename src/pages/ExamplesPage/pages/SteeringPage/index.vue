@@ -1,5 +1,5 @@
 <script>
-  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BButton, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
@@ -32,7 +32,7 @@
 
   export default {
     name: 'SteeringPage',
-    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BButton, BIcon },
     data() {
       return {
         offsetTop: 0,
@@ -41,7 +41,9 @@
       }
     },
     methods: {
-
+      screenshot: function () {
+        engine.screenshot()
+      },
     },
     destroyed() {
       engine.destroy()
@@ -274,9 +276,13 @@
 
 <template>
   <WrapperView :bgId="containerId" enableEvents="bg">
-    <WrapperCorner>
+    <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left">
         <div class="m-2">
+
+          <BButton variant="dark" size="sm" @click="screenshot"  class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
 
         </div>
       </template>

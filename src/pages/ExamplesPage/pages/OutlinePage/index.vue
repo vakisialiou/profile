@@ -36,7 +36,7 @@
       }
     },
     methods: {
-      saveImage: function () {
+      screenshot: function () {
         engine.screenshot()
       }
     },
@@ -142,9 +142,11 @@
     <WrapperCorner :topOffset="offsetTop">
 
       <template slot="top-left">
-        <BButton size="sm" @click="saveImage" class="m-1">
-          <BIcon icon="image" />
-        </BButton>
+        <div class="m-2">
+          <BButton variant="dark" size="sm" @click="screenshot" class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+        </div>
       </template>
 
       <template slot="bottom-left">

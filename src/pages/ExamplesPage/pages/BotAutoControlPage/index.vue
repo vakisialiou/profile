@@ -1,5 +1,5 @@
 <script>
-  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
+  import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
   import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
@@ -28,7 +28,7 @@
 
   export default {
     name: 'BotAutoControlPage',
-    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
     data() {
       return {
         offsetTop: 0,
@@ -50,6 +50,9 @@
       }
     },
     methods: {
+      screenshot: function () {
+        engine.screenshot()
+      },
       toggleAnimation: function () {
         botController.useMovingAnimation(this.selectedAnimation)
       },
@@ -121,7 +124,11 @@
     <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left">
         <div class="m-2">
-          <BFormGroup label="Переключить анимацию движения">
+          <BButton variant="dark" size="sm" @click="screenshot"  class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+
+          <BFormGroup label="Анимация">
             <BFormRadioGroup
               id="bot-animations-running"
               v-on:input="toggleAnimation"
@@ -131,7 +138,7 @@
             />
           </BFormGroup>
 
-          <BFormGroup label="Выбрать действие после достижения последней точки">
+          <BFormGroup label="Действие после достижения последней точки">
             <BFormRadioGroup
               id="bot-path-type"
               v-on:input="togglePathType"

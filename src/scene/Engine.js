@@ -79,10 +79,7 @@ class Engine {
     this.mapControls.keys = {}
     this.mapControls.enablePan = true
     this.mapControls.enableRotate = true
-    this.mapControls.mouseButtons = {
-      RIGHT: MOUSE.ROTATE,
-      LEFT: MOUSE.PAN,
-    }
+    this.mapControls.mouseButtons = { RIGHT: MOUSE.ROTATE }
 
     /**
      *
@@ -342,7 +339,7 @@ class Engine {
    */
   enableMousePan(value = true, speed = 1.0) {
     this.mapControls.enablePan = value
-    this.mapControls.panSpeed = speed
+    // this.mapControls.panSpeed = speed
     return this
   }
 
@@ -354,7 +351,7 @@ class Engine {
    */
   enableMouseRotate(value = true, speed = 1.0) {
     this.mapControls.enableRotate = value
-    this.mapControls.rotateSpeed = speed
+    // this.mapControls.rotateSpeed = speed
     return this
   }
 

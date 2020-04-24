@@ -8,6 +8,7 @@
   import HelperMouseSegment from '@scene/objects/Ground/Helpers/HelperMouseSegment'
   import { loading as loadingTower, ControllerTower } from '@scene/controllers/ControllerTower'
   import Ground from '@scene/objects/Ground'
+  import { BButton, BIcon } from 'bootstrap-vue'
 
   let engine = null
   const TEXTURE_GROUND = 'TEXTURE_GROUND'
@@ -19,13 +20,18 @@
   export default {
     name: 'TowerPage',
     components: {
-      WrapperView, WrapperCorner, GitHubIcon
+      WrapperView, WrapperCorner, GitHubIcon, BButton, BIcon
     },
     data: () => {
       return {
         offsetTop: 0,
         offsetLeft: 0,
         containerId: 'tower-page',
+      }
+    },
+    methods: {
+      screenshot: function () {
+        engine.screenshot()
       }
     },
     destroyed() {
@@ -92,6 +98,14 @@
 <template>
   <WrapperView :bgId="containerId" enableEvents="bg">
     <WrapperCorner :topOffset="offsetTop">
+      <template slot="top-left">
+        <div class="m-2">
+          <BButton variant="dark" size="sm" @click="screenshot"  class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+        </div>
+      </template>
+
       <template slot="bottom-left">
         <GitHubIcon path="/src/pages/ExamplesPage/pages/TowerPage" />
       </template>
