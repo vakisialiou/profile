@@ -1,7 +1,7 @@
 <script>
-  import './index.less'
   import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -27,10 +27,12 @@
 
   export default {
     name: 'OutlinePage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
+    components: { WrapperView, WrapperCorner, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
     data() {
       return {
-
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'outline-page'
       }
     },
     methods: {
@@ -42,11 +44,18 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('outline-canvas')
-      const container = document.getElementById('outline-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseClick = new HelperMouseClick(ground)
         helperMouseClick.position.set(100000, 0, 100000)
 
@@ -91,9 +100,6 @@
               return
             }
 
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-
             const enemies = engine.getUnits('shapes')
             const intersection = ground.findIntersection(event, engine.camera, enemies, true)
             if (!intersection) {
@@ -132,15 +138,19 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="outline-canvas" :autofill="true" class="outline-page">
-      <div class="outline-page__controls mx-2 my-2">
-        <BButton size="sm" @click="saveImage">
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+
+      <template slot="top-left">
+        <BButton size="sm" @click="saveImage" class="m-1">
           <BIcon icon="image" />
         </BButton>
-      </div>
+      </template>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/OutlinePage" class="m-2" />
-    </WrapperView>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/OutlinePage" class="m-2" />
+      </template>
+
+    </WrapperCorner>
   </WrapperView>
 </template>

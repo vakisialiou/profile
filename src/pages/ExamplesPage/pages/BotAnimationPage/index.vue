@@ -1,7 +1,7 @@
 <script>
-  import './index.less'
   import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -22,9 +22,12 @@
 
   export default {
     name: 'BotAnimationPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: { WrapperView, WrapperCorner, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'bot-animation-page',
         selectedAnimation: Bot.ANIMATION_KEY_IDLE,
         animations: [
           { text: Bot.ANIMATION_KEY_IDLE , value: Bot.ANIMATION_KEY_IDLE },
@@ -62,11 +65,18 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('bot-animation-canvas')
-      const container = document.getElementById('bot-animation-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseClick = new HelperMouseClick(ground)
         helperMouseClick.position.set(100000, 0, 100000)
 
@@ -87,7 +97,7 @@
         const cameraPosition = new Vector3(-100, 0, 100)
 
         engine
-          .enableMousePan(false)
+          .enableMousePan(true)
           .enableMouseRotate(true)
           .add('ground', ground)
           .add('ground-helper', helperMouseClick)
@@ -105,50 +115,54 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="bot-animation-canvas" :autofill="true" class="bot-animation-page">
-      <div class="bot-animation-page__controls px-4 py-2">
-        <BFormGroup label="Переключить анимацию">
-          <BFormRadioGroup
-            id="bot-animations"
-            v-on:input="toggleAnimation"
-            v-model="selectedAnimation"
-            :options="animations"
-            buttons
-          />
-        </BFormGroup>
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+      <template slot="top-left">
+        <div class="m-2">
+          <BFormGroup label="Переключить анимацию">
+            <BFormRadioGroup
+              id="bot-animations"
+              v-on:input="toggleAnimation"
+              v-model="selectedAnimation"
+              :options="animations"
+              buttons
+            />
+          </BFormGroup>
 
-        <BFormGroup label="Переключить анимацию движения">
-          <BFormRadioGroup
-            id="bot-animations-moving"
-            v-on:input="toggleAnimation"
-            v-model="selectedAnimation"
-            :options="animationsMoving"
-            buttons
-          />
-        </BFormGroup>
+          <BFormGroup label="Переключить анимацию движения">
+            <BFormRadioGroup
+              id="bot-animations-moving"
+              v-on:input="toggleAnimation"
+              v-model="selectedAnimation"
+              :options="animationsMoving"
+              buttons
+            />
+          </BFormGroup>
 
-        <BFormGroup label="Переключить анимацию прыжков">
-          <BFormRadioGroup
-            id="bot-animations-jumping"
-            v-on:input="toggleAnimation"
-            v-model="selectedAnimation"
-            :options="animationsJumping"
-            buttons
-          />
-        </BFormGroup>
+          <BFormGroup label="Переключить анимацию прыжков">
+            <BFormRadioGroup
+              id="bot-animations-jumping"
+              v-on:input="toggleAnimation"
+              v-model="selectedAnimation"
+              :options="animationsJumping"
+              buttons
+            />
+          </BFormGroup>
 
 
-        <BFormCheckbox
-          class="mx-2"
-          id="bot-animation-pause"
-          v-on:input="toggleAnimationAction"
-          v-model="pauseAnimationAction"
-          switch
-        >Пауза анимации</BFormCheckbox>
-      </div>
+          <BFormCheckbox
+            class="mx-2"
+            id="bot-animation-pause"
+            v-on:input="toggleAnimationAction"
+            v-model="pauseAnimationAction"
+            switch
+          >Пауза анимации</BFormCheckbox>
+        </div>
+      </template>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAnimationPage" class="m-2" />
-    </WrapperView>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAnimationPage" />
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

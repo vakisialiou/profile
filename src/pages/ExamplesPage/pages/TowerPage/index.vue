@@ -1,5 +1,6 @@
 <script>
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -18,21 +19,35 @@
   export default {
     name: 'TowerPage',
     components: {
-      WrapperView, GitHubIcon
+      WrapperView, WrapperCorner, GitHubIcon
+    },
+    data: () => {
+      return {
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'tower-page',
+      }
     },
     destroyed() {
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('tower-page-canvas')
-      const container = document.getElementById('tower-page-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
         const lightPosition = new Vector3(70, 70, 70)
         const cameraLookAt = new Vector3(0, 0, 0)
         const cameraPosition = new Vector3(-600, 0, 600)
 
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseSegment = new HelperMouseSegment(ground)
         helperMouseSegment.position.set(1000000, 0, 1000000)
 
@@ -57,9 +72,6 @@
           .registerEvents()
           .animate()
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-
             // Ground intersection only
             const intersection = ground.findIntersection(event, engine.camera)
             if (!intersection) {
@@ -78,9 +90,11 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="tower-page-canvas" :autofill="true">
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/TowerPage" class="m-2" />
-    </WrapperView>
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/TowerPage" />
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

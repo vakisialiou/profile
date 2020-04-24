@@ -1,7 +1,7 @@
 <script>
-  import './index.less'
   import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -22,10 +22,12 @@
 
   export default {
     name: 'BotUserControlPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
+    components: { WrapperView, WrapperCorner, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon, BButton },
     data() {
       return {
-
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'bot-user-control-page',
       }
     },
     methods: {
@@ -37,13 +39,20 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('bot-user-control-canvas')
-      const container = document.getElementById('bot-user-control-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
         switchMouseControls(engine, 'bot-controller-rotation')
 
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseClick = new HelperMouseClick(ground)
         helperMouseClick.position.set(100000, 0, 100000)
 
@@ -111,9 +120,6 @@
               return
             }
 
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-
             const intersection = ground.findIntersection(event, engine.camera, enemies, true)
             if (!intersection) {
               return
@@ -159,31 +165,35 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="bot-user-control-canvas" :autofill="true" class="bot-user-control-page">
-      <div class="bot-user-control-page__controls mx-2 my-2">
-        <BButton size="sm" @click="screenshot" class="my-2">
-          <BIcon icon="image" />
-        </BButton>
-        <div>
-        <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" font-scale="2" />
-        <b-popover ref="popover" target="controls-helper" title="Управление ботом" triggers="focus">
-          <b>Персонаж:</b>
-          <br/>
-          1. <b>Left Click</b> - двигаться в направлении клика.
-          <br/>
-          2. <b>Ctrl + Left Click</b> (клик по объекту) - двигаться в направлении объекта и атаковать.
-          <hr/>
-          <b>Камера:</b>
-          <br/>
-          1. <b>Right Click</b> - повернуть камеру.
-          <br/>
-          2. <b>Ctrl + Right Click</b> - сместить камеру.
-        </b-popover>
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+      <template slot="top-left">
+        <div class="m-2">
+          <BButton size="sm" @click="screenshot" class="mb-2">
+            <BIcon icon="image" />
+          </BButton>
+          <div>
+          <BIcon icon="question" id="controls-helper" aria-hidden="true" variant="info" font-scale="2" />
+          <b-popover ref="popover" target="controls-helper" title="Управление ботом" triggers="focus">
+            <b>Персонаж:</b>
+            <br/>
+            1. <b>Left Click</b> - двигаться в направлении клика.
+            <br/>
+            2. <b>Ctrl + Left Click</b> (клик по объекту) - двигаться в направлении объекта и атаковать.
+            <hr/>
+            <b>Камера:</b>
+            <br/>
+            1. <b>Right Click</b> - повернуть камеру.
+            <br/>
+            2. <b>Ctrl + Right Click</b> - сместить камеру.
+          </b-popover>
+          </div>
         </div>
-      </div>
+      </template>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotUserControlPage" class="m-2" />
-    </WrapperView>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/BotUserControlPage"/>
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

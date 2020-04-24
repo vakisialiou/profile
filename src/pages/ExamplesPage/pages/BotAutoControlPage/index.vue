@@ -1,7 +1,7 @@
 <script>
-  import './index.less'
   import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -28,9 +28,12 @@
 
   export default {
     name: 'BotAutoControlPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'bot-auto-control-page',
         selectedAnimation: Bot.ANIMATION_KEY_RUNNING,
         animations: [
           { text: Bot.ANIMATION_KEY_WALKING, value: Bot.ANIMATION_KEY_WALKING },
@@ -69,11 +72,18 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('bot-auto-control-canvas')
-      const container = document.getElementById('bot-auto-control-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseClick = new HelperMouseClick(ground)
         helperMouseClick.position.set(100000, 0, 100000)
 
@@ -107,33 +117,36 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="bot-auto-control-canvas" :autofill="true" class="bot-auto-control-page">
-      <div class="bot-auto-control-page__controls mx-2 my-2">
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+      <template slot="top-left">
+        <div class="m-2">
+          <BFormGroup label="Переключить анимацию движения">
+            <BFormRadioGroup
+              id="bot-animations-running"
+              v-on:input="toggleAnimation"
+              v-model="selectedAnimation"
+              :options="animations"
+              buttons
+            />
+          </BFormGroup>
 
-        <BFormGroup label="Переключить анимацию движения">
-          <BFormRadioGroup
-            id="bot-animations-running"
-            v-on:input="toggleAnimation"
-            v-model="selectedAnimation"
-            :options="animations"
-            buttons
-          />
-        </BFormGroup>
+          <BFormGroup label="Выбрать действие после достижения последней точки">
+            <BFormRadioGroup
+              id="bot-path-type"
+              v-on:input="togglePathType"
+              v-model="selectedPathType"
+              :options="pathTypes"
+              buttons
+            />
+          </BFormGroup>
 
-        <BFormGroup label="Выбрать действие после достижения последней точки">
-          <BFormRadioGroup
-            id="bot-path-type"
-            v-on:input="togglePathType"
-            v-model="selectedPathType"
-            :options="pathTypes"
-            buttons
-          />
-        </BFormGroup>
+        </div>
+      </template>
 
-      </div>
-
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAutoControlPage" class="m-2" />
-    </WrapperView>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/BotAutoControlPage" />
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

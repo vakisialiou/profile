@@ -1,7 +1,6 @@
 <script>
-  import './index.less'
   import {
-    BImg, BLink
+    BImg, BButton
   } from 'bootstrap-vue'
 
   export default {
@@ -30,13 +29,13 @@
       }
     },
     components: {
-      BImg, BLink
+      BImg, BButton
     }
   }
 </script>
 
 <template>
-  <BLink :href="href" class="git-hub-icon git-hub-icon--bottom" target="_blank">
-    <BImg src="/svg/git-hub.svg" />
-  </BLink>
+  <BButton :href="href" size="sm" variant="link" target="_blank">
+    <BImg src="/svg/git-hub.svg" :style="{ width: '30px', }" />
+  </BButton>
 </template>

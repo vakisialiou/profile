@@ -1,6 +1,7 @@
 <script>
   import { BFormGroup, BFormRadioGroup, BFormCheckboxGroup } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Ground from '@scene/objects/Ground'
   import HelperMouseSegment from '@scene/objects/Ground/Helpers/HelperMouseSegment'
@@ -29,6 +30,9 @@
     name: 'GroundPage',
     data: () => {
       return {
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'ground-page',
         selectedMouseHelper: 'Click',
         mouseHelpers: [
           { text: 'Segment' , value: 'Segment', helper: helperMouseSegment },
@@ -64,15 +68,21 @@
         }
       },
     },
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckboxGroup },
+    components: { WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckboxGroup },
     destroyed() {
       engine.destroy()
     },
     mounted() {
-      loader.preset().then(() => {
-        engine = Engine.create('model-ground-page-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
 
-        ground.setTexture(loader.getTexture(TEXTURE_GROUND))
+      loader.preset().then(() => {
+        engine = Engine.create(this.containerId)
+
+        ground
+          .setTexture(loader.getTexture(TEXTURE_GROUND))
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
 
         const intersectionObjects = []
         for (let i = 0; i < 5; i++) {
@@ -97,13 +107,10 @@
           .setHemiLight(lightPosition)
           .setAxesHelper()
           .setCamera(cameraPosition, cameraLookAt)
-          .preset(document.getElementById('model-ground-page-canvas'))
+          .preset(document.getElementById(this.containerId))
           .registerEvents()
           .animate()
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
-
             const intersection = ground.findIntersection(event, engine.camera, intersectionObjects)
             if (!intersection) {
               return
@@ -136,31 +143,35 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="model-ground-page-canvas" :autofill="true">
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitGroundPage" class="m-2" />
-    </WrapperView>
-    <WrapperView class="px-2 py-1">
-      <BFormGroup label="Выбрать для получения позиции">
-        <BFormRadioGroup
-          id="mouse-helpers"
-          v-on:input="toggleMouseHelper"
-          v-model="selectedMouseHelper"
-          :options="mouseHelpers"
-          switches
-          name="radios-btn-default"
-        />
-      </BFormGroup>
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner :topOffset="offsetTop">
+      <template slot="top-left" class="m-4">
+        <div class="m-2">
+          <BFormGroup label="Выбрать для получения позиции">
+            <BFormRadioGroup
+              id="mouse-helpers"
+              v-on:input="toggleMouseHelper"
+              v-model="selectedMouseHelper"
+              :options="mouseHelpers"
+              switches
+              name="radios-btn-default"
+            />
+          </BFormGroup>
 
-      <BFormGroup label="Включить помощник на плоскости">
-        <BFormCheckboxGroup
-          id="grid-helpers"
-          v-on:input="toggleGridHelper"
-          v-model="selectedGridHelpers"
-          :options="gridHelpers"
-          switches
-        />
-      </BFormGroup>
-    </WrapperView>
+          <BFormGroup label="Включить помощник на плоскости">
+            <BFormCheckboxGroup
+              id="grid-helpers"
+              v-on:input="toggleGridHelper"
+              v-model="selectedGridHelpers"
+              :options="gridHelpers"
+              switches
+            />
+          </BFormGroup>
+        </div>
+      </template>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitGroundPage" />
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

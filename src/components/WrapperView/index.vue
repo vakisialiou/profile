@@ -1,31 +1,40 @@
 <script>
-  import './index.css'
+  import './index.less'
 
   export default {
     name: 'WrapperView',
     props: {
-      autofill: {
-        type: Boolean,
-        default: false
+      bgId: {
+        type: String,
+        default: null
       },
-      disableEvents: {
-        type: Boolean,
-        default: false
+      containerId: {
+        type: String,
+        default: null
+      },
+      enableEvents: {
+        type: String,
+        default: 'container'
       }
     },
     computed: {
-      htmlClass: function () {
-        return {
-          'wrapper-view__lock': this.disableEvents,
-          'wrapper-view__fill': this.autofill
-        }
+      htmlClassBg: function () {
+        return { 'wrapper-view__bg--active': this.enableEvents === 'bg' }
+      },
+      htmlClassContainer: function () {
+        return { 'wrapper-view__container--active': this.enableEvents === 'container' }
       }
-    },
+    }
   }
 </script>
 
 <template>
-  <div class="wrapper-view" :class="htmlClass">
-    <slot />
+  <div class="wrapper-view">
+    <div class="wrapper-view wrapper-view__bg" :class="htmlClassBg" :id="bgId">
+      <slot name="bg" />
+    </div>
+    <div class="wrapper-view wrapper-view__container" :class="htmlClassContainer" :id="containerId">
+      <slot />
+    </div>
   </div>
 </template>

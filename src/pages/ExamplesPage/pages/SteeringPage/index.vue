@@ -1,7 +1,7 @@
 <script>
-  import './index.less'
   import { BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon } from 'bootstrap-vue'
   import WrapperView from '@components/WrapperView'
+  import WrapperCorner from '@components/WrapperCorner'
   import GitHubIcon from '@components/GitHubIcon'
   import Loading from '@scene/loading/Loading'
   import Engine from '@scene/Engine'
@@ -14,7 +14,7 @@
     ConeGeometry,
     BoxGeometry,
     SphereGeometry,
-    BufferGeometry, LineBasicMaterial, Line, Raycaster, RingGeometry, Color, Group, Math as _Math
+    BufferGeometry, LineBasicMaterial, Line, Raycaster, RingGeometry, Color, Group
   } from 'three'
   import { loading as loadingBot } from '@scene/controllers/ControllerBot'
   import HelperMouseClick from '@scene/objects/Ground/Helpers/HelperMouseClick'
@@ -32,10 +32,12 @@
 
   export default {
     name: 'SteeringPage',
-    components: { WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
+    components: {WrapperCorner, WrapperView, GitHubIcon, BFormGroup, BFormRadioGroup, BFormCheckbox, BPopover, BIcon },
     data() {
       return {
-
+        offsetTop: 0,
+        offsetLeft: 0,
+        containerId: 'steering-page',
       }
     },
     methods: {
@@ -45,11 +47,18 @@
       engine.destroy()
     },
     mounted() {
-      engine = Engine.create('steering-canvas')
-      const container = document.getElementById('steering-canvas')
+      this.offsetTop = this.$el.offsetTop
+      this.offsetLeft = this.$el.offsetLeft
+
+      engine = Engine.create(this.containerId)
+      const container = document.getElementById(this.containerId)
 
       loader.preset().then(() => {
-        const ground = new Ground().setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+        const ground = new Ground()
+          .setTexture(loader.getTexture(TEXTURE_GROUND), 6, 6)
+          // This page has top menu. Need set mouse offset on height it menu.
+          .setMouseOffset(this.offsetTop, this.offsetLeft)
+
         const helperMouseClick = new HelperMouseClick(ground)
         helperMouseClick.position.set(100000, 0, 100000)
 
@@ -159,16 +168,13 @@
           .enableOutline(true)
           .animate()
 
-        let outlinePass = engine.createOutline([], { visibleEdgeColor: new Color(0xC4A900), edgeGlow: 0, edgeThickness: 2, edgeStrength: 2 })
+        let outlinePass = engine.createOutline({ visibleEdgeColor: new Color(0xC4A900), edgeGlow: 0, edgeThickness: 2, edgeStrength: 2 })
 
         engine
           .addEventListener(Engine.EVENT_MOUSE_DOWN, ({event}) => {
             if (event.buttons !== 1) {
               return
             }
-
-            // This page has top menu. Need set mouse offset on height it menu.
-            ground.setMouseOffset(event.target.offsetParent.offsetTop, event.target.offsetParent.offsetLeft)
 
             const enemies = engine.getUnits('shapes')
             const intersection = ground.findIntersection(event, engine.camera, enemies, true)
@@ -187,7 +193,7 @@
             const unit = enemies.find((item) => item.getObjectById(intersection.object.id))
             if (unit) {
               userTarget.set(0, 0, 0)
-              outlinePass.selectedObjects = [intersection.object]
+              outlinePass.setMeshes([intersection.object])
               for (const shape of shapes) {
                 shape.enableUserControls = shape.shape === unit
               }
@@ -267,13 +273,17 @@
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="steering-canvas" :autofill="true" class="steering-page">
-      <div class="steering-page__controls mx-2 my-2">
+  <WrapperView :bgId="containerId" enableEvents="bg">
+    <WrapperCorner>
+      <template slot="top-left">
+        <div class="m-2">
 
-      </div>
+        </div>
+      </template>
 
-      <GitHubIcon path="/src/pages/ExamplesPage/pages/SteeringPage" class="m-2" />
-    </WrapperView>
+      <template slot="bottom-left">
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/SteeringPage" />
+      </template>
+    </WrapperCorner>
   </WrapperView>
 </template>

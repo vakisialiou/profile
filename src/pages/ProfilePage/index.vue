@@ -1,5 +1,4 @@
 <script>
-import './index.less'
 import Carousel from './containers/Carousel'
 import WrapperView from '@components/WrapperView'
 import Engine from '@scene/Engine'
@@ -27,14 +26,14 @@ export default {
   name: 'ProfilePage',
   data: () => {
     return {
-
+      containerId: 'profile-page'
     }
   },
   destroyed() {
     engine.destroy()
   },
   mounted() {
-    engine = Engine.create('home-page-canvas')
+    engine = Engine.create(this.containerId)
     textures.preset().then(() => {
       const storm = new Storm(new Color(0x6A9EE6))
       const sky = new SkyBox(textures.getTexture('sky-box-galaxy'))
@@ -60,7 +59,7 @@ export default {
         .enableMousePan(false)
         .enableMouseRotate(false)
         .enableMouseZoom(false)
-        .preset(document.getElementById('home-page-canvas'))
+        .preset(document.getElementById(this.containerId))
         .enableOutline(true)
         .registerEvents()
         .animate()
@@ -78,8 +77,8 @@ export default {
         engine.pointLight.position.copy(engine.camera.position)
       })
 
-      engine.createOutline(storm.lightningsMeshes, { visibleEdgeColor: new Color(0x6A9EE6) })
-      engine.createOutline([planet], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 1.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 })
+      engine.createOutline({ visibleEdgeColor: new Color(0x6A9EE6) }).setMeshes(storm.lightningsMeshes)
+      engine.createOutline({ visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 2.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 }).setMeshes([planet])
     })
   },
   components: {
@@ -89,10 +88,7 @@ export default {
 </script>
 
 <template>
-  <WrapperView :autofill="true">
-    <WrapperView id="home-page-canvas" :autofill="true" />
-    <WrapperView class="home-page-content d-none d-md-block" :autofill="true">
-      <Carousel />
-    </WrapperView>
+  <WrapperView :bgId="containerId">
+    <Carousel />
   </WrapperView>
 </template>

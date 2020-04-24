@@ -126,6 +126,7 @@ class EngineRenderer extends WebGLRenderer {
       outlinePass.depthMaterial.needsUpdate = true
       outlinePass.prepareMaskMaterial.needsUpdate = true
       outlinePass.selectedObjects = meshes
+      return outlinePass
     }
 
     this.composer.addPass(outlinePass)

@@ -392,12 +392,11 @@ class Engine {
 
   /**
    *
-   * @param {Array.<(Object3D|Mesh)>} objectsArray
-   * @param {Color} visibleColor
+   * @param {Object} options
    * @returns {OutlinePass}
    */
-  createOutline(objectsArray, visibleColor) {
-    return this.renderer.createOutline(objectsArray, visibleColor)
+  createOutline(options) {
+    return this.renderer.createOutline(options)
   }
 
   /**

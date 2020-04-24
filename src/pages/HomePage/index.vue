@@ -1,5 +1,4 @@
 <script>
-import './index.less'
 import WrapperView from '@components/WrapperView'
 import Engine from '@scene/Engine'
 import { Color, Vector3 } from 'three'
@@ -35,14 +34,14 @@ export default {
   },
   data: () => {
     return {
-
+      containerId: 'home-page'
     }
   },
   destroyed() {
     engine.destroy()
   },
   mounted() {
-    engine = Engine.create('home-page')
+    engine = Engine.create(this.containerId)
     textures.preset().then(() => {
       const storm = new Storm(new Color(0x6A9EE6))
       const sky = new SkyBox(textures.getTexture('sky-box-galaxy'))
@@ -68,7 +67,7 @@ export default {
         .enableMousePan(false)
         .enableMouseRotate(false)
         .enableMouseZoom(false)
-        .preset(document.getElementById('home-page'))
+        .preset(document.getElementById(this.containerId))
         .enableOutline(true)
         .registerEvents()
         .animate()
@@ -77,7 +76,6 @@ export default {
       engine.scene.add(storm)
       storm.position.copy(stormPosition)
 
-      let i = 0
       engine.updates.push((delta) => {
         storm.update(delta)
         sky.setPosition(engine.mapControls.target).update(delta)
@@ -86,8 +84,8 @@ export default {
         engine.pointLight.position.copy(engine.camera.position)
       })
 
-      engine.createOutline(storm.lightningsMeshes, { visibleEdgeColor: new Color(0x6A9EE6) })
-      engine.createOutline([planet], { visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 2.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 })
+      engine.createOutline({ visibleEdgeColor: new Color(0x6A9EE6) }).setMeshes(storm.lightningsMeshes)
+      engine.createOutline({ visibleEdgeColor: new Color(0xFFFFFF), edgeGlow: 2.4, pulsePeriod: 20, edgeThickness: 4.4, edgeStrength: 1.5 }).setMeshes([planet])
     })
   },
   components: {
@@ -97,37 +95,36 @@ export default {
 </script>
 
 <template>
-  <div class="home-page">
-    <WrapperView id="home-page" class="home-page__canvas" :autofill="true" />
-      <div class="container-fluid home-page__container">
+  <WrapperView :bgId="containerId">
+    <div class="container-fluid">
 
-        <div class="row p-2">
-          <div class="col-md-6 col-lg-4 px-0" v-for="(item, index) in menuItems" :key="index">
+      <div class="row p-2">
+        <div class="col-md-6 col-lg-4 px-0" v-for="(item, index) in menuItems" :key="index">
 
-            <div class="card flex-md-row box-shadow bg-dark m-2">
-              <div class="card-body d-flex flex-column align-items-start p-2">
+          <div class="card flex-md-row box-shadow bg-dark m-2">
+            <div class="card-body d-flex flex-column align-items-start p-2">
 
-                <h3 class="mb-2">
-                  <RouterLink :to="{ name: item.name }" :key="index" v-slot="{ href, navigate }">
-                    <a :href="href" @click="navigate" class="text-light">{{ item.title }}</a>
-                  </RouterLink>
-                </h3>
-                <p class="card-text mb-auto text-light">{{ item.description }}</p>
-
+              <h3 class="mb-2">
                 <RouterLink :to="{ name: item.name }" :key="index" v-slot="{ href, navigate }">
-                  <a :href="href" @click="navigate" class="btn btn-dark border-light btn-sm">Open</a>
+                  <a :href="href" @click="navigate" class="text-light">{{ item.title }}</a>
                 </RouterLink>
+              </h3>
+              <p class="card-text mb-auto text-light">{{ item.description }}</p>
 
-              </div>
-              <div>
-                <img class="card-img-right flex-auto d-none d-md-block" data-src="holder.js/200x250?theme=thumb" alt="Thumbnail [200x250]" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22250%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20250%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17196979987%20text%20%7B%20fill%3A%23eceeef%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A13pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17196979987%22%3E%3Crect%20width%3D%22200%22%20height%3D%22250%22%20fill%3D%22%2355595c%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.6015625%22%20y%3D%22131%22%3EThumbnail%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" data-holder-rendered="true" style="width: 150px; height: 150px;">
-              </div>
+              <RouterLink :to="{ name: item.name }" :key="index" v-slot="{ href, navigate }">
+                <a :href="href" @click="navigate" class="btn btn-dark border-light btn-sm">Open</a>
+              </RouterLink>
+
             </div>
-
+            <div>
+              <img class="card-img-right flex-auto d-none d-md-block" data-src="holder.js/200x250?theme=thumb" alt="Thumbnail [200x250]" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22250%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20250%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17196979987%20text%20%7B%20fill%3A%23eceeef%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A13pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17196979987%22%3E%3Crect%20width%3D%22200%22%20height%3D%22250%22%20fill%3D%22%2355595c%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.6015625%22%20y%3D%22131%22%3EThumbnail%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" data-holder-rendered="true" style="width: 150px; height: 150px;">
+            </div>
           </div>
 
         </div>
 
       </div>
-  </div>
+
+    </div>
+  </WrapperView>
 </template>
