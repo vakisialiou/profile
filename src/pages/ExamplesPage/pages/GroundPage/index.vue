@@ -178,7 +178,7 @@
         </div>
       </template>
       <template slot="bottom-left">
-        <GitHubIcon path="/src/pages/ExamplesPage/pages/UnitGroundPage" />
+        <GitHubIcon path="/src/pages/ExamplesPage/pages/GroundPage" />
       </template>
     </WrapperCorner>
   </WrapperView>

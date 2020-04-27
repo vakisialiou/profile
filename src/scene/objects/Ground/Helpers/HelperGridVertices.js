@@ -20,5 +20,6 @@ export default class HelperGridVertices extends Points {
      */
     this.geometry = new BufferGeometry().setFromPoints(ground.cover.geometry.vertices)
     this.quaternion.copy(ground.cover.quaternion)
+    this.position.setY(1)
   }
 }

@@ -14,6 +14,6 @@ export default class Cover extends Mesh {
      *
      * @type {MeshBasicMaterial}
      */
-    this.material = new MeshBasicMaterial({ color: options.color, transparent: true, opacity: 0.8, vertexColors: FaceColors })
+    this.material = new MeshBasicMaterial({ color: options.color, transparent: true, opacity: 0.8 })
   }
 }

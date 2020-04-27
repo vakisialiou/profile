@@ -6,6 +6,7 @@ import SteeringPage from './../pages/ExamplesPage/pages/SteeringPage'
 import BotUserControlPage from './../pages/ExamplesPage/pages/BotUserControlPage'
 import BotAutoControlPage from './../pages/ExamplesPage/pages/BotAutoControlPage'
 import BotAnimationPage from './../pages/ExamplesPage/pages/BotAnimationPage'
+import EnvironmentPage from './../pages/ExamplesPage/pages/EnvironmentPage'
 
 export const routes = [
   new RouteItem(GroundPage, 'Плоскость', '/example/ground')
@@ -28,4 +29,7 @@ export const routes = [
 
   new RouteItem(SteeringPage, 'Движение ботов', '/example/steering')
     .setDescription('Боты ходят по цсене. При встрече препятствия стараются обойти либо пропустить.'),
+
+  new RouteItem(EnvironmentPage, 'Окружающая среда', '/example/ocean')
+    .setDescription('Вода. Земля. Небо.'),
 ]

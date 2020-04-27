@@ -1,4 +1,4 @@
-import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color } from 'three'
+import { WebGLRenderer, WebGLRendererParameters, Scene, Vector2, Color, sRGBEncoding, LinearToneMapping } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
@@ -13,7 +13,7 @@ class EngineRenderer extends WebGLRenderer {
    * @param {WebGLRendererParameters} [parameters]
    */
   constructor(scene, camera, parameters = {}) {
-    super({ alpha: false, antialias: true, logarithmicDepthBuffer: true, ...parameters })
+    super({ alpha: true, antialias: true, logarithmicDepthBuffer: true, ...parameters })
 
     /**
      *

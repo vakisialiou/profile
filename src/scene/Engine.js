@@ -56,7 +56,7 @@ class Engine {
      *
      * @type {PerspectiveCamera}
      */
-    this.camera = new PerspectiveCamera(45, this.width / this.height, 0.1, 5000)
+    this.camera = new PerspectiveCamera(55, this.width / this.height, 0.1, 10000)
 
     /**
      *
@@ -315,7 +315,7 @@ class Engine {
    * @returns {Engine}
    */
   setFog(hex) {
-    this.scene.fog = new Fog(hex, 1, 1000)
+    this.scene.fog = new Fog(hex, 100, 3000)
     return this
   }
 

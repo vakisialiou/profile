@@ -10,7 +10,7 @@ export default class Unit extends Group {
      */
     this.model = rawModel.model
 
-    if (this.model.hasOwnProperty('material')) {
+    if (this.model.hasOwnProperty('material') && this.model.material.hasOwnProperty('metalness')) {
       this.model.material.metalness = 0
     }
 

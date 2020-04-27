@@ -7,5 +7,6 @@ export default class HelperGridSegments extends GridHelper {
    */
   constructor(ground) {
     super(ground.options.height, ground.options.heightSegments)
+    this.position.setY(1)
   }
 }

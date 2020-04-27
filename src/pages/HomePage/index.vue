@@ -3,7 +3,7 @@ import WrapperView from '@components/WrapperView'
 import Engine from '@scene/Engine'
 import { Color, Vector3 } from 'three'
 import Storm from '@scene/objects/Storm'
-import SkyBox from '@scene/objects/SkyBox'
+import SpaceBox from '@scene/objects/SpaceBox'
 import Planet from '@scene/objects/Planet'
 import Star from '@scene/objects/Star'
 import LoadingTextures from '@scene/loading/LoadingTextures'
@@ -54,7 +54,7 @@ export default {
     engine = Engine.create(this.containerId)
     textures.preset().then(() => {
       const storm = new Storm(new Color(0x6A9EE6))
-      const sky = new SkyBox(textures.getTexture('sky-box-galaxy'))
+      const sky = new SpaceBox(textures.getTexture('sky-box-galaxy'))
 
       const planet = new Planet(textures.getTexture('planet-1')).setPosition(new Vector3(300, - 160, 20))
       sky.addParticle(planet)
