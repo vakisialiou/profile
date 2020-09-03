@@ -47,7 +47,7 @@ export default class Bot extends Unit {
 
     /**
      *
-     * @type {Object3D}
+     * @type {Node}
      */
     this.weaponPlug = this.getObjectByName('Plug')
     this._weaponPlugPosition = new Vector3()

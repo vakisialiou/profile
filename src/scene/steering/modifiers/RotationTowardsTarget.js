@@ -26,7 +26,7 @@ export default class RotationTowardsTarget {
 
   /**
    *
-   * @param {(Object3D|Group)} unit
+   * @param {(Node|Group)} unit
    * @param {Vector3} target
    * @param {number} speed
    * @returns {Quaternion}

@@ -49,7 +49,7 @@ export default class Bullet extends Unit {
 
     /**
      *
-     * @type {(Object3D|Mesh|Group)[]}
+     * @type {(Node|Mesh|Group)[]}
      */
     this.collisionObjects = []
   }
@@ -78,7 +78,7 @@ export default class Bullet extends Unit {
 
   /**
    *
-   * @param {(Object3D|Mesh|Group)[]} objects
+   * @param {(Node|Mesh|Group)[]} objects
    * @returns {Bullet}
    */
   setCollisionObjects(objects) {
@@ -91,7 +91,7 @@ export default class Bullet extends Unit {
 
   /**
    *
-   * @param {Object3D[]} objects
+   * @param {Node[]} objects
    * @param {boolean} [recursive]
    * @returns {Intersection[]}
    */

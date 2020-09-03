@@ -8,7 +8,7 @@ export default class Tower extends Unit {
 
     /**
      *
-     * @type {(Object3D|Mesh|Group)}
+     * @type {(Node|Mesh|Group)}
      */
     this.target = null
 
@@ -20,7 +20,7 @@ export default class Tower extends Unit {
 
     /**
      * @typedef {Object} GunOptions
-     * @property {(Object3D|Mesh|Group)} model
+     * @property {(Node|Mesh|Group)} model
      * @property {number} reloadTime
      * @property {number} lastShotTime
      */
@@ -96,7 +96,7 @@ export default class Tower extends Unit {
 
   /**
    *
-   * @param {(Object3D|Mesh|Group)} target
+   * @param {(Node|Mesh|Group)} target
    * @returns {Tower}
    */
   setTarget(target) {

@@ -39,7 +39,7 @@ export class ControllerBullet {
 
   /**
    * @param {Engine} engine
-   * @param {Array.<Object3D|Mesh|Group>} collisionObjects
+   * @param {Array.<Node|Mesh|Group>} collisionObjects
    * @returns {ControllerBullet}
    */
   preset(engine, collisionObjects = []) {

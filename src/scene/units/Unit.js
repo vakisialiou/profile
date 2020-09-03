@@ -67,7 +67,7 @@ export default class Unit extends Group {
   /**
    *
    * @param {string} name
-   * @returns {Object3D|undefined}
+   * @returns {Node|undefined}
    */
   getObjectByName(name) {
     return this.model.getObjectByName(name) || super.getObjectByName(name)

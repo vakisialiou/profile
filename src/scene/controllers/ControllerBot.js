@@ -49,7 +49,7 @@ export class ControllerBot {
 
     /**
      *
-     * @type {Object3D|Group|Unit|null}
+     * @type {Node|Group|Unit|null}
      */
     this.target = null
 
@@ -273,7 +273,7 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Object3D|Mesh|Group|Unit} enemies
+   * @param {Node|Mesh|Group|Unit} enemies
    * @returns {ControllerBot}
    */
   setEnemies(enemies) {
@@ -283,7 +283,7 @@ export class ControllerBot {
 
   /**
    *
-   * @param {Object3D|Group|Unit} value
+   * @param {Node|Group|Unit} value
    * @returns {ControllerBot}
    */
   setTarget(value) {

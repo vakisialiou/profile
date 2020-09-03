@@ -1,5 +1,5 @@
-import { routes as routesHomePage } from './home-page'
-import { routes as routesHorizontalMenu, TYPE_MENU_HOME, TYPE_MENU_HORIZONTAL } from './horizontal'
+import { routes as routesThreeJsPage } from './three-js-page'
+import { routes as routesHorizontalMenu, TYPE_MENU_HOME, TYPE_MENU_HORIZONTAL } from './horizontal-menu'
 
 export default class AppRoutes {
   constructor() {
@@ -7,7 +7,7 @@ export default class AppRoutes {
      *
      * @type {Array.<RouteItem>}
      */
-    this.fullRoutes = [ ...routesHomePage, ...routesHorizontalMenu ]
+    this.fullRoutes = [ ...routesThreeJsPage, ...routesHorizontalMenu ]
   }
 
   /**
@@ -24,8 +24,8 @@ export default class AppRoutes {
    *
    * @returns {RouteItem[]}
    */
-  homePageMenuRoutes() {
-    return routesHomePage
+  threeJSPageMenuRoutes() {
+    return routesThreeJsPage
   }
 
   /**

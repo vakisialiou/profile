@@ -128,7 +128,7 @@ export default class Ground extends Group {
    *
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {Array.<Object3D|Group>} [intersectionObjects]
+   * @param {Array.<Node|Group>} [intersectionObjects]
    * @returns {Vector3|?}
    */
   getVertexPosition(event, camera, intersectionObjects = []) {
@@ -177,7 +177,7 @@ export default class Ground extends Group {
    *
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {Array.<Object3D|Group>} [intersectionObjects]
+   * @param {Array.<Node|Group>} [intersectionObjects]
    * @param {number} [distance]
    * @returns {Vector3|?}
    */
@@ -229,7 +229,7 @@ export default class Ground extends Group {
    *
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {Array.<Object3D|Group>} [intersectionObjects]
+   * @param {Array.<Node|Group>} [intersectionObjects]
    * @returns {Vector3|?}
    */
   getMouse3DPosition(event, camera, intersectionObjects = []) {
@@ -244,7 +244,7 @@ export default class Ground extends Group {
    *
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {Array.<Object3D|Group>} [intersectionObjects]
+   * @param {Array.<Node|Group>} [intersectionObjects]
    * @param {boolean} [recursive]
    * @returns {Object|?}
    */
@@ -260,7 +260,7 @@ export default class Ground extends Group {
    *
    * @param {MouseEvent} event
    * @param {Camera} camera
-   * @param {Array.<Object3D|Group>} [intersectionObjects]
+   * @param {Array.<Node|Group>} [intersectionObjects]
    * @param {boolean} [recursive]
    * @returns {Array.<Object>}
    */

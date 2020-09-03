@@ -3,13 +3,13 @@ import { Vector3, Group, Euler } from 'three'
 export default class MathObject {
   /**
    *
-   * @param {(Object3D|Mesh|Group)} obj
+   * @param {(Node|Mesh|Group)} obj
    */
   constructor(obj) {
 
     /**
      *
-     * @type {Object3D|Mesh|Group}
+     * @type {Node|Mesh|Group}
      * @private
      */
     this._obj = obj

@@ -15,6 +15,10 @@
       enableEvents: {
         type: String,
         default: 'container'
+      },
+      disableScrolling: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
@@ -22,7 +26,10 @@
         return { 'wrapper-view__bg--active': this.enableEvents === 'bg' }
       },
       htmlClassContainer: function () {
-        return { 'wrapper-view__container--active': this.enableEvents === 'container' }
+        return {
+          'wrapper-view__container--active': this.enableEvents === 'container',
+          'wrapper-view__container--disable-overflow': this.disableScrolling,
+        }
       }
     }
   }

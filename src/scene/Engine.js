@@ -220,7 +220,7 @@ class Engine {
 
   /**
    *
-   * @param {(Mesh|Group|Object3D|Unit)} mesh
+   * @param {(Mesh|Group|Node|Unit)} mesh
    * @returns {boolean}
    */
   has(mesh) {
@@ -231,7 +231,7 @@ class Engine {
    * Add element to scene and distribute to different categories.
    *
    * @param {string|Array.<string>} categories
-   * @param {(Mesh|Group|Object3D|Unit)} mesh
+   * @param {(Mesh|Group|Node|Unit)} mesh
    * @returns {Engine}
    */
   add(categories, mesh) {
@@ -252,7 +252,7 @@ class Engine {
 
   /**
    *
-   * @param {(Object3D|Mesh|Group|Unit)} mesh
+   * @param {(Node|Mesh|Group|Unit)} mesh
    * @returns {Engine}
    */
   remove(mesh) {
@@ -296,7 +296,7 @@ class Engine {
   /**
    *
    * @param {string|Array.<string>} categories
-   * @returns {Array.<(Mesh|Group|Object3D|Unit)>}
+   * @returns {Array.<(Mesh|Group|Node|Unit)>}
    */
   getUnits(categories) {
     let units = []

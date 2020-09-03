@@ -12,7 +12,7 @@
 
   export default {
     name: 'App',
-    router: new VueRouter({ routes: appRoutes.fullRoutes }),
+    router: new VueRouter({ routes: appRoutes.fullRoutes, mode: 'history' }),
     computed: {
       horizontalMenuRoutes: () => {
         return appRoutes.horizontalMenuRoutes()
@@ -39,7 +39,7 @@
     <BNavbar toggleable="lg" type="dark" variant="dark">
       <RouterLink :to="{ name: homePageRouter.name }" v-slot="{ href, navigate }">
         <BNavbarBrand :href="href" @click="navigate">
-          <BImg v-bind="{ width: 40, height: 40, class: 'm1', src: '/images/me.jpeg' }" rounded="circle" alt="Circle image" />
+          <BImg v-bind="{ width: 40, height: 40, class: 'm1', src: '/images/icon.jpeg' }" rounded="circle" alt="Circle image" />
         </BNavbarBrand>
       </RouterLink>
 

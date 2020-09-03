@@ -6,13 +6,20 @@ export default class RouteItem {
    * @param {VueComponent|Object} component
    * @param {string} title
    * @param {string} path
+   * @param {string|?} [to]
    */
-  constructor(component, title, path) {
+  constructor(component, title, path, to) {
     /**
      *
      * @type {string}
      */
     this.path = path
+
+    /**
+     *
+     * @type {string|?}
+     */
+    this.to = to || path
 
     /**
      *

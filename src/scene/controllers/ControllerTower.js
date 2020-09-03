@@ -41,7 +41,7 @@ export class ControllerTower {
   /**
    *
    * @param {Engine} engine
-   * @param {Array.<Object3D|Mesh|Group>} collisionObjects
+   * @param {Array.<Node|Mesh|Group>} collisionObjects
    * @returns {ControllerTower}
    */
   preset(engine, collisionObjects = []) {
@@ -82,7 +82,7 @@ export class ControllerTower {
 
   /**
    *
-   * @param {Object3D|Group|Unit} mesh
+   * @param {Node|Group|Unit} mesh
    * @returns {ControllerTower}
    */
   setTarget(mesh) {

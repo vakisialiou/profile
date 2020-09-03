@@ -26,10 +26,10 @@ textures.addItem('star-7', '/images/stars/7.png')
 
 let engine = null
 export default {
-  name: 'HomePage',
+  name: 'ThreeJsPage',
   computed: {
     menuItems: () => {
-      return new AppRoutes().homePageMenuRoutes()
+      return new AppRoutes().threeJSPageMenuRoutes()
     },
   },
   methods: {
@@ -41,7 +41,7 @@ export default {
     return {
       offsetTop: 0,
       offsetLeft: 0,
-      containerId: 'home-page'
+      containerId: 'three-js-page'
     }
   },
   destroyed() {

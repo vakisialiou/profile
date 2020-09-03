@@ -13,9 +13,11 @@
 
   let engine = null
   const TEXTURE_GROUND = 'TEXTURE_GROUND'
+  const MODEL_GROUND = 'MODEL_GROUND'
   const TEXTURE_WATER = 'TEXTURE_WATER'
   const loader = new Loading()
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_GROUND, '/models/ground/grass/1.jpg')
+    .addItem(Loading.TYPE_MODEL, MODEL_GROUND, '/models/ground/ground.glb')
     .addItem(Loading.TYPE_TEXTURE, TEXTURE_WATER, '/textures/water/waternormals.jpg')
 
   const ground = new Ground()
@@ -51,12 +53,18 @@
         const waterPieces = new WaterPieces()
         const waterGeometry = new RingBufferGeometry(700, 10000, 4)
         const water = waterPieces.renderWater(waterGeometry, loader.getTexture(TEXTURE_WATER), sky.sunPosition.clone().normalize())
+        water.material.transparent = true
+        water.material.opacity = 0.5
         water.rotation.z = water.rotation.y - Math.PI / 4
         water.position.setY(-1)
         engine.add('water', waterPieces)
         engine.addUpdate(() => waterPieces.update())
 
-        const cubeCamera = new CubeCamera( 0.1, 1, 512 )
+        engine.addUpdate(() => {
+          // sky.setSunPosition(distance, inclination, azimuth)
+        })
+
+        const cubeCamera = new CubeCamera( 0.1, 1, 512, {  } )
         cubeCamera.renderTarget.texture.generateMipmaps = true
         cubeCamera.renderTarget.texture.minFilter = LinearMipmapLinearFilter
         engine.scene.background = cubeCamera.renderTarget
@@ -66,6 +74,31 @@
           .setTexture(loader.getTexture(TEXTURE_GROUND))
           // This page has top menu. Need set mouse offset on height it menu.
           .setMouseOffset(this.offsetTop, this.offsetLeft)
+
+
+        const model = loader.getRawModel(MODEL_GROUND, 2).model
+        model.position.setY(1)
+
+
+        model.traverse( function ( child ) {
+
+          if ( child.material ) {
+            // console.log(child.material)
+            // child.material.metalness = 0;
+          }
+          if ( child.isMesh ) {
+            // console.log(
+            //   child.material.emissive, child.material.color,
+            // child.material.emissiveMap, child.material.map,
+            // )
+            // child.material.emissive =  child.material.color;
+            // child.material.emissiveMap = child.material.map ;
+          }
+        } )
+
+        console.log(model, ground.cover)
+        model.scale.set(400, 1, 400)
+        engine.add('ddd', model)
 
         for (let i = 0; i < 5; i++) {
           const geometry = new BoxGeometry(20, 30, 20)
@@ -77,14 +110,14 @@
           engine.add('shapes', item)
         }
 
-        const lightPosition = new Vector3(70, 70, 70)
+        const lightPosition = new Vector3(0, 700, 0).copy(sky.sunPosition.clone())
         const cameraLookAt = new Vector3(0, 0, 0)
         const cameraPosition = new Vector3(-600, 0, 600)
 
         engine
           .add('ground', ground)
           .setDirLight(lightPosition)
-          .setHemiLight(lightPosition)
+          .setHemiLight(new Vector3(0, 700, 0))
           .setAxesHelper()
           .setCamera(cameraPosition, cameraLookAt)
           .preset(document.getElementById(this.containerId))

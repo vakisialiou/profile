@@ -99,11 +99,12 @@ export default class Loading {
   /**
    *
    * @param {string} name
+   * @param {Number} index
    * @returns {RawModel}
    */
-  getRawModel(name) {
+  getRawModel(name, index = 0) {
     const loader = this.loaders[Loading.TYPE_MODEL]
-    return loader.getRawModel(name)
+    return loader.getRawModel(name, index)
   }
 
   /**

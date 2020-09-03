@@ -27,7 +27,7 @@ export default class DisplacementPush extends DisplacementFollow {
 
   /**
    *
-   * @param {(Object3D|Group)} unit - Object to calculate displacement into him direction.
+   * @param {(Node|Group)} unit - Object to calculate displacement into him direction.
    * @returns {Vector3}
    */
   calculate(unit) {
