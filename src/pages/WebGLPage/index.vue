@@ -20,15 +20,14 @@
     },
     mounted: function () {
       this.offsetTop = this.$el.offsetTop
-      // this.render()
     },
     data() {
       return {
         offsetTop: 0,
         canvasId: 'canvas-container',
-        selectedExample: 'three',
+        selectedExample: 'custom',
         examples: [
-          { text: 'WebGL', value: 'webgl' },
+          { text: 'Custom', value: 'custom' },
           { text: 'Three.js', value: 'three' }
         ],
       }
@@ -41,7 +40,7 @@
             clearRenderWebGLScene()
             renderThreeScene(canvas, this.offsetTop)
             break
-          case 'webgl':
+          case 'custom':
             clearRenderThreeScene()
             renderWebGlScene(canvas, this.offsetTop)
             break
