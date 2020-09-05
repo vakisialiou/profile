@@ -4,18 +4,11 @@ import PerspectiveCamera from './../PerspectiveCamera'
 import WebGLRenderer from './../WebGLRenderer'
 import * as constants from './../constants'
 import * as shapeBox from '../primitives/box'
+import { degToRad } from './../../lib/math'
 
 window.__cacheWebGL = window.__cacheWebGL || { resize: null, requestID: null }
 
-function radToDeg(r) {
-  return r * 180 / Math.PI
-}
-
-function degToRad(d) {
-  return d * Math.PI / 180
-}
-
-export const renderWebGlScene = (canvas, offsetTop) => {
+export const renderWebGlScene = (canvas, offsetTop, update) => {
   // Before mount
   // -------------------------------------------------------------------------------------------------------------------
   clearRenderWebGLScene()
@@ -33,12 +26,12 @@ export const renderWebGlScene = (canvas, offsetTop) => {
   camera.target = [0, 0, 0]
 
   const cubeGeometry = { vertices: shapeBox.vertices }
-  const cubeMaterial = { colors: shapeBox.colors, size: 3, side: constants.SIDE_BACK, wireframe: true }
+  const cubeMaterial = { colors: shapeBox.colors, size: 3, side: constants.SIDE_BACK, wireframe: false }
 
-  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('WEBGL-CUBE0')
-  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('WEBGL-CUBE1')
-  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('WEBGL-CUBE2')
-  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('WEBGL-CUBE3')
+  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('BOX-0')
+  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('BOX-1')
+  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('BOX-2')
+  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('BOX-3')
 
   cube1.add(cube0)
   scene.add(cube1)
@@ -54,26 +47,29 @@ export const renderWebGlScene = (canvas, offsetTop) => {
 
   const render = () => {
     window.__cacheWebGL.requestID = requestAnimationFrame(render)
+    update({ renderer, scene, camera, cubeMaterial })
+
     scene.traverse((mesh) => {
       switch (mesh.name) {
-        case 'WEBGL-CUBE0':
+        case 'BOX-0':
           angle0 += 0.004
           mesh.position[0] = r0 * Math.cos(angle0)
           mesh.position[1] = r0 * Math.sin(angle0)
           break
-        case 'WEBGL-CUBE1':
+        case 'BOX-1':
           angle1 += 0.009
           mesh.position[0] = r1 * Math.cos(angle1)
           mesh.position[1] = r1 * Math.sin(angle1)
           break
-        case 'WEBGL-CUBE2':
+        case 'BOX-2':
           mesh.rotation[1] += 0.005
           break
-        case 'WEBGL-CUBE3':
+        case 'BOX-3':
           mesh.rotation[2] += 0.005
           break
       }
     })
+
     renderer.update(scene, camera)
   }
 

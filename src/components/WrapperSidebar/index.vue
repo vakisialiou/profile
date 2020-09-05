@@ -2,23 +2,14 @@
   import './index.less'
   import WrapperView from '@components/WrapperView'
   import { BSidebar, BButton, BNav, BNavItem, BIcon } from 'bootstrap-vue'
-  import Vue from 'vue'
-  import VueRouter from 'vue-router'
-
-  Vue.use(VueRouter)
 
   export default {
-    name: 'WebGlPage',
+    name: 'WrapperSidebar',
     components: { WrapperView, BSidebar, BButton, BNav, BNavItem, BIcon },
     props: {
       title: {
         type: String,
         required: true,
-      },
-      routes: {
-        type: Array,
-        required: true,
-        default: () => []
       },
       bgVariant: {
         type: String,
@@ -28,6 +19,10 @@
         type: String,
         default: 'light'
       },
+      backdrop: {
+        type: Boolean,
+        default: true
+      }
     },
     data() {
       return {
@@ -59,19 +54,9 @@
       :bg-variant="bgVariant"
       :text-variant="textVariant"
       :visible="visibleSidebar"
-      :backdrop="visibleSidebar"
+      :backdrop="backdrop && visibleSidebar"
     >
-      <BNav vertical>
-        <template v-for="(route, index) in routes">
-          <RouterLink :to="route.to" :key="index" v-slot="{ href, navigate, isActive }" v-if="route.children.length === 0">
-            <BNavItem :active="isActive" :href="href" @click="navigate">
-              <BIcon :icon="route.icon" aria-hidden="true" v-if="route.icon" />
-              {{ route.title }}
-            </BNavItem>
-          </RouterLink>
-        </template>
-      </BNav>
+      <slot />
     </BSidebar>
-    <slot />
   </WrapperView>
 </template>

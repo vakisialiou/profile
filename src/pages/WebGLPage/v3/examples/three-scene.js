@@ -30,7 +30,7 @@ function degToRad(d) {
   return d * Math.PI / 180
 }
 
-export const renderThreeScene = (canvas, offsetTop) => {
+export const renderThreeScene = (canvas, offsetTop, update) => {
   // Before mount
   // -------------------------------------------------------------------------------------------------------------------
   clearRenderThreeScene()
@@ -63,12 +63,12 @@ export const renderThreeScene = (canvas, offsetTop) => {
     cubeGeometry.faces[index + 1].color.setRGB(color.r, color.g, color.b)
   }
 
-  const cubeMaterial = new MeshBasicMaterial( { color: 0xffffff, vertexColors: true, wireframe: true } );
+  const cubeMaterial = new MeshBasicMaterial( { color: 0xffffff, vertexColors: true, wireframe: false } );
 
-  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('THREE-JS-CUBE0')
-  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('THREE-JS-CUBE1')
-  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('THREE-JS-CUBE2')
-  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('THREE-JS-CUBE3')
+  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('BOX-0')
+  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('BOX-1')
+  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('BOX-2')
+  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('BOX-3')
 
   cube1.add(cube0)
   scene.add(cube1)
@@ -82,22 +82,24 @@ export const renderThreeScene = (canvas, offsetTop) => {
 
   const render = () => {
     window.__cacheThreeJS.requestID = requestAnimationFrame(render)
+    update({ renderer, scene, camera, cubeMaterial })
+
     scene.traverse((mesh) => {
       switch (mesh.name) {
-        case 'THREE-JS-CUBE0':
+        case 'BOX-0':
           angle0 += 0.004
           mesh.position.x = r0 * Math.cos(angle0)
           mesh.position.y = r0 * Math.sin(angle0)
           break
-        case 'THREE-JS-CUBE1':
+        case 'BOX-1':
           angle1 += 0.009
           mesh.position.x = r1 * Math.cos(angle1)
           mesh.position.y = r1 * Math.sin(angle1)
           break
-        case 'THREE-JS-CUBE2':
+        case 'BOX-2':
           mesh.rotation.y += 0.005
           break
-        case 'THREE-JS-CUBE3':
+        case 'BOX-3':
           mesh.rotation.z += 0.005
           break
       }
