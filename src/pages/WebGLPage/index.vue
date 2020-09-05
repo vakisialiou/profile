@@ -24,27 +24,18 @@
     data() {
       return {
         offsetTop: 0,
-        canvasId: 'canvas-container',
-        selectedExample: 'custom',
-        examples: [
-          { text: 'Custom', value: 'custom' },
-          { text: 'Three.js', value: 'three' }
-        ],
+        canvasIdWebGl: 'canvas-container-webgl',
+        canvasIdThree: 'canvas-container-three',
       }
     },
     methods: {
       render: function () {
-        const canvas = document.getElementById(this.canvasId)
-        switch (this.selectedExample) {
-          case 'three':
-            clearRenderWebGLScene()
-            renderThreeScene(canvas, this.offsetTop)
-            break
-          case 'custom':
-            clearRenderThreeScene()
-            renderWebGlScene(canvas, this.offsetTop)
-            break
-        }
+        const canvasWebGL = document.getElementById(this.canvasIdWebGl)
+        const canvasThree = document.getElementById(this.canvasIdThree)
+        console.log(canvasWebGL.offsetLeft, canvasWebGL.offsetTop)
+        console.log(canvasThree.offsetLeft, canvasThree.offsetTop)
+        renderThreeScene(canvasThree, this.offsetTop)
+        renderWebGlScene(canvasWebGL, this.offsetTop)
       },
     }
   }
@@ -54,11 +45,21 @@
   <WrapperView class="webgl-container">
     <WrapperCorner :topOffset="offsetTop">
       <template slot="top-left">
-        <BFormGroup class="m-2">
-          <BFormRadioGroup v-model="selectedExample" :options="examples" />
-        </BFormGroup>
+        <div class="text-secondary m-2">Custom WebGL</div>
+      </template>
+      <template slot="top-right">
+        <div class="text-secondary m-2">Three.js framework</div>
       </template>
     </WrapperCorner>
-    <canvas :id="canvasId" />
+   <template slot="bg">
+     <div class="row m-0">
+       <div class="col-6 p-0 border border-secondary">
+         <canvas :id="canvasIdWebGl" />
+       </div>
+       <div class="col-6 p-0 border border-secondary">
+         <canvas :id="canvasIdThree" />
+       </div>
+     </div>
+   </template>
   </WrapperView>
 </template>

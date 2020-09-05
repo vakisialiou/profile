@@ -25,19 +25,19 @@ export const renderWebGlScene = (canvas, offsetTop) => {
   const scene = new Scene()
   const renderer = new WebGLRenderer(canvas)
 
-  const aspect = window.innerWidth / (window.innerHeight - offsetTop)
+  const aspect = (window.innerWidth / 2) / (window.innerHeight - offsetTop)
   const camera = new PerspectiveCamera(55, aspect, 0.1, 2000)
 
   scene.background = [0.0, 1.0, 1.0, 1.0]
-  camera.position = [0, 80, 200]
+  camera.position = [0, 0, 200]
   camera.target = [0, 0, 0]
 
   const cubeGeometry = { vertices: shapeBox.vertices }
-  const cubeMaterial = { colors: shapeBox.colors, size: 3, side: constants.SIDE_BACK }
+  const cubeMaterial = { colors: shapeBox.colors, size: 3, side: constants.SIDE_BACK, wireframe: true }
 
   const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('WEBGL-CUBE0')
   const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('WEBGL-CUBE1')
-  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setName('WEBGL-CUBE2')
+  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('WEBGL-CUBE2')
   const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('WEBGL-CUBE3')
 
   cube1.add(cube0)
@@ -45,7 +45,7 @@ export const renderWebGlScene = (canvas, offsetTop) => {
   scene.add(cube2)
   scene.add(cube3)
 
-  renderer.resize(window.innerWidth, (window.innerHeight - offsetTop)).update(scene, camera)
+  renderer.resize((window.innerWidth / 2), (window.innerHeight - offsetTop)).update(scene, camera)
 
   const r0 = 40
   const r1 = 180
@@ -80,10 +80,10 @@ export const renderWebGlScene = (canvas, offsetTop) => {
   // After mounted
   // -------------------------------------------------------------------------------------------------------------------
   window.__cacheWebGL.resize = () => {
-    camera.aspect = window.innerWidth / (window.innerHeight - offsetTop)
+    camera.aspect = (window.innerWidth / 2) / (window.innerHeight - offsetTop)
     camera.update()
 
-    renderer.resize(window.innerWidth, (window.innerHeight - offsetTop))
+    renderer.resize((window.innerWidth / 2), (window.innerHeight - offsetTop))
   }
   window.addEventListener('resize', window.__cacheWebGL.resize, false)
   render()

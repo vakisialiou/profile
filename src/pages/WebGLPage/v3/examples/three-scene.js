@@ -38,12 +38,12 @@ export const renderThreeScene = (canvas, offsetTop) => {
   // -------------------------------------------------------------------------------------------------------------------
   const scene = new Scene()
   const renderer = new WebGLRenderer({ antialias: true, canvas })
-  const camera = new PerspectiveCamera(55, window.innerWidth / (window.innerHeight - offsetTop), 0.1, 10000)
+  const camera = new PerspectiveCamera(55, (window.innerWidth / 2) / (window.innerHeight - offsetTop), 0.1, 10000)
 
   scene.background = new Color().setRGB(0.0, 1.0, 1.0)
-  camera.position.copy(new Vector3(0, 80, 200))
+  camera.position.copy(new Vector3(0, 0, 200))
   camera.lookAt(new Vector3(0, 0, 0))
-  renderer.setSize(window.innerWidth, (window.innerHeight - offsetTop))
+  renderer.setSize((window.innerWidth / 2), (window.innerHeight - offsetTop))
 
   const cubeGeometry = new BoxGeometry(50, 50, 50)
 
@@ -63,11 +63,11 @@ export const renderThreeScene = (canvas, offsetTop) => {
     cubeGeometry.faces[index + 1].color.setRGB(color.r, color.g, color.b)
   }
 
-  const cubeMaterial = new MeshBasicMaterial( { color: 0xffffff, vertexColors: true } );
+  const cubeMaterial = new MeshBasicMaterial( { color: 0xffffff, vertexColors: true, wireframe: true } );
 
   const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('THREE-JS-CUBE0')
   const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('THREE-JS-CUBE1')
-  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setName('THREE-JS-CUBE2')
+  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('THREE-JS-CUBE2')
   const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('THREE-JS-CUBE3')
 
   cube1.add(cube0)
@@ -109,9 +109,9 @@ export const renderThreeScene = (canvas, offsetTop) => {
   // After mounted
   // -------------------------------------------------------------------------------------------------------------------
   window.__cacheThreeJS.resize = () => {
-    camera.aspect = window.innerWidth / (window.innerHeight - offsetTop)
+    camera.aspect = (window.innerWidth / 2) / (window.innerHeight - offsetTop)
     camera.updateProjectionMatrix()
-    renderer.setSize(window.innerWidth, (window.innerHeight - offsetTop))
+    renderer.setSize((window.innerWidth / 2), (window.innerHeight - offsetTop))
   }
   window.addEventListener('resize', window.__cacheThreeJS.resize, false)
   render()

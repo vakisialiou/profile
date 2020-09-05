@@ -386,15 +386,17 @@ export default class WebGLRenderer {
       }
 
       // Draw the geometry.
-      const primitiveType = this.gl.TRIANGLES
+      // const primitiveType = this.gl.TRIANGLES
       // const primitiveType = this.gl.TRIANGLE_STRIP
       // const primitiveType = this.gl.POINTS
       // const primitiveType = this.gl.LINES
       // const primitiveType = this.gl.LINE_LOOP
       // const primitiveType = this.gl.LINE_STRIP
-      const offset = 0
-      const count = mesh.geometry.vertices.length / 3
-      this.gl.drawArrays(primitiveType, offset, count)
+      if (mesh.material.wireframe === true) {
+        this.gl.drawArrays(this.gl.LINES, 0, mesh.geometry.vertices.length / 3)
+      } else {
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, mesh.geometry.vertices.length / 3)
+      }
       this.gl.enable(this.gl.CULL_FACE)
       this.gl.cullFace(this.gl.BACK)
 
