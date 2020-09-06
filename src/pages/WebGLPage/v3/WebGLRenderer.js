@@ -2,9 +2,9 @@ import { mat4 } from 'gl-matrix'
 import vertexShaderText from './shader/shader-vertex.vert'
 import fragmentShaderText from './shader/shader-fragment.frag'
 import * as constants from './constants'
-import {PerspectiveCamera, BoxGeometry, BoxBufferGeometry, Mesh, Material, Face3, Scene, Object3D,
-  // Renderer,
-} from 'three'
+// import {PerspectiveCamera, BoxGeometry, BoxBufferGeometry, Mesh, Material, Face3, Scene, Object3D,
+//   // Renderer,
+// } from 'three'
 //
 // import sss from './../lib/#primitives'
 
@@ -25,12 +25,12 @@ import {PerspectiveCamera, BoxGeometry, BoxBufferGeometry, Mesh, Material, Face3
 // console.log(d, JSON.stringify(arr))
 // console.log(arr, sss.createCubeVertices(100), JSON.stringify(sss.createCubeVertices(100)))
 // console.log(new Mesh(new BoxGeometry(), new Material()))
-console.log({
-  BoxBufferGeometry: new BoxBufferGeometry(50, 50, 50),
-  BoxGeometry: new BoxGeometry(50, 50, 50),
-  m1: new Mesh(new BoxGeometry(), new Material()),
-  m2: new Mesh(new BoxBufferGeometry(), new Material())
-})
+// console.log({
+//   BoxBufferGeometry: new BoxBufferGeometry(50, 50, 50),
+//   BoxGeometry: new BoxGeometry(50, 50, 50),
+//   m1: new Mesh(new BoxGeometry(), new Material()),
+//   m2: new Mesh(new BoxBufferGeometry(), new Material())
+// })
 
 // import * as shapeLetter from './shapes/letter'
 // import * as shapeCube from './shapes/cube'
@@ -38,9 +38,9 @@ console.log({
 // import * as shapeCone from './shapes/cone'
 // import * as shapePlane from './shapes/plane'
 
-function radToDeg(r) {
-  return r * 180 / Math.PI
-}
+// function radToDeg(r) {
+//   return r * 180 / Math.PI
+// }
 
 function degToRad(d) {
   return d * Math.PI / 180

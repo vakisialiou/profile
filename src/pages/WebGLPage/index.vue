@@ -10,17 +10,18 @@
     BCard, BCardHeader, BCollapse, BCardBody
   } from 'bootstrap-vue'
   import { hexToNormalizedRgb, rgbToArrayRgba } from './lib/color'
-  import { decodeStorageItem, encodeStorageItem } from './lib/storage'
+  import { decodeStorageItem, encodeStorageItem, getStorageItem } from './lib/storage'
   import { degToRad } from './lib/math'
 
   import { renderThreeScene } from './v3/examples/three-scene'
   import { renderWebGlScene } from './v3/examples/webgl-scene'
 
   const defaultOptions = {
+    saveCounter: 0,
     scene: {
       background: '#00ffff'
     },
-    objects: {
+    baseMaterial: {
       wireframe: false
     },
     camera: {
@@ -37,14 +38,14 @@
 
     renderWebGlScene(canvasWebGL, offsetTop, ({ scene, camera, cubeMaterial }) => {
       scene.background = rgbToArrayRgba(hexToNormalizedRgb(storedOptions.scene.background))
-      cubeMaterial.wireframe = storedOptions.objects.wireframe
+      cubeMaterial.wireframe = storedOptions.baseMaterial.wireframe
       camera.position = Array.from(storedOptions.camera.position)
       camera.rotation = Array.from(storedOptions.camera.rotation)
     })
 
     renderThreeScene(canvasThree, offsetTop, ({ scene, camera, cubeMaterial }) => {
       scene.background.set(storedOptions.scene.background)
-      cubeMaterial.wireframe = storedOptions.objects.wireframe
+      cubeMaterial.wireframe = storedOptions.baseMaterial.wireframe
       camera.position.fromArray(storedOptions.camera.position)
       camera.rotation.fromArray(storedOptions.camera.rotation)
     })
@@ -66,11 +67,14 @@
         canvasIdWebGl: 'canvas-container-webgl',
         canvasIdThree: 'canvas-container-three',
         options: storedOptions,
-        iteration: 1,
+        renderCounter: 1,
       }
     },
     computed: {
-
+      settingsStatus: function () {
+        const savedConfig = getStorageItem('webgl') || JSON.stringify(defaultOptions)
+        return JSON.stringify(this.options) === savedConfig ? 'saved' : 'changed'
+      },
     },
     mounted: function () {
       this.offsetTop = this.$el.offsetTop
@@ -81,18 +85,20 @@
     },
     methods: {
       saveOptions() {
-        setTimeout(() => {
-          encodeStorageItem('webgl', this.options)
-        }, 200)
+        this.renderCounter += 1
+        this.options.saveCounter += 1
+        encodeStorageItem('webgl', this.options)
       },
-      resetOptions() {
+      resetOptionsToDefault() {
         storedOptions = JSON.parse(JSON.stringify(defaultOptions))
         this.options = storedOptions
-        this.saveOptions()
-        this.iteration += 1
+      },
+      resetOptionsToSaved() {
+        storedOptions = decodeStorageItem('webgl') || JSON.parse(JSON.stringify(defaultOptions))
+        this.options = storedOptions
       },
       key(value) {
-        return String(this.iteration) + value
+        return String(this.renderCounter) + value
       },
       degToRad: degToRad
     }
@@ -113,22 +119,24 @@
       </template>
     </WrapperCorner>
 
-    <WrapperSidebar title="Настройки" :backdrop="false">
+    <WrapperSidebar title="Settings" :backdrop="false">
+      <template slot="title">
+        Settings: <small :class="settingsStatus === 'changed' ? 'text-warning' : 'text-success'">{{ settingsStatus }}</small>
+      </template>
       <div role="tablist" class="m-2 text-muted">
         <BCard no-body class="mb-1">
           <BCardHeader header-tag="header" class="p-0" role="tab">
-            <BButton block v-b-toggle.accordion-1 variant="info">Настройки сцены</BButton>
+            <BButton block v-b-toggle.accordion-1 variant="info" size="sm">Scene</BButton>
           </BCardHeader>
           <BCollapse id="accordion-1" accordion="my-accordion" role="tabpanel">
             <BCardBody>
               <div>
-                <label for="scene-background">Цвет сцены:</label>
+                <label for="scene-background">Background:</label>
                 <BFormInput
                   type="color"
                   id="scene-background"
                   :key="key('scene-background')"
-                  v-model="options.scene.background"
-                  @change="saveOptions" />
+                  v-model="options.scene.background"/>
               </div>
             </BCardBody>
           </BCollapse>
@@ -136,29 +144,27 @@
 
         <BCard no-body class="mb-1">
           <BCardHeader header-tag="header" class="p-0" role="tab">
-            <BButton block v-b-toggle.accordion-2 variant="info">Настройки WebGL</BButton>
+            <BButton block v-b-toggle.accordion-2 variant="info" size="sm">WebGLRenderer</BButton>
           </BCardHeader>
           <BCollapse id="accordion-2" accordion="my-accordion" role="tabpanel">
             <BCardBody>
-              <i>Настроить</i>
+              <i>In process</i>
             </BCardBody>
           </BCollapse>
         </BCard>
 
         <BCard no-body class="mb-1">
           <BCardHeader header-tag="header" class="p-0" role="tab">
-            <BButton block v-b-toggle.accordion-3 variant="info">Настройки объектов</BButton>
+            <BButton block v-b-toggle.accordion-3 variant="info" size="sm">Material</BButton>
           </BCardHeader>
           <BCollapse id="accordion-3" accordion="my-accordion" role="tabpanel">
             <BCardBody>
               <div>
                 <BFormCheckbox
-                  id="object-wireframe"
-                  :key="key('object-wireframe')"
-                  v-model="options.objects.wireframe"
-                  @change="saveOptions"
-                >
-                  Показать каркас объекта
+                  id="base-material-wireframe"
+                  :key="key('base-material-wireframe')"
+                  v-model="options.baseMaterial.wireframe">
+                  BaseMaterial
                 </BFormCheckbox>
               </div>
             </BCardBody>
@@ -167,44 +173,44 @@
 
         <BCard no-body class="mb-1">
           <BCardHeader header-tag="header" class="p-0" role="tab">
-            <BButton block v-b-toggle.accordion-4 variant="info">Настройки освещения</BButton>
+            <BButton block v-b-toggle.accordion-4 variant="info" size="sm">Light</BButton>
           </BCardHeader>
           <BCollapse id="accordion-4" accordion="my-accordion" role="tabpanel">
             <BCard>
-              <i>Настроить</i>
+              <i>In process</i>
             </BCard>
           </BCollapse>
         </BCard>
 
         <BCard no-body class="mb-1">
           <BCardHeader header-tag="header" class="p-0" role="tab">
-            <BButton block v-b-toggle.accordion-5 variant="info">Настройки камеры</BButton>
+            <BButton block v-b-toggle.accordion-5 variant="info" size="sm">Camera</BButton>
           </BCardHeader>
           <BCollapse id="accordion-5" accordion="my-accordion" role="tabpanel">
             <BCard>
               <FormRangeVector3
-                label="Позиция камеры:"
+                label="Position:"
                 id="camera-position"
                 :key="key('camera-position')"
-                v-model="options.camera.position"
-                @change="saveOptions"
-              />
+                v-model="options.camera.position"/>
 
               <FormRangeVector3
-                label="Вращение камеры:"
+                label="Rotation:"
                 id="camera-rotation"
                 :key="key('camera-rotation')"
                 v-model="options.camera.rotation"
                 :min="degToRad(0)"
                 :max="degToRad(360)"
-                :step="degToRad(2)"
-                @change="saveOptions"
-              />
+                :step="degToRad(2)"/>
             </BCard>
           </BCollapse>
         </BCard>
 
-        <BButton class="mb-1" @click="resetOptions">Сбросить настройки</BButton>
+        <div class="mb-1 d-flex justify-content-between">
+          <BButton size="sm" variant="success" @click="saveOptions">Save</BButton>
+          <BButton size="sm" variant="warning" @click="resetOptionsToDefault">Reset to default</BButton>
+          <BButton size="sm" variant="warning" @click="resetOptionsToSaved">Reset to saved</BButton>
+        </div>
       </div>
 
     </WrapperSidebar>
@@ -212,10 +218,10 @@
     <template slot="bg">
      <div class="row m-0">
        <div class="col-6 p-0 border border-secondary">
-         <canvas :id="canvasIdWebGl" />
+         <canvas :id="canvasIdWebGl" style="width: 100%; height: 100%" />
        </div>
        <div class="col-6 p-0 border border-secondary">
-         <canvas :id="canvasIdThree" />
+         <canvas :id="canvasIdThree" style="width: 100%; height: 100%" />
        </div>
      </div>
     </template>

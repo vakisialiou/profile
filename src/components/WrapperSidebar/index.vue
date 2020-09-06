@@ -56,6 +56,7 @@
       :visible="visibleSidebar"
       :backdrop="backdrop && visibleSidebar"
     >
+      <template slot="title"><slot name="title" /></template>
       <slot />
     </BSidebar>
   </WrapperView>
