@@ -2,6 +2,7 @@ import Mesh from './../Mesh'
 import Scene from './../Scene'
 import PerspectiveCamera from './../PerspectiveCamera'
 import WebGLRenderer from './../WebGLRenderer'
+import MeshBaseMaterial from './../MeshBaseMaterial'
 import * as constants from './../constants'
 import * as shapeBox from '../primitives/box'
 import { degToRad } from './../../lib/math'
@@ -21,12 +22,12 @@ export const renderWebGlScene = (canvas, offsetTop, update) => {
   const aspect = (window.innerWidth / 2) / (window.innerHeight - offsetTop)
   const camera = new PerspectiveCamera(55, aspect, 0.1, 2000)
 
-  scene.background = [0.0, 1.0, 1.0, 1.0]
   camera.position = [0, 0, 200]
   camera.target = [0, 0, 0]
 
-  const cubeGeometry = { vertices: shapeBox.vertices }
-  const cubeMaterial = { colors: shapeBox.colors, size: 3, side: constants.SIDE_BACK, wireframe: false }
+  const cubeGeometry = { vertices: shapeBox.vertices, colors: shapeBox.colors, }
+  // const cubeMaterial = { color: [1, 1, 1], vertexColors: true, side: constants.SIDE_BACK, wireframe: false }
+  const cubeMaterial = new MeshBaseMaterial().useVertexColors()
 
   const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('BOX-0')
   const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('BOX-1')

@@ -174,11 +174,10 @@ export default class WebGLRenderer {
 
   /**
    *
-   * @param {string} uuid
-   * @param {Object} geometry
-   * @param {Object} material
+   * @param {Object|Node} node
    */
-  getAttributes(uuid, geometry, material) {
+  getAttributes(node) {
+    const { uuid, geometry, material } = node
     if (this._cache.hasOwnProperty(uuid)) {
       return this._cache[uuid]
     }
@@ -189,14 +188,16 @@ export default class WebGLRenderer {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer)
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(geometry.vertices), this.gl.STATIC_DRAW)
 
-    const colorLocation = this.gl.getAttribLocation(program, 'a_color')
+    const uUseVertexColors = this.gl.getUniformLocation(program, 'u_use_vertex_colors')
+    const uColorLocation = this.gl.getUniformLocation(program, 'u_color')
+    const vColorLocation = this.gl.getAttribLocation(program, 'a_color')
     const colorBuffer = this.gl.createBuffer()
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Uint8Array(material.colors), this.gl.STATIC_DRAW)
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Uint8Array(geometry.colors), this.gl.STATIC_DRAW)
 
     const matrixLocation = this.gl.getUniformLocation(program, 'u_matrix')
 
-    this._cache[uuid] = { program, positionLocation, positionBuffer, colorLocation, colorBuffer, matrixLocation }
+    this._cache[uuid] = { program, positionLocation, positionBuffer, colorBuffer, matrixLocation, vColorLocation, uColorLocation, uUseVertexColors }
     return this._cache[uuid]
   }
 
@@ -262,7 +263,8 @@ export default class WebGLRenderer {
 
   update(scene, camera) {
     // BG color
-    this.gl.clearColor(scene.background[0], scene.background[1], scene.background[2], scene.background[3])
+    const bgColor = scene.background.toNormalizedArray()
+    this.gl.clearColor(bgColor[0], bgColor[1], bgColor[2], 1)
 
     // this.gl.clearDepth(1.0)
     // Clear the canvas AND the depth buffer.
@@ -330,8 +332,8 @@ export default class WebGLRenderer {
       }
 
       // ============================================== Mesh start ==============================================
-      const attributes = this.getAttributes(mesh.uuid, mesh.geometry, mesh.material)
-      const { program, positionLocation, positionBuffer, colorLocation, colorBuffer, matrixLocation } = attributes
+      const attributes = this.getAttributes(mesh)
+      const { program, positionLocation, positionBuffer, colorBuffer, matrixLocation, vColorLocation, uColorLocation, uUseVertexColors } = attributes
 
       // Tell it to use mesh program (pair of shaders)
       this.gl.useProgram(program)
@@ -353,6 +355,7 @@ export default class WebGLRenderer {
       // ----------------------- POSITION END --------------------------
 
       // ----------------------- COLOR START --------------------------
+
       // Bind the color buffer.
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
       // 0. Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
@@ -361,9 +364,12 @@ export default class WebGLRenderer {
       // 3. normalize the data (convert from 0-255 to 0-1)
       // 4. 0 = move forward size * sizeof(type) each iteration to get the next position
       // 5. start at the beginning of the buffer
-      this.gl.vertexAttribPointer(colorLocation, 3, this.gl.UNSIGNED_BYTE, true, 0, 0)
+      this.gl.vertexAttribPointer(vColorLocation, 3, this.gl.UNSIGNED_BYTE, true, 0, 0)
       // Turn on the color attribute
-      this.gl.enableVertexAttribArray(colorLocation)
+      this.gl.enableVertexAttribArray(vColorLocation)
+
+      this.gl.uniform1i(uUseVertexColors, Number(mesh.material.vertexColors))
+      this.gl.uniform3fv(uColorLocation, mesh.material.color.toNormalizedArray())
       // ----------------------- COLOR END --------------------------
 
       let matrix = mat4.create()
@@ -376,7 +382,7 @@ export default class WebGLRenderer {
         case constants.SIDE_DOUBLE:
           this.gl.disable(this.gl.CULL_FACE)
           break
-        case constants.SIDE_FRONT:
+        case constants.SIDE_BACK:
           this.gl.cullFace(this.gl.FRONT)
           break
       }

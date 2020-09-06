@@ -6,12 +6,13 @@
   import FormRangeVector3 from '@components/FormRangeVector3'
   import {
     BSidebar, BButton, BNav, BNavItem, BIcon, BFormGroup, BFormRadioGroup,
-    BFormInput, BFormCheckbox, BFormSpinbutton,
+    BFormInput, BFormCheckbox, BFormSpinbutton, BFormSelect,
     BCard, BCardHeader, BCollapse, BCardBody
   } from 'bootstrap-vue'
-  import { hexToNormalizedRgb, rgbToArrayRgba } from './lib/color'
   import { decodeStorageItem, encodeStorageItem, getStorageItem } from './lib/storage'
   import { degToRad } from './lib/math'
+  import { SIDE_FRONT, SIDE_BACK, SIDE_DOUBLE } from './v3/constants'
+  import { FrontSide, BackSide, DoubleSide } from 'three'
 
   import { renderThreeScene } from './v3/examples/three-scene'
   import { renderWebGlScene } from './v3/examples/webgl-scene'
@@ -19,10 +20,16 @@
   const defaultOptions = {
     saveCounter: 0,
     scene: {
-      background: '#00ffff'
+      background: '#00FFFF'
+    },
+    objects: {
+      visible: true,
     },
     baseMaterial: {
-      wireframe: false
+      color: '#FFFFFF',
+      wireframe: false,
+      vertexColors: true,
+      side: 'front',
     },
     camera: {
       position: [0, 0, 200],
@@ -37,17 +44,48 @@
     const canvasThree = document.getElementById(canvasIdThree)
 
     renderWebGlScene(canvasWebGL, offsetTop, ({ scene, camera, cubeMaterial }) => {
-      scene.background = rgbToArrayRgba(hexToNormalizedRgb(storedOptions.scene.background))
-      cubeMaterial.wireframe = storedOptions.baseMaterial.wireframe
+      scene.background.set(storedOptions.scene.background)
+
       camera.position = Array.from(storedOptions.camera.position)
       camera.rotation = Array.from(storedOptions.camera.rotation)
+
+      cubeMaterial.useWireframe(storedOptions.baseMaterial.wireframe)
+      cubeMaterial.useVertexColors(storedOptions.baseMaterial.vertexColors)
+      cubeMaterial.setColor(storedOptions.baseMaterial.color)
+      switch (storedOptions.baseMaterial.side) {
+        case 'front':
+          cubeMaterial.side = SIDE_FRONT
+          break
+        case 'back':
+          cubeMaterial.side = SIDE_BACK
+          break
+        case 'double':
+          cubeMaterial.side = SIDE_DOUBLE
+          break
+      }
     })
 
     renderThreeScene(canvasThree, offsetTop, ({ scene, camera, cubeMaterial }) => {
       scene.background.set(storedOptions.scene.background)
-      cubeMaterial.wireframe = storedOptions.baseMaterial.wireframe
+
       camera.position.fromArray(storedOptions.camera.position)
       camera.rotation.fromArray(storedOptions.camera.rotation)
+
+      cubeMaterial.wireframe = storedOptions.baseMaterial.wireframe
+
+      cubeMaterial.color.set(storedOptions.baseMaterial.color)
+      cubeMaterial.vertexColors = storedOptions.baseMaterial.vertexColors
+      switch (storedOptions.baseMaterial.side) {
+        case 'front':
+          cubeMaterial.side = FrontSide
+          break
+        case 'back':
+          cubeMaterial.side = BackSide
+          break
+        case 'double':
+          cubeMaterial.side = DoubleSide
+          break
+      }
     })
   }
 
@@ -57,7 +95,7 @@
     name: 'WebGlPage',
     components: {
       WrapperView, WrapperCorner, WrapperSidebar, FormRangeVector3,
-      BCard, BCardHeader, BCollapse, BCardBody,
+      BCard, BCardHeader, BCollapse, BCardBody, BFormSelect,
       BFormGroup, BFormRadioGroup, BSidebar, BButton, BNav, BNavItem, BIcon,
       BFormInput, BFormCheckbox, BFormSpinbutton,
     },
@@ -68,6 +106,11 @@
         canvasIdThree: 'canvas-container-three',
         options: storedOptions,
         renderCounter: 1,
+        materialSideOptions: [
+          { value: 'front', text: 'Front' },
+          { value: 'back', text: 'Back' },
+          { value: 'Double', text: 'Double' },
+        ]
       }
     },
     computed: {
@@ -132,11 +175,7 @@
             <BCardBody>
               <div>
                 <label for="scene-background">Background:</label>
-                <BFormInput
-                  type="color"
-                  id="scene-background"
-                  :key="key('scene-background')"
-                  v-model="options.scene.background"/>
+                <BFormInput type="color" size="sm" id="scene-background" :key="key('scene-background')" v-model="options.scene.background"/>
               </div>
             </BCardBody>
           </BCollapse>
@@ -160,13 +199,15 @@
           <BCollapse id="accordion-3" accordion="my-accordion" role="tabpanel">
             <BCardBody>
               <div>
-                <BFormCheckbox
-                  id="base-material-wireframe"
-                  :key="key('base-material-wireframe')"
-                  v-model="options.baseMaterial.wireframe">
-                  BaseMaterial
-                </BFormCheckbox>
+                <BFormCheckbox id="base-material-wireframe" :key="key('base-material-wireframe')" v-model="options.baseMaterial.wireframe">Use wire frame</BFormCheckbox>
+                <BFormCheckbox id="base-material-vertex-colors" :key="key('base-material-vertex-colors')" v-model="options.baseMaterial.vertexColors">Use vertex colors</BFormCheckbox>
               </div>
+
+              <label for="base-material-color">Base material color:</label>
+              <BFormInput type="color" size="sm" id="base-material-color" :key="key('base-material-color')" v-model="options.baseMaterial.color"/>
+
+              <label for="base-material-side">Base material side:</label>
+              <BFormSelect size="sm" id="base-material-side" v-model="options.baseMaterial.side" :options="materialSideOptions" />
             </BCardBody>
           </BCollapse>
         </BCard>
@@ -188,20 +229,9 @@
           </BCardHeader>
           <BCollapse id="accordion-5" accordion="my-accordion" role="tabpanel">
             <BCard>
-              <FormRangeVector3
-                label="Position:"
-                id="camera-position"
-                :key="key('camera-position')"
-                v-model="options.camera.position"/>
+              <FormRangeVector3 label="Position:" id="camera-position" :key="key('camera-position')" v-model="options.camera.position"/>
 
-              <FormRangeVector3
-                label="Rotation:"
-                id="camera-rotation"
-                :key="key('camera-rotation')"
-                v-model="options.camera.rotation"
-                :min="degToRad(0)"
-                :max="degToRad(360)"
-                :step="degToRad(2)"/>
+              <FormRangeVector3 label="Rotation:" id="camera-rotation" :key="key('camera-rotation')" v-model="options.camera.rotation" :min="degToRad(0)" :max="degToRad(360)" :step="degToRad(2)"/>
             </BCard>
           </BCollapse>
         </BCard>
