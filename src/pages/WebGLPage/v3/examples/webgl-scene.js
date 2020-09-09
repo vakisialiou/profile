@@ -3,9 +3,13 @@ import Scene from './../Scene'
 import PerspectiveCamera from './../PerspectiveCamera'
 import WebGLRenderer from './../WebGLRenderer'
 import MeshBaseMaterial from './../MeshBaseMaterial'
+import BufferGeometry from './../BufferGeometry'
 import * as constants from './../constants'
 import * as shapeBox from '../primitives/box'
 import { degToRad } from './../../lib/math'
+import Vector3 from './../Vector3'
+
+import OBJLoader from './../loaders/OBJLoader'
 
 window.__cacheWebGL = window.__cacheWebGL || { resize: null, requestID: null }
 
@@ -22,17 +26,29 @@ export const renderWebGlScene = (canvas, offsetTop, update) => {
   const aspect = (window.innerWidth / 2) / (window.innerHeight - offsetTop)
   const camera = new PerspectiveCamera(55, aspect, 0.1, 2000)
 
-  camera.position = [0, 0, 200]
-  camera.target = [0, 0, 0]
+  camera.position.set(0, 0, 200)
 
-  const cubeGeometry = { vertices: shapeBox.vertices, colors: shapeBox.colors, }
+  new OBJLoader().load('/models/cube.obj').then((res) => {
+    res.position.y = - 40
+    res.position.x = - 80
+    res.scale.set(26, 26, 26)
+    // res.material.wireframe = true
+    scene.add(res)
+    // console.log('webgl', res)
+    // console.log('webgl BufferGeometry', res.geometry)
+  })
+
+  const cubeGeometry = new BufferGeometry()
+  cubeGeometry.setAttribute('position', { vertices: new Float32Array(shapeBox.vertices), itemSize: 3 })
+  cubeGeometry.setAttribute('color', { vertices: new Uint8Array(shapeBox.colors), itemSize: 3 })
+  // const cubeGeometry = { vertices: shapeBox.vertices, colors: shapeBox.colors, }
   // const cubeMaterial = { color: [1, 1, 1], vertexColors: true, side: constants.SIDE_BACK, wireframe: false }
   const cubeMaterial = new MeshBaseMaterial().useVertexColors()
 
-  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 100,  0]).setScale([0.1, 0.1, 0.1]).setName('BOX-0')
-  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition([  100, 0, -500]).setName('BOX-1')
-  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition([    0, 0, -500]).setScale([3, 3, 3]).setName('BOX-2')
-  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition([- 100, 0, -500]).setName('BOX-3')
+  const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(0, 100,  0)).setScale(new Vector3(0.1, 0.1, 0.1)).setName('BOX-0')
+  const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(100, 0, -500)).setName('BOX-1')
+  const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(0, 0, -500)).setScale(new Vector3(3, 3, 3)).setName('BOX-2')
+  const cube3 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(- 100, 0, -500)).setName('BOX-3')
 
   cube1.add(cube0)
   scene.add(cube1)
@@ -54,19 +70,19 @@ export const renderWebGlScene = (canvas, offsetTop, update) => {
       switch (mesh.name) {
         case 'BOX-0':
           angle0 += 0.004
-          mesh.position[0] = r0 * Math.cos(angle0)
-          mesh.position[1] = r0 * Math.sin(angle0)
+          mesh.position.x = r0 * Math.cos(angle0)
+          mesh.position.y = r0 * Math.sin(angle0)
           break
         case 'BOX-1':
           angle1 += 0.009
-          mesh.position[0] = r1 * Math.cos(angle1)
-          mesh.position[1] = r1 * Math.sin(angle1)
+          mesh.position.x = r1 * Math.cos(angle1)
+          mesh.position.y = r1 * Math.sin(angle1)
           break
         case 'BOX-2':
-          mesh.rotation[1] += 0.005
+          mesh.rotation.y += 0.005
           break
         case 'BOX-3':
-          mesh.rotation[2] += 0.005
+          mesh.rotation.z += 0.005
           break
       }
     })

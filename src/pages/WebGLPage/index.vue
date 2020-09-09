@@ -46,12 +46,13 @@
     renderWebGlScene(canvasWebGL, offsetTop, ({ scene, camera, cubeMaterial }) => {
       scene.background.set(storedOptions.scene.background)
 
-      camera.position = Array.from(storedOptions.camera.position)
-      camera.rotation = Array.from(storedOptions.camera.rotation)
+      camera.position.fromArray(storedOptions.camera.position)
+      camera.rotation.fromArray(storedOptions.camera.rotation)
 
       cubeMaterial.useWireframe(storedOptions.baseMaterial.wireframe)
       cubeMaterial.useVertexColors(storedOptions.baseMaterial.vertexColors)
       cubeMaterial.setColor(storedOptions.baseMaterial.color)
+
       switch (storedOptions.baseMaterial.side) {
         case 'front':
           cubeMaterial.side = SIDE_FRONT
@@ -109,7 +110,7 @@
         materialSideOptions: [
           { value: 'front', text: 'Front' },
           { value: 'back', text: 'Back' },
-          { value: 'Double', text: 'Double' },
+          { value: 'double', text: 'Double' },
         ]
       }
     },
@@ -135,10 +136,12 @@
       resetOptionsToDefault() {
         storedOptions = JSON.parse(JSON.stringify(defaultOptions))
         this.options = storedOptions
+        this.renderCounter += 1
       },
       resetOptionsToSaved() {
         storedOptions = decodeStorageItem('webgl') || JSON.parse(JSON.stringify(defaultOptions))
         this.options = storedOptions
+        this.renderCounter += 1
       },
       key(value) {
         return String(this.renderCounter) + value
@@ -229,9 +232,9 @@
           </BCardHeader>
           <BCollapse id="accordion-5" accordion="my-accordion" role="tabpanel">
             <BCard>
-              <FormRangeVector3 label="Position:" id="camera-position" :key="key('camera-position')" v-model="options.camera.position"/>
-
-              <FormRangeVector3 label="Rotation:" id="camera-rotation" :key="key('camera-rotation')" v-model="options.camera.rotation" :min="degToRad(0)" :max="degToRad(360)" :step="degToRad(2)"/>
+              <FormRangeVector3 class="mb-2" label="Position:" id="camera-position" :key="key('camera-position')" v-model="options.camera.position"/>
+              <hr />
+              <FormRangeVector3 class="mb-2" label="Rotation:" id="camera-rotation" :key="key('camera-rotation')" v-model="options.camera.rotation" :min="degToRad(0)" :max="degToRad(360)" :step="degToRad(2)"/>
             </BCard>
           </BCollapse>
         </BCard>

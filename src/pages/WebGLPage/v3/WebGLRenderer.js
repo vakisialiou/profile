@@ -183,21 +183,37 @@ export default class WebGLRenderer {
     }
 
     const program = this.defaultProgram
-    const positionLocation = this.gl.getAttribLocation(program, 'a_position')
-    const positionBuffer = this.gl.createBuffer()
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer)
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(geometry.vertices), this.gl.STATIC_DRAW)
+    this._cache[uuid] = {
+      program: this.defaultProgram,
+      matrixLocation: this.gl.getUniformLocation(program, 'u_matrix'),
+      uUseVertexColors: this.gl.getUniformLocation(program, 'u_use_vertex_colors'),
+      uColorLocation: this.gl.getUniformLocation(program, 'u_color'),
+      positionLocation: null,
+      positionBuffer: null,
+      vColorLocation: null,
+      colorBuffer: null
+    }
 
-    const uUseVertexColors = this.gl.getUniformLocation(program, 'u_use_vertex_colors')
-    const uColorLocation = this.gl.getUniformLocation(program, 'u_color')
-    const vColorLocation = this.gl.getAttribLocation(program, 'a_color')
-    const colorBuffer = this.gl.createBuffer()
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Uint8Array(geometry.colors), this.gl.STATIC_DRAW)
+    const position = geometry.getAttribute('position')
+    if (position) {
+      const positionLocation = this.gl.getAttribLocation(program, 'a_position')
+      const positionBuffer = this.gl.createBuffer()
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer)
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, position.vertices, this.gl.STATIC_DRAW)
+      this._cache[uuid]['positionLocation'] = positionLocation
+      this._cache[uuid]['positionBuffer'] = positionBuffer
+    }
 
-    const matrixLocation = this.gl.getUniformLocation(program, 'u_matrix')
+    const color = geometry.getAttribute('color')
+    if (color) {
+      const vColorLocation = this.gl.getAttribLocation(program, 'a_color')
+      const colorBuffer = this.gl.createBuffer()
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, color.vertices, this.gl.STATIC_DRAW)
+      this._cache[uuid]['vColorLocation'] = vColorLocation
+      this._cache[uuid]['colorBuffer'] = colorBuffer
+    }
 
-    this._cache[uuid] = { program, positionLocation, positionBuffer, colorBuffer, matrixLocation, vColorLocation, uColorLocation, uUseVertexColors }
     return this._cache[uuid]
   }
 
@@ -318,11 +334,11 @@ export default class WebGLRenderer {
 
     scene.traverse((node) => {
       node.localMatrix = mat4.create()
-      mat4.translate(node.localMatrix, node.localMatrix, node.position)
-      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation[0], [1, 0, 0])
-      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation[1], [0, 1, 0])
-      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation[2], [0, 0, 1])
-      mat4.scale(node.localMatrix, node.localMatrix, node.scale)
+      mat4.translate(node.localMatrix, node.localMatrix, node.position.toArray())
+      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation.x, [1, 0, 0])
+      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation.y, [0, 1, 0])
+      mat4.rotate(node.localMatrix, node.localMatrix, node.rotation.z, [0, 0, 1])
+      mat4.scale(node.localMatrix, node.localMatrix, node.scale.toArray())
       node.updateWorldMatrix(false)
     })
 
@@ -335,10 +351,21 @@ export default class WebGLRenderer {
       const attributes = this.getAttributes(mesh)
       const { program, positionLocation, positionBuffer, colorBuffer, matrixLocation, vColorLocation, uColorLocation, uUseVertexColors } = attributes
 
+      if (!positionLocation && !positionBuffer) {
+        return
+      }
+
+      // TODO before cycle
+      let matrix = mat4.create()
+      matrix = mat4.multiply(matrix, viewProjectionMatrix, mesh.worldMatrix)
+
       // Tell it to use mesh program (pair of shaders)
       this.gl.useProgram(program)
 
+      // TODO start material cycle
       // ----------------------- POSITION START --------------------------
+
+      // TODO: position function - inside material cycle
       // Turn on the position attribute
       this.gl.enableVertexAttribArray(positionLocation)
 
@@ -356,25 +383,25 @@ export default class WebGLRenderer {
 
       // ----------------------- COLOR START --------------------------
 
-      // Bind the color buffer.
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
-      // 0. Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
-      // 1. 3 components per iteration
-      // 2. the data is 8bit unsigned values
-      // 3. normalize the data (convert from 0-255 to 0-1)
-      // 4. 0 = move forward size * sizeof(type) each iteration to get the next position
-      // 5. start at the beginning of the buffer
-      this.gl.vertexAttribPointer(vColorLocation, 3, this.gl.UNSIGNED_BYTE, true, 0, 0)
-      // Turn on the color attribute
-      this.gl.enableVertexAttribArray(vColorLocation)
-
+      // TODO: color function - inside material cycle
+      if (vColorLocation && colorBuffer) {
+        // Bind the color buffer.
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer)
+        // 0. Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+        // 1. 3 components per iteration
+        // 2. the data is 8bit unsigned values
+        // 3. normalize the data (convert from 0-255 to 0-1)
+        // 4. 0 = move forward size * sizeof(type) each iteration to get the next position
+        // 5. start at the beginning of the buffer
+        this.gl.vertexAttribPointer(vColorLocation, 3, this.gl.UNSIGNED_BYTE, true, 0, 0)
+        // Turn on the color attribute
+        this.gl.enableVertexAttribArray(vColorLocation)
+      }
       this.gl.uniform1i(uUseVertexColors, Number(mesh.material.vertexColors))
       this.gl.uniform3fv(uColorLocation, mesh.material.color.toNormalizedArray())
       // ----------------------- COLOR END --------------------------
 
-      let matrix = mat4.create()
-      matrix = mat4.multiply(matrix, viewProjectionMatrix, mesh.worldMatrix)
-
+      // TODO: uniform function inside cycle - inside material cycle
       // Set the matrix.
       this.gl.uniformMatrix4fv(matrixLocation, false,  matrix)
 
@@ -391,6 +418,7 @@ export default class WebGLRenderer {
         this.gl.cullFace(this.gl.FRONT_AND_BACK)
       }
 
+      const position = mesh.geometry.getAttribute('position')
       // Draw the geometry.
       // const primitiveType = this.gl.TRIANGLES
       // const primitiveType = this.gl.TRIANGLE_STRIP
@@ -398,13 +426,17 @@ export default class WebGLRenderer {
       // const primitiveType = this.gl.LINES
       // const primitiveType = this.gl.LINE_LOOP
       // const primitiveType = this.gl.LINE_STRIP
+
+      // TODO position.vertices.length / 3 - calculate by group (start, count)
       if (mesh.material.wireframe === true) {
-        this.gl.drawArrays(this.gl.LINES, 0, mesh.geometry.vertices.length / 3)
+        this.gl.drawArrays(this.gl.LINES, 0, position.vertices.length / 3)
       } else {
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, mesh.geometry.vertices.length / 3)
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, position.vertices.length / 3)
       }
       this.gl.enable(this.gl.CULL_FACE)
       this.gl.cullFace(this.gl.BACK)
+
+      // TODO end material cycle
 
       // ============================================== Mesh end ==============================================
     })

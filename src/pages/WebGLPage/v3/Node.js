@@ -1,5 +1,6 @@
 import { v4 } from 'uuid'
 import { mat4 } from 'gl-matrix'
+import Vector3 from './Vector3'
 
 export default class Node {
   constructor() {
@@ -26,9 +27,23 @@ export default class Node {
      */
     this.visible = true
 
-    this.position = [0, 0, 0]
-    this.rotation = [0, 0, 0]
-    this.scale = [1, 1, 1]
+    /**
+     *
+     * @type {Vector3}
+     */
+    this.position = new Vector3(0, 0, 0)
+
+    /**
+     *
+     * @type {Vector3}
+     */
+    this.rotation = new Vector3(0, 0, 0)
+
+    /**
+     *
+     * @type {Vector3}
+     */
+    this.scale = new Vector3(1, 1, 1)
 
     /**
      *
@@ -50,18 +65,33 @@ export default class Node {
     return this
   }
 
+  /**
+   *
+   * @param {Object|Vector3} v
+   * @returns {Node}
+   */
   setPosition(v) {
-    this.position = v
+    this.position.copy(v)
     return this
   }
 
+  /**
+   *
+   * @param {Object|Vector3} v
+   * @returns {Node}
+   */
   setRotation(v) {
-    this.rotation = v
+    this.rotation.copy(v)
     return this
   }
 
+  /**
+   *
+   * @param {Object|Vector3} v
+   * @returns {Node}
+   */
   setScale(v) {
-    this.scale = v
+    this.scale.copy(v)
     return this
   }
 

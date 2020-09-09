@@ -2,6 +2,7 @@
 node_modules
 /lesson_1.bot/node_modules
 /dist
+*#*
 
 # local env files
 .env.local

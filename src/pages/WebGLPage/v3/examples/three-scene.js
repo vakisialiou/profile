@@ -1,8 +1,11 @@
 import {
   Scene, PerspectiveCamera, WebGLRenderer,
-  Mesh, MeshBasicMaterial, BoxGeometry,
-  Vector3, Color, Object3D,
+  Mesh, MeshBasicMaterial, BoxGeometry, BoxBufferGeometry, Geometry,
+  Vector3, Color, Object3D, Face3, DirectionalLight, HemisphereLight, Light
 } from 'three'
+
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { normalize } from './../../lib/integer'
 
 window.__cacheThreeJS = window.__cacheThreeJS || { resize: null, requestID: null }
@@ -39,13 +42,33 @@ export const renderThreeScene = (canvas, offsetTop, update) => {
   const scene = new Scene()
   const renderer = new WebGLRenderer({ antialias: true, canvas })
   const camera = new PerspectiveCamera(55, (window.innerWidth / 2) / (window.innerHeight - offsetTop), 0.1, 10000)
+  const light = new HemisphereLight()
+  scene.add(light)
 
   scene.background = new Color().setRGB(0.0, 1.0, 1.0)
   camera.position.copy(new Vector3(0, 0, 200))
   camera.lookAt(new Vector3(0, 0, 0))
   renderer.setSize((window.innerWidth / 2), (window.innerHeight - offsetTop))
 
+  new MTLLoader().load('/models/cube.mtl', (mtl) => {
+    mtl.preload()
+
+    const loader = new OBJLoader()
+    loader.setMaterials(mtl)
+    loader.load('/models/cube.obj', (res) => {
+        res.position.y = - 40
+        res.position.x = - 80
+        res.scale.set(26, 26, 26)
+        scene.add(res)
+        console.log('three', res)
+        console.log('three BufferGeometry', res.children[0]['geometry'])
+        console.log('three Geometry', new Geometry().fromBufferGeometry(res.children[0]['geometry']))
+        // console.log('three Material', res.children[0]['material'])
+      })
+  })
+
   const cubeGeometry = new BoxGeometry(50, 50, 50)
+  // console.log(cubeGeometry, new BoxGeometry(50, 50, 50), new BoxBufferGeometry(50, 50, 50))
 
   const boxColors = [
     [80, 70, 200],
