@@ -4,12 +4,12 @@ import PerspectiveCamera from './../PerspectiveCamera'
 import WebGLRenderer from './../WebGLRenderer'
 import MeshBaseMaterial from './../MeshBaseMaterial'
 import BufferGeometry from './../BufferGeometry'
-import * as constants from './../constants'
 import * as shapeBox from '../primitives/box'
 import { degToRad } from './../../lib/math'
 import Vector3 from './../Vector3'
 
 import OBJLoader from './../loaders/OBJLoader'
+import MTLLoader from './../loaders/MTLLoader'
 
 window.__cacheWebGL = window.__cacheWebGL || { resize: null, requestID: null }
 
@@ -28,23 +28,20 @@ export const renderWebGlScene = (canvas, offsetTop, update) => {
 
   camera.position.set(0, 0, 200)
 
-  new OBJLoader().load('/models/cube.obj').then((res) => {
-    res.position.y = - 40
-    res.position.x = - 80
-    res.scale.set(26, 26, 26)
-    // res.material.wireframe = true
-    scene.add(res)
-    // console.log('webgl', res)
-    // console.log('webgl BufferGeometry', res.geometry)
+  new MTLLoader().load('/models/cube.mtl').then((materials) => {
+    new OBJLoader().setMTLMaterials(materials).load('/models/cube.obj').then((res) => {
+      res.position.y = - 40
+      res.position.x = - 80
+      res.scale.set(26, 26, 26)
+      scene.add(res)
+    })
   })
 
   const cubeGeometry = new BufferGeometry()
   cubeGeometry.setAttribute('position', { vertices: new Float32Array(shapeBox.vertices), itemSize: 3 })
   cubeGeometry.setAttribute('color', { vertices: new Uint8Array(shapeBox.colors), itemSize: 3 })
-  // const cubeGeometry = { vertices: shapeBox.vertices, colors: shapeBox.colors, }
-  // const cubeMaterial = { color: [1, 1, 1], vertexColors: true, side: constants.SIDE_BACK, wireframe: false }
-  const cubeMaterial = new MeshBaseMaterial().useVertexColors()
 
+  const cubeMaterial = new MeshBaseMaterial().useVertexColors()
   const cube0 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(0, 100,  0)).setScale(new Vector3(0.1, 0.1, 0.1)).setName('BOX-0')
   const cube1 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(100, 0, -500)).setName('BOX-1')
   const cube2 = new Mesh(cubeGeometry, cubeMaterial).setPosition(new Vector3(0, 0, -500)).setScale(new Vector3(3, 3, 3)).setName('BOX-2')

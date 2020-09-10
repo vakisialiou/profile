@@ -174,10 +174,10 @@ export default class WebGLRenderer {
 
   /**
    *
-   * @param {Object|Node} node
+   * @param {Object|Mesh} mesh
    */
-  getAttributes(node) {
-    const { uuid, geometry, material } = node
+  getAttributes(mesh) {
+    const { uuid, geometry, material } = mesh
     if (this._cache.hasOwnProperty(uuid)) {
       return this._cache[uuid]
     }
@@ -277,6 +277,77 @@ export default class WebGLRenderer {
     return this
   }
 
+  createMeshBuffer(mesh) {
+    if (mesh.hasOwnProperty('__buffer')) {
+      return mesh['__buffer']
+    }
+
+    const meshBuffer = {
+      /** @type {Function|?} */
+      bindBufferVertexPosition: null,
+      /** @type {Function|?} */
+      bindBufferVertexColor: null,
+      /** @type {Function|?} */
+      setUniformMatrix4: null,
+      /** @type {Function|?} */
+      drawArrays: null
+    }
+
+    const { geometry } = mesh
+
+    // Attribute vertex position
+    const attributePosition = geometry.getAttribute('position')
+    const attributePositionLocation = this.gl.getAttribLocation(this.defaultProgram, 'a_position')
+    const attributePositionBuffer = this.gl.createBuffer()
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attributePositionBuffer)
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, attributePosition.vertices, this.gl.STATIC_DRAW)
+
+    meshBuffer.bindBufferVertexPosition = () => {
+      // Bind buffer vertex position
+      this.gl.enableVertexAttribArray(attributePositionLocation)
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attributePositionBuffer)
+      this.gl.vertexAttribPointer(attributePositionLocation, 3, this.gl.FLOAT, false, 0, 0)
+    }
+
+    // Attribute vertex color
+    const attributeColor = geometry.getAttribute('color')
+    if (attributeColor && attributeColor.vertices.length > 0) {
+      const attributeColorLocation = this.gl.getAttribLocation(this.defaultProgram, 'a_color')
+      const attributeColorBuffer = this.gl.createBuffer()
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attributeColorBuffer)
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, attributeColor.vertices, this.gl.STATIC_DRAW)
+
+      meshBuffer.bindBufferVertexColor = () => {
+        // Bind buffer vertex color
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attributeColorBuffer)
+        this.gl.vertexAttribPointer(attributeColorLocation, 3, this.gl.UNSIGNED_BYTE, true, 0, 0)
+        this.gl.enableVertexAttribArray(attributeColorLocation)
+      }
+    }
+
+    const uniformMatrixLocation = this.gl.getUniformLocation(this.defaultProgram, 'u_matrix')
+    meshBuffer.setUniformMatrix4 = (matrix) => {
+      this.gl.uniformMatrix4fv(uniformMatrixLocation, false, matrix)
+    }
+
+    const uniformUseVertexColors = this.gl.getUniformLocation(this.defaultProgram, 'u_use_vertex_colors')
+    const uniformColorLocation = this.gl.getUniformLocation(this.defaultProgram, 'u_color')
+
+    meshBuffer.drawArrays = (material, group) => {
+      this.gl.uniform1i(uniformUseVertexColors, Number(material.vertexColors))
+      this.gl.uniform3fv(uniformColorLocation, material.color.toNormalizedArray())
+
+      if (material.wireframe === true) {
+        this.gl.drawArrays(this.gl.LINE_STRIP, group.start, group.count)
+      } else {
+        this.gl.drawArrays(this.gl.TRIANGLES, group.start, group.count)
+      }
+    }
+
+    mesh['__buffer'] = meshBuffer
+    return mesh['__buffer']
+  }
+
   update(scene, camera) {
     // BG color
     const bgColor = scene.background.toNormalizedArray()
@@ -347,7 +418,35 @@ export default class WebGLRenderer {
         return
       }
 
-      // ============================================== Mesh start ==============================================
+      let matrix = mat4.create()
+      matrix = mat4.multiply(matrix, viewProjectionMatrix, mesh.worldMatrix)
+
+      this.gl.useProgram(this.defaultProgram)
+
+      const buffer = this.createMeshBuffer(mesh)
+      if (buffer.bindBufferVertexPosition) {
+        buffer.bindBufferVertexPosition()
+      }
+
+      if (buffer.bindBufferVertexColor) {
+        buffer.bindBufferVertexColor()
+      }
+
+      if (buffer.setUniformMatrix4) {
+        buffer.setUniformMatrix4(matrix)
+      }
+
+      if (Array.isArray(mesh.material) === false) {
+        const attributePosition = mesh.geometry.getAttribute('position')
+        buffer.drawArrays(mesh.material, { start: 0, count: attributePosition.vertices.length / 3 })
+      } else {
+        for (let group of mesh.geometry.groups) {
+          const material = mesh.material[group.materialIndex]
+          buffer.drawArrays(material, group)
+        }
+      }
+
+     /* // ============================================== Mesh start ==============================================
       const attributes = this.getAttributes(mesh)
       const { program, positionLocation, positionBuffer, colorBuffer, matrixLocation, vColorLocation, uColorLocation, uUseVertexColors } = attributes
 
@@ -361,6 +460,10 @@ export default class WebGLRenderer {
 
       // Tell it to use mesh program (pair of shaders)
       this.gl.useProgram(program)
+
+      // TODO: uniform function inside cycle - inside material cycle
+      // Set the matrix.
+      this.gl.uniformMatrix4fv(matrixLocation, false,  matrix)
 
       // TODO start material cycle
       // ----------------------- POSITION START --------------------------
@@ -401,10 +504,6 @@ export default class WebGLRenderer {
       this.gl.uniform3fv(uColorLocation, mesh.material.color.toNormalizedArray())
       // ----------------------- COLOR END --------------------------
 
-      // TODO: uniform function inside cycle - inside material cycle
-      // Set the matrix.
-      this.gl.uniformMatrix4fv(matrixLocation, false,  matrix)
-
       switch (mesh.material.side) {
         case constants.SIDE_DOUBLE:
           this.gl.disable(this.gl.CULL_FACE)
@@ -438,7 +537,7 @@ export default class WebGLRenderer {
 
       // TODO end material cycle
 
-      // ============================================== Mesh end ==============================================
+      // ============================================== Mesh end ==============================================*/
     })
   }
 }

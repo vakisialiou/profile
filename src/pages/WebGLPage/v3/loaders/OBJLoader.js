@@ -4,15 +4,28 @@ import Face3 from './../Face3'
 import Vector2 from './../Vector2'
 import Vector3 from './../Vector3'
 import Geometry from './../Geometry'
-import BufferGeometry from './../BufferGeometry'
-import MeshBaseMaterial from './../MeshBaseMaterial'
 import Mesh from './../Mesh'
 
 export default class OBJLoader {
   constructor() {
-
+    this._mtlMaterials = []
   }
 
+  /**
+   *
+   * @param {Array} materials
+   * @returns {OBJLoader}
+   */
+  setMTLMaterials(materials) {
+    this._mtlMaterials = materials
+    return this
+  }
+
+  /**
+   *
+   * @param {string} file
+   * @returns {Promise<Mesh>}
+   */
   async load(file) {
     const str = await fetch(file)
       .then((res) => res.text())
@@ -20,6 +33,7 @@ export default class OBJLoader {
     const mesh = new Mesh()
     const geometry = new Geometry()
 
+    const materials = []
     const normals = []
     const uvs = []
     let materialIndex = -1
@@ -34,15 +48,12 @@ export default class OBJLoader {
           mesh.setName(cells[1])
           break
         case 'v':
-          // Geometry start
           geometry.addVertex(
             new Vector3()
               .setX(parseFloat(cells[1]))
               .setY(parseFloat(cells[2]))
               .setZ(parseFloat(cells[3]))
           )
-
-          // Geometry end
           break
         case 'vn':
           normals.push([parseFloat(cells[1]), parseFloat(cells[2]), parseFloat(cells[3])])
@@ -52,6 +63,10 @@ export default class OBJLoader {
           break
         case 'usemtl':
           materialIndex++
+          const material = this._mtlMaterials.find((material) => material.name === cells[1])
+          if (material) {
+            materials.push(material)
+          }
           break
         case 'f':
           const map0 = cells[1].split(/\//)
@@ -106,6 +121,10 @@ export default class OBJLoader {
             new Vector2().fromArray(uvs[dt]),
           ])
       }
+    }
+
+    if (materials.length > 0) {
+      mesh.material = materials
     }
 
     geometry.computeFaceNormals()

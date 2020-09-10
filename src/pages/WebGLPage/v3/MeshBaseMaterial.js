@@ -3,10 +3,21 @@ import Color from './Color'
 
 export default class MeshBaseMaterial {
   constructor() {
+    this.name = null
     this.color = new Color().setHex(0xffffff)
     this.wireframe = false
     this.side = SIDE_FRONT
     this.vertexColors = false
+  }
+
+  /**
+   *
+   * @param {string} name
+   * @returns {MeshBaseMaterial}
+   */
+  setName(name) {
+    this.name = name
+    return this
   }
 
   /**

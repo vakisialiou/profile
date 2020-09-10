@@ -1,7 +1,7 @@
 import {
   Scene, PerspectiveCamera, WebGLRenderer,
-  Mesh, MeshBasicMaterial, BoxGeometry, BoxBufferGeometry, Geometry,
-  Vector3, Color, Object3D, Face3, DirectionalLight, HemisphereLight, Light
+  Mesh, MeshBasicMaterial, BoxGeometry,
+  Vector3, Color, HemisphereLight, MathUtils
 } from 'three'
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
@@ -25,14 +25,6 @@ Mesh.prototype.setName = function (name) {
   return this
 }
 
-function radToDeg(r) {
-  return r * 180 / Math.PI
-}
-
-function degToRad(d) {
-  return d * Math.PI / 180
-}
-
 export const renderThreeScene = (canvas, offsetTop, update) => {
   // Before mount
   // -------------------------------------------------------------------------------------------------------------------
@@ -52,24 +44,15 @@ export const renderThreeScene = (canvas, offsetTop, update) => {
 
   new MTLLoader().load('/models/cube.mtl', (mtl) => {
     mtl.preload()
-
-    const loader = new OBJLoader()
-    loader.setMaterials(mtl)
-    loader.load('/models/cube.obj', (res) => {
+    new OBJLoader().setMaterials(mtl).load('/models/cube.obj', (res) => {
         res.position.y = - 40
         res.position.x = - 80
         res.scale.set(26, 26, 26)
         scene.add(res)
-        console.log('three', res)
-        console.log('three BufferGeometry', res.children[0]['geometry'])
-        console.log('three Geometry', new Geometry().fromBufferGeometry(res.children[0]['geometry']))
-        // console.log('three Material', res.children[0]['material'])
       })
   })
 
   const cubeGeometry = new BoxGeometry(50, 50, 50)
-  // console.log(cubeGeometry, new BoxGeometry(50, 50, 50), new BoxBufferGeometry(50, 50, 50))
-
   const boxColors = [
     [80, 70, 200],
     [80, 70, 200],
@@ -100,8 +83,8 @@ export const renderThreeScene = (canvas, offsetTop, update) => {
 
   const r0 = 40
   const r1 = 180
-  let angle0 = degToRad(0)
-  let angle1 = degToRad(0)
+  let angle0 = MathUtils.degToRad(0)
+  let angle1 = MathUtils.degToRad(0)
 
   const render = () => {
     window.__cacheThreeJS.requestID = requestAnimationFrame(render)

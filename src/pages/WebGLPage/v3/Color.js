@@ -24,7 +24,7 @@ export default class Color {
    * @returns {Color}
    */
   set(value) {
-    if (value && value.isColor) {
+    if (typeof value === 'object') {
 
       this.copy(value)
 
@@ -98,9 +98,9 @@ export default class Color {
    * @returns {Color}
    */
   fromNormalizedArray(arr, offset = 0) {
-    this.r = arr[offset] + 255
-    this.g = arr[offset + 1] + 255
-    this.b = arr[offset + 2] + 255
+    this.r = arr[offset] * 255
+    this.g = arr[offset + 1] * 255
+    this.b = arr[offset + 2] * 255
     return this
   }
 
@@ -120,7 +120,7 @@ export default class Color {
 
   /**
    *
-   * @param {Color} color
+   * @param {Object|Color} color
    * @returns {Color}
    */
   copy(color) {

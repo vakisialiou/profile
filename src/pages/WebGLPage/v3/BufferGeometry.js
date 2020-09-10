@@ -31,12 +31,32 @@ export default class BufferGeometry {
    * @param {Geometry} geometry
    * @returns {BufferGeometry}
    */
+  computeGroups(geometry) {
+    let materialIndex;
+    for (const face of geometry.faces) {
+      const prevGroup = this.groups[this.groups.length - 1] || {}
+      const prevStart = prevGroup.start || 0
+      const prevCount = prevGroup.count || 0
+      if (face.materialIndex !== materialIndex) {
+        materialIndex = face.materialIndex
+        this.groups.push({ start: prevStart + prevCount, count: 3, materialIndex: face.materialIndex })
+      } else {
+        prevGroup.count += 3
+      }
+    }
+    return this
+  }
+
+  /**
+   *
+   * @param {Geometry} geometry
+   * @returns {BufferGeometry}
+   */
   fromGeometry(geometry) {
     let uv = []
     let colors = []
     let normals = []
     let vertices = []
-    let group = { start: 0, count: 0, materialIndex: 0 }
 
     for (let i = 0; i < geometry.faces.length; i++) {
       const face = geometry.faces[i]
@@ -51,9 +71,6 @@ export default class BufferGeometry {
       uv = uv.concat(geometry.faceVertexUvs[i][0].toArray())
       uv = uv.concat(geometry.faceVertexUvs[i][1].toArray())
       uv = uv.concat(geometry.faceVertexUvs[i][2].toArray())
-
-
-      // {start: 0, count: 12, materialIndex: 0}
     }
 
     if (vertices.length > 0) {
@@ -68,6 +85,8 @@ export default class BufferGeometry {
     if (uv.length > 0) {
       this.setAttribute('uv', {vertices: new Float32Array(uv), itemSize: 2})
     }
+
+    this.computeGroups(geometry)
     return this
   }
 }
